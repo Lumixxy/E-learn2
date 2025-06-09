@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 // chakra imports
@@ -28,32 +28,13 @@ import PropTypes from "prop-types";
 import { IoMenuOutline } from "react-icons/io5";
 
 function Sidebar(props) {
-  const { routes } = props;
-  const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed
-  const [isHovered, setIsHovered] = useState(false);
+  const { routes, collapsed, setCollapsed } = props;
   const location = useLocation();
 
   // Auto-collapse sidebar when route changes (when user clicks a link)
   useEffect(() => {
-    setIsCollapsed(true);
-    setIsHovered(false);
-  }, [location.pathname]);
-
-  // Handle click outside to collapse
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const sidebar = document.getElementById('main-sidebar');
-      if (sidebar && !sidebar.contains(event.target)) {
-        setIsCollapsed(true);
-        setIsHovered(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    setCollapsed(true);
+  }, [location.pathname, setCollapsed]);
 
   let variantChange = "0.3s ease";
   let shadow = useColorModeValue(
@@ -64,32 +45,37 @@ function Sidebar(props) {
   let sidebarBg = useColorModeValue("white", "navy.800");
   let sidebarMargins = "0px";
 
-  const shouldExpand = isHovered || !isCollapsed;
-
   // SIDEBAR
   return (
-    <Box display={{ sm: "none", xl: "block" }} w="100%" position='fixed' minH='100%'>
+    <Box
+      display={{ sm: "none", xl: "block" }}
+      h="100vh"
+      minH="100vh"
+      position="fixed"
+      left="0"
+      top="0"
+      zIndex={1000}
+    >
       <Box
         id="main-sidebar"
         bg={sidebarBg}
-        transition={variantChange}
-        w={shouldExpand ? '300px' : '80px'}
+        transition="width 0.3s cubic-bezier(0.685, 0.0473, 0.346, 1)"
+        w={collapsed ? '80px' : '300px'}
         h='100vh'
         m={sidebarMargins}
-        minH='100%'
+        minH='100vh'
         overflowX='hidden'
         boxShadow={shadow}
         position="relative"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => setCollapsed(false)}
+        onMouseLeave={() => setCollapsed(true)}
         zIndex={1000}>
-
         <Scrollbars
           autoHide
           renderTrackVertical={renderTrack}
           renderThumbVertical={renderThumb}
           renderView={renderView}>
-          <Content routes={routes} isCollapsed={!shouldExpand} />
+          <Content routes={routes} isCollapsed={collapsed} />
         </Scrollbars>
       </Box>
     </Box>
@@ -154,6 +140,8 @@ Sidebar.propTypes = {
   logoText: PropTypes.string,
   routes: PropTypes.arrayOf(PropTypes.object),
   variant: PropTypes.string,
+  collapsed: PropTypes.bool,
+  setCollapsed: PropTypes.func,
 };
 
 export default Sidebar;

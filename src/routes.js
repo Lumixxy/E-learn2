@@ -2,16 +2,14 @@ import React from "react";
 
 import { Icon } from "@chakra-ui/react";
 import {
-  MdBarChart,
   MdPerson,
   MdHome,
-  MdLock,
   MdOutlineShoppingCart,
   MdDescription,
   MdSchool,
   MdLeaderboard
 } from "react-icons/md";
-import { FiStar } from "react-icons/fi";
+
 
 // Admin Imports
 import NFTMarketplace from "views/admin/marketplace";
@@ -22,7 +20,7 @@ import Leaderboard from "views/admin/leaderboard";
 import Home from "views/admin/home";
 
 // Auth Imports
-import SignInCentered from "views/auth/signIn";
+
 
 const routes = [
   {
