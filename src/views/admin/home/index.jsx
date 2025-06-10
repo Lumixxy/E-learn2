@@ -12,29 +12,29 @@ import {
   VStack,
   HStack,
   Icon,
+  Badge,
   Divider,
+  Card,
 } from "@chakra-ui/react";
-import Card from "components/card/Card";
-import { 
-  FiBookOpen, 
-  FiAward, 
-  FiTrendingUp, 
-  FiUsers, 
-  FiCode, 
+import {
+  FiBookOpen,
+  FiAward,
+  FiTrendingUp,
+  FiUsers,
+  FiCode,
   FiLayers,
-  FiStar
+  FiStar,
 } from "react-icons/fi";
 import { MdArrowForward } from "react-icons/md";
+import { FAQAccordion } from "components/home/FAQAccordion.jsx";
 
 function Home() {
   const textColor = useColorModeValue("gray.700", "white");
   const brandColor = useColorModeValue("brand.500", "brand.400");
-  const bgColor = useColorModeValue("white", "navy.700");
-  const bgGradient = useColorModeValue(
-    "linear(to-r, brand.300, brand.500)",
-    "linear(to-r, brand.400, brand.600)"
-  );
-  const featureBorderColor = useColorModeValue("gray.200", "gray.700"); // Move this outside the map function
+  const featureBorderColor = useColorModeValue("gray.200", "gray.700");
+  const bgColor = useColorModeValue("white", "navy.800");
+  const cardBg = useColorModeValue("white", "navy.700");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
 
   // Features data
   const features = [
@@ -129,12 +129,12 @@ function Home() {
           <VStack spacing="5px" align="start">
             <Text fontSize="sm" color="gray.500">Active Students</Text>
             <Text fontSize="3xl" fontWeight="bold" color={textColor}>10,000+</Text>
-            <Text fontSize="sm" color="green.500">From 120+ countries</Text>
+            <Text fontSize="sm" color="green.500">From 12+ States</Text>
           </VStack>
         </Card>
         <Card p="20px">
           <VStack spacing="5px" align="start">
-            <Text fontSize="sm" color="gray.500">Projects Completed</Text>
+            <Text fontSize="sm" color="gray.500">Students Enrolled</Text>
             <Text fontSize="3xl" fontWeight="bold" color={textColor}>25,000+</Text>
             <Text fontSize="sm" color="green.500">Real-world applications</Text>
           </VStack>
@@ -166,7 +166,7 @@ function Home() {
               p="25px" 
               borderRadius="xl" 
               borderWidth="1px" 
-              borderColor={featureBorderColor} // Use the variable defined outside
+              borderColor={featureBorderColor}
               _hover={{ 
                 shadow: "md", 
                 borderColor: brandColor,
@@ -257,23 +257,15 @@ function Home() {
                 <Heading as="h3" size="md" mb="10px" color={textColor} noOfLines={2}>
                   {course.title}
                 </Heading>
-                <HStack mb="15px">
-                  <Text fontSize="sm" fontWeight="bold" color={brandColor}>
-                    {course.level}
-                  </Text>
-                  <Text fontSize="sm" color="gray.500">
-                    • {course.duration}
-                  </Text>
+                <HStack spacing="10px" mb="10px">
+                  <Badge colorScheme="blue">{course.level}</Badge>
+                  <Text fontSize="sm" color="gray.500">{course.duration}</Text>
                 </HStack>
-                <Flex justify="space-between" align="center">
-                  <HStack>
-                    <Icon as={FiStar} color="yellow.400" />
-                    <Text fontWeight="bold">{course.rating}</Text>
-                  </HStack>
-                  <Button size="sm" colorScheme="brand" variant="outline">
-                    Enroll Now
-                  </Button>
-                </Flex>
+                <HStack spacing="5px" align="center">
+                  <Icon as={FiStar} color="orange.400" />
+                  <Text fontSize="sm" fontWeight="bold" color={textColor}>{course.rating}</Text>
+                  <Text fontSize="sm" color="gray.500">(1,200 reviews)</Text>
+                </HStack>
               </Box>
             </Box>
           ))}
@@ -342,40 +334,16 @@ function Home() {
         </SimpleGrid>
       </Card>
 
-      {/* CTA Section */}
-      <Card 
-        mb="20px" 
-        bgGradient={bgGradient}
-        color="white"
-        p={{ base: "30px", md: "50px" }}
-      >
-        <Grid templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap="30px" alignItems="center">
-          <Box>
-            <Heading as="h2" size="xl" mb="20px">
-              Ready to Start Your Learning Journey?
-            </Heading>
-            <Text fontSize="lg" mb="30px" opacity="0.9">
-              Join thousands of students who are already advancing their careers with PyGenicArc. Get started today and take the first step towards mastering programming.
-            </Text>
-          </Box>
-          <Flex justify={{ base: "flex-start", md: "flex-end" }}>
-            <Button 
-              size="lg" 
-              colorScheme="whiteAlpha" 
-              rightIcon={<MdArrowForward />}
-            >
-              Get Started Now
-            </Button>
-          </Flex>
-        </Grid>
-      </Card>
-
       {/* Learning Paths Section */}
       <Card mb="20px" p="30px">
-        <Heading as="h2" size="lg" mb="30px" color={textColor}>
-          Learning Paths
-        </Heading>
-
+        <Flex justify="space-between" align="center" mb="30px">
+          <Heading as="h2" size="lg" color={textColor}>
+            Learning Paths
+          </Heading>
+          <Button variant="ghost" colorScheme="brand" rightIcon={<MdArrowForward />}>
+            View All Paths
+          </Button>
+        </Flex>
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing="20px">
           {[
             {
@@ -431,155 +399,13 @@ function Home() {
         </SimpleGrid>
       </Card>
 
-      {/* Latest Updates Section */}
-      <Card mb="20px" p="30px">
-        <Flex justify="space-between" align="center" mb="30px">
-          <Heading as="h2" size="lg" color={textColor}>
-            Latest Updates
-          </Heading>
-          <Button variant="ghost" colorScheme="brand" rightIcon={<MdArrowForward />}>
-            View All Updates
-          </Button>
-        </Flex>
-
-        <VStack spacing="20px" align="stretch">
-          {[
-            {
-              title: "New Course: Advanced Python for AI Development",
-              date: "June 10, 2023",
-              description: "We've just launched our new advanced Python course focused on AI development. Learn how to build intelligent systems using the latest techniques."
-            },
-            {
-              title: "Platform Update: Enhanced Code Editor",
-              date: "May 28, 2023",
-              description: "Our code editor now features improved syntax highlighting, auto-completion, and real-time error checking to enhance your coding experience."
-            },
-            {
-              title: "Community Milestone: 10,000 Students!",
-              date: "May 15, 2023",
-              description: "We're thrilled to announce that PyGenicArc now has over 10,000 active students from around the world. Thank you for being part of our community!"
-            }
-          ].map((update, index) => (
-            <Card key={index} p="20px" variant="outline">
-              <Grid templateColumns={{ base: "1fr", md: "auto 1fr" }} gap="20px">
-                <Box 
-                  bg={brandColor} 
-                  color="white" 
-                  p="15px" 
-                  borderRadius="md" 
-                  textAlign="center"
-                  minW="100px"
-                >
-                  <Text fontSize="sm">{update.date.split(' ')[0]}</Text>
-                  <Text fontSize="xl" fontWeight="bold">{update.date.split(' ')[1].replace(',', '')}</Text>
-                </Box>
-                <Box>
-                  <Heading as="h3" size="md" mb="10px" color={textColor}>
-                    {update.title}
-                  </Heading>
-                  <Text color={textColor} opacity="0.8" mb="15px">
-                    {update.description}
-                  </Text>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    colorScheme="brand" 
-                    rightIcon={<MdArrowForward />}
-                  >
-                    Read More
-                  </Button>
-                </Box>
-              </Grid>
-            </Card>
-          ))}
-        </VStack>
-      </Card>
-
-      {/* Partners Section */}
-      <Card mb="20px" p="30px">
-        <VStack spacing="30px" align="center">
-          <Heading as="h2" size="lg" textAlign="center" color={textColor}>
-            Trusted By Industry Leaders
-          </Heading>
-          <SimpleGrid columns={{ base: 2, md: 3, lg: 6 }} spacing="30px" w="100%">
-            {[1, 2, 3, 4, 5, 6].map((index) => (
-              <Flex 
-                key={index} 
-                h="60px" 
-                align="center" 
-                justify="center"
-                opacity="0.7"
-                _hover={{ opacity: 1 }}
-                transition="all 0.3s ease"
-              >
-                <Box 
-                  w="120px" 
-                  h="40px" 
-                  bg="gray.200" 
-                  borderRadius="md"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Text fontWeight="bold" color="gray.500">Partner {index}</Text>
-                </Box>
-              </Flex>
-            ))}
-          </SimpleGrid>
-        </VStack>
-      </Card>
-
       {/* FAQ Section */}
-      <Card mb="20px" p="30px">
-        <VStack spacing="30px" align="center" mb="40px">
-          <Heading as="h2" size="xl" textAlign="center" color={textColor}>
-            Frequently Asked Questions
-          </Heading>
-          <Text fontSize="lg" textAlign="center" maxW="800px" color={textColor} opacity="0.8">
-            Have questions? We've got answers. If you can't find what you're looking for, feel free to contact our support team.
-          </Text>
-        </VStack>
+      <FAQAccordion />
 
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing="30px">
-          {[
-            {
-              question: "How do I get started with PyGenicArc?",
-              answer: "Getting started is easy! Simply create an account, browse our course catalog, and enroll in any course that interests you. You can start learning immediately after enrollment."
-            },
-            {
-              question: "Are there any prerequisites for the courses?",
-              answer: "Each course has its own prerequisites listed on the course page. Some beginner courses have no prerequisites, while advanced courses may require prior knowledge or completion of foundational courses."
-            },
-            {
-              question: "How long do I have access to a course after enrollment?",
-              answer: "Once you enroll in a course, you have lifetime access to the course materials, allowing you to learn at your own pace and revisit the content whenever you need to."
-            },
-            {
-              question: "Do you offer certificates upon course completion?",
-              answer: "Yes, we provide certificates of completion for all our courses. These certificates can be shared on your LinkedIn profile or included in your resume to showcase your skills."
-            },
-            {
-              question: "Can I switch between different learning paths?",
-              answer: "Absolutely! You can switch between different learning paths or take courses from multiple paths simultaneously, giving you the flexibility to customize your learning journey."
-            },
-            {
-              question: "Is there a mobile app available?",
-              answer: "Yes, we have mobile apps for both iOS and Android platforms, allowing you to learn on the go. You can download them from the respective app stores."
-            }
-          ].map((faq, index) => (
-            <Card key={index} p="25px" variant="outline">
-              <VStack spacing="15px">
-                <Text fontSize="md" fontWeight="bold" color={textColor}>
-                  {faq.question}
-                </Text>
-                <Text fontSize="sm" color={textColor} opacity="0.8">
-                  {faq.answer}
-                </Text>
-              </VStack>
-            </Card>
-          ))}
-        </SimpleGrid>
-      </Card>
+      {/* Footer */}
+      <Box mt="60px" pb="20px" textAlign="center" fontSize="sm" color={textColor} opacity="0.7">
+        <Text>&copy; {new Date().getFullYear()} PyGenicArc. All rights reserved.</Text>
+      </Box>
     </Box>
   );
 }

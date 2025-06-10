@@ -82,14 +82,7 @@ const routes = [
     icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,
     component: <Leaderboard />,
   },
-  {
-    name: "Settings",
-    layout: "/admin",
-    path: "/settings",
-    icon: <Icon as={MdSettings} width="20px" height="20px" color="inherit" />,
-    component: <Settings />,
-    secondary: true,
-  },
+  
 ];
 
 export default routes;

@@ -66,4 +66,4 @@ export function SidebarBrand({ isCollapsed = false }) {
   );
 }
 
-export default SidebarBrand;
+export default SidebarBrand; 

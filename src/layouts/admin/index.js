@@ -138,7 +138,7 @@ export default function Dashboard(props) {
               brandText={getActiveRoute(routes)}
               secondary={getActiveNavbar(routes)}
               message={getActiveNavbarText(routes)}
-              fixed={false}
+              fixed={true}
               {...rest}
             />
           </Box>
