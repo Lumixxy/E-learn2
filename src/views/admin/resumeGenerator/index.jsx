@@ -17,12 +17,20 @@ import {
   IconButton,
   Divider,
   useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { AddIcon, DeleteIcon, DownloadIcon } from "@chakra-ui/icons";
+import { AddIcon, DeleteIcon, DownloadIcon, ViewIcon } from "@chakra-ui/icons";
 import Card from "components/card/Card";
 
 function ResumeGenerator() {
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const textColor = useColorModeValue("gray.700", "white");
   const bgColor = useColorModeValue("white", "navy.700");
 
@@ -170,22 +178,48 @@ function ResumeGenerator() {
     });
   };
 
+  // Preview Resume
+  const previewResume = () => {
+    onOpen();
+  };
+
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       <Grid templateColumns={{ base: "1fr", lg: "1fr" }} gap="20px">
         <Card mb="20px">
           <Flex direction="column">
-            <Text
-              color={textColor}
-              fontSize="2xl"
-              fontWeight="700"
-              mb="10px"
-            >
-              Resume Generator
-            </Text>
-            <Text color="gray.500" fontSize="md" mb="30px">
-              Fill in the details below to generate your professional resume
-            </Text>
+            <Flex justify="space-between" align="center" mb="30px">
+              <Box>
+                <Text
+                  color={textColor}
+                  fontSize="2xl"
+                  fontWeight="700"
+                  mb="10px"
+                >
+                  Resume Generator
+                </Text>
+                <Text color="gray.500" fontSize="md">
+                  Fill in the details below to generate your professional resume
+                </Text>
+              </Box>
+              <HStack spacing="4">
+                <Button
+                  leftIcon={<ViewIcon />}
+                  colorScheme="brand"
+                  variant="outline"
+                  onClick={previewResume}
+                >
+                  Preview
+                </Button>
+                <Button
+                  leftIcon={<DownloadIcon />}
+                  colorScheme="brand"
+                  onClick={generateResume}
+                >
+                  Generate
+                </Button>
+              </HStack>
+            </Flex>
 
             {/* Personal Information */}
             <Box mb="20px">
@@ -467,16 +501,107 @@ function ResumeGenerator() {
             </Box>
 
             <Divider my="30px" />
-
-            {/* Generate Resume Button */}
-            <Flex justify="flex-end">
-              <Button rightIcon={<DownloadIcon />} colorScheme="teal" onClick={generateResume}>
-                Generate Resume
-              </Button>
-            </Flex>
           </Flex>
         </Card>
       </Grid>
+
+      {/* Preview Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} size="full">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Resume Preview</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Box p="20px" bg="white" borderRadius="md" boxShadow="md">
+              {/* Header */}
+              <Box mb="20px">
+                <Text fontSize="2xl" fontWeight="bold" color={textColor}>
+                  {personalInfo.fullName}
+                </Text>
+                <Text color="gray.600">{personalInfo.email} • {personalInfo.phone}</Text>
+                <Text color="gray.600">{personalInfo.address}</Text>
+                {personalInfo.linkedin && (
+                  <Text color="blue.500">LinkedIn: {personalInfo.linkedin}</Text>
+                )}
+                {personalInfo.website && (
+                  <Text color="blue.500">Website: {personalInfo.website}</Text>
+                )}
+              </Box>
+
+              {/* Summary */}
+              {personalInfo.summary && (
+                <Box mb="20px">
+                  <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
+                    Professional Summary
+                  </Text>
+                  <Text color="gray.600">{personalInfo.summary}</Text>
+                </Box>
+              )}
+
+              {/* Education */}
+              <Box mb="20px">
+                <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
+                  Education
+                </Text>
+                {education.map((edu) => (
+                  <Box key={edu.id} mb="10px">
+                    <Text fontWeight="bold" color={textColor}>
+                      {edu.institution}
+                    </Text>
+                    <Text color="gray.600">
+                      {edu.degree} in {edu.field}
+                    </Text>
+                    <Text color="gray.500" fontSize="sm">
+                      {edu.startDate} - {edu.endDate}
+                      {edu.gpa && ` • GPA: ${edu.gpa}`}
+                    </Text>
+                  </Box>
+                ))}
+              </Box>
+
+              {/* Experience */}
+              <Box mb="20px">
+                <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
+                  Work Experience
+                </Text>
+                {experience.map((exp) => (
+                  <Box key={exp.id} mb="10px">
+                    <Text fontWeight="bold" color={textColor}>
+                      {exp.position} at {exp.company}
+                    </Text>
+                    <Text color="gray.500" fontSize="sm">
+                      {exp.startDate} - {exp.endDate}
+                    </Text>
+                    <Text color="gray.600" mt="5px">
+                      {exp.description}
+                    </Text>
+                  </Box>
+                ))}
+              </Box>
+
+              {/* Skills */}
+              <Box>
+                <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
+                  Skills
+                </Text>
+                <Flex wrap="wrap" gap="10px">
+                  {skills.map((skill) => (
+                    <Box
+                      key={skill.id}
+                      bg="gray.100"
+                      px="10px"
+                      py="5px"
+                      borderRadius="md"
+                    >
+                      <Text color="gray.700">{skill.name}</Text>
+                    </Box>
+                  ))}
+                </Flex>
+              </Box>
+            </Box>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }
