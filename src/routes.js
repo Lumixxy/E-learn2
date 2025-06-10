@@ -7,9 +7,10 @@ import {
   MdOutlineShoppingCart,
   MdDescription,
   MdSchool,
-  MdLeaderboard
+  MdLeaderboard,
+  MdMap,
+  MdSettings
 } from "react-icons/md";
-
 
 // Admin Imports
 import NFTMarketplace from "views/admin/marketplace";
@@ -18,9 +19,10 @@ import ResumeGenerator from "views/admin/resumeGenerator";
 import MyLearning from "views/admin/myLearning";
 import Leaderboard from "views/admin/leaderboard";
 import Home from "views/admin/home";
+import Roadmap from "views/admin/roadmap";
+import Settings from "views/admin/settings";
 
 // Auth Imports
-
 
 const routes = [
   {
@@ -36,6 +38,13 @@ const routes = [
     path: "/my-learning",
     icon: <Icon as={MdSchool} width="20px" height="20px" color="inherit" />,
     component: <MyLearning />,
+  },
+  {
+    name: "Roadmap",
+    layout: "/admin",
+    path: "/roadmap",
+    icon: <Icon as={MdMap} width="20px" height="20px" color="inherit" />,
+    component: <Roadmap />,
   },
   {
     name: "Marketplace",
@@ -72,6 +81,14 @@ const routes = [
     path: "/leaderboard",
     icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,
     component: <Leaderboard />,
+  },
+  {
+    name: "Settings",
+    layout: "/admin",
+    path: "/settings",
+    icon: <Icon as={MdSettings} width="20px" height="20px" color="inherit" />,
+    component: <Settings />,
+    secondary: true,
   },
 ];
 
