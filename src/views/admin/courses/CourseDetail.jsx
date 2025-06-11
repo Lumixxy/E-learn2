@@ -234,9 +234,36 @@ export default function CourseDetail() {
             </Button>
           </HStack>
         </Flex>
-        
         <Text color={textColor} mt={1}>{courseData.description}</Text>
       </Box>
+
+       {/* Smart Revision Card */}
+       <Card mb={6} bg={bgColor} borderColor={borderColor}>
+              <CardHeader>
+                <Flex align="center">
+                  <Icon as={FiFileText} w={5} h={5} mr={2} color={blueIconColor} />
+                  <Text fontSize="xl" fontWeight="bold" color={titleColor}>
+                    Smart Revision
+                  </Text>
+                </Flex>
+              </CardHeader>
+              <CardBody>
+                <VStack spacing={4} align="stretch">
+                  <Text fontSize="md" color={textColorSecondary}>
+                    Review key concepts and practice with AI-generated questions tailored to your progress.
+                  </Text>
+                  <Button
+                    leftIcon={<Icon as={FiFileText} />}
+                    colorScheme="purple"
+                    variant="outline"
+                    onClick={() => alert("Launching Smart Revision...")}
+                  >
+                    Start Revision
+                  </Button>
+                </VStack>
+              </CardBody>
+          </Card>
+
 
       <Grid templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={6}>
         {/* Left Column: Modules */}
@@ -407,46 +434,18 @@ export default function CourseDetail() {
             </Card>
 
             {/* Instructor Card */}
-            <Card bg={bgColor} borderColor={borderColor}>
+           
+           
+
+            {/* Course Overview */}
+            <Card bg={bgColor} borderColor={borderColor} mb={6}>
               <CardHeader>
-                <Flex align="center">
-                  <Avatar src={courseData.instructor.avatar} size="lg" mr={4} />
-                  <Box>
-                    <Text fontSize="xl" fontWeight="bold" color={titleColor}>
-                      {courseData.instructor.name}
-                    </Text>
-                    <Text fontSize="md" color={textColorSecondary}>
-                      {courseData.instructor.role}
-                    </Text>
-                  </Box>
-                </Flex>
+                <Text fontSize="xl" fontWeight="bold" color={titleColor}>
+                  Course Overview
+                </Text>
               </CardHeader>
               <CardBody>
-                <Text color={textColor} mb={4}>
-                  {courseData.instructor.bio}
-                </Text>
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
-                  <VStack align="flex-start" spacing={0}>
-                    <Text fontSize="sm" color={textColorSecondary}>Courses</Text>
-                    <Text fontWeight="semibold" color={titleColor}>{courseData.instructor.courses}</Text>
-                  </VStack>
-                  <VStack align="flex-start" spacing={0}>
-                    <Text fontSize="sm" color={textColorSecondary}>Students</Text>
-                    <Text fontWeight="semibold" color={titleColor}>{courseData.instructor.students.toLocaleString()}</Text>
-                  </VStack>
-                  <VStack align="flex-start" spacing={0}>
-                    <Text fontSize="sm" color={textColorSecondary}>Rating</Text>
-                    <Text fontWeight="semibold" color={titleColor}>{courseData.instructor.rating} stars</Text>
-                  </VStack>
-                  <Button
-                    leftIcon={<Icon as={FiMail} />}
-                    colorScheme="blue"
-                    variant="outline"
-                    size="sm"
-                  >
-                    Contact Instructor
-                  </Button>
-                </SimpleGrid>
+                <Text color={textColor}>{courseData.description}</Text>
               </CardBody>
             </Card>
           </VStack>

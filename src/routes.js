@@ -9,7 +9,6 @@ import {
   MdSchool,
   MdLeaderboard,
   MdMap,
-  MdSettings
 } from "react-icons/md";
 
 // Admin Imports
@@ -20,7 +19,6 @@ import MyLearning from "views/admin/myLearning";
 import Leaderboard from "views/admin/leaderboard";
 import Home from "views/admin/home";
 import Roadmap from "views/admin/roadmap";
-import Settings from "views/admin/settings";
 import CourseDetail from "views/admin/courses/CourseDetail";
 
 
