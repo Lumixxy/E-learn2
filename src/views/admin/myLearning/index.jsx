@@ -12,30 +12,16 @@ const MyLearning = () => {
 
   return (
     <Box minH="100vh" bg={bgColor} p={4}>
-      <Grid
-        templateColumns={{ base: "1fr", md: "2fr 1fr" }}
-        gap={6}
-      >
-        {/* Left Column */}
-        <GridItem>
-          <VStack spacing={6} align="stretch">
-            <InProgressCoursesCard />
-            <LearningGoalCard />
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-              <LearningPathCard />
-              <TodaysPlanCard />
-            </SimpleGrid>
-            <CompletedCoursesCard />
-          </VStack>
-        </GridItem>
-
-        {/* Right Column */}
-        <GridItem>
-          <VStack spacing={6} align="stretch">
-            <ProgressAnalyticsCard />
-          </VStack>
-        </GridItem>
-      </Grid>
+      <VStack spacing={6} align="stretch">
+        <InProgressCoursesCard />
+        <LearningGoalCard />
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+          <LearningPathCard />
+          <TodaysPlanCard />
+        </SimpleGrid>
+        <CompletedCoursesCard />
+        <ProgressAnalyticsCard />
+      </VStack>
     </Box>
   );
 };
