@@ -33,7 +33,7 @@ function Home() {
   const brandColor = useColorModeValue("brand.500", "brand.400");
   const featureBorderColor = useColorModeValue("gray.200", "gray.700");
   const bgColor = useColorModeValue("white", "navy.800");
-  const cardBg = useColorModeValue("white", "navy.700");
+  const cardBg = useColorModeValue("white", "navy.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
   // Features data
@@ -136,14 +136,12 @@ function Home() {
           <VStack spacing="5px" align="start">
             <Text fontSize="sm" color="gray.500">Students Enrolled</Text>
             <Text fontSize="3xl" fontWeight="bold" color={textColor}>25,000+</Text>
-            <Text fontSize="sm" color="green.500">Real-world applications</Text>
           </VStack>
         </Card>
         <Card p="20px">
           <VStack spacing="5px" align="start">
             <Text fontSize="sm" color="gray.500">Success Rate</Text>
             <Text fontSize="3xl" fontWeight="bold" color={textColor}>94%</Text>
-            <Text fontSize="sm" color="green.500">Job placement</Text>
           </VStack>
         </Card>
       </SimpleGrid>

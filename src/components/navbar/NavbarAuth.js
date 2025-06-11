@@ -82,7 +82,7 @@ export default function AuthNavbar(props) {
   // Chakra color mode
 
   const textColor = useColorModeValue("navy.700", "white");
-  let menuBg = useColorModeValue("white", "navy.900");
+  let menuBg = useColorModeValue("white", "navy.800");
   let mainText = "#fff";
   let navbarBg = "none";
   let navbarShadow = "initial";
