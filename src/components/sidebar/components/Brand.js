@@ -1,11 +1,11 @@
 import React from "react";
 
 // Chakra imports
-import { Flex, useColorModeValue, Box } from "@chakra-ui/react";
+import { Flex, useColorModeValue, Box, Image, Text, HStack } from "@chakra-ui/react";
 
 // Custom components
-import { PygenicarcLogo } from "components/icons/Icons";
 import { HSeparator } from "components/separator/Separator";
+import favicon from "assets/img/logo/favicon.ico";
 
 export function SidebarBrand({ isCollapsed = false }) {
   //   Chakra color mode
@@ -15,44 +15,34 @@ export function SidebarBrand({ isCollapsed = false }) {
 
   return (
     <Flex align='center' direction='column' transition={smoothTransition}>
-      <Box
-        transition={smoothTransition}
-        transform={isCollapsed ? "scale(0.9)" : "scale(1)"}
-        opacity={isCollapsed ? 0.8 : 1}
+      <HStack
+        spacing={isCollapsed ? "0" : "12px"}
+        align="center"
+        my="32px"
+        justifyContent={isCollapsed ? "center" : "flex-start"}
+        w="100%"
       >
-        {isCollapsed ? (
-          // Show a smaller logo or just initials when collapsed
-          <Box
-            w='40px'
-            h='40px'
-            bg={logoColor}
-            borderRadius='12px'
-            display='flex'
-            alignItems='center'
-            justifyContent='center'
-            my='32px'
-            color='white'
-            fontWeight='bold'
-            fontSize='lg'
-            transition={smoothTransition}
-            _hover={{
-              transform: "scale(1.05)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
-            }}
-          >
-            P
-          </Box>
-        ) : (
-          // Show full logo when expanded
-          <Box
-            transition={smoothTransition}
-            transform="translateX(0)"
-            opacity={1}
-          >
-            <PygenicarcLogo h='40px' w='280px' my='32px' color={logoColor} />
-          </Box>
-        )}
-      </Box>
+        <Image
+          src={favicon}
+          alt="Logo"
+          w={isCollapsed ? "32px" : "40px"}
+          h={isCollapsed ? "32px" : "40px"}
+          objectFit="contain"
+        />
+        <Text
+          fontSize="2xl"
+          fontWeight="900"
+          color={logoColor}
+          transition={smoothTransition}
+          opacity={isCollapsed ? 0 : 1}
+          transform={isCollapsed ? "translateX(-10px)" : "translateX(0)"}
+          whiteSpace="nowrap"
+          overflow="hidden"
+          textOverflow="clip"
+        >
+          PyGenicArc
+        </Text>
+      </HStack>
 
       <Box
         w="100%"

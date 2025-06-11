@@ -489,9 +489,7 @@ export default function CourseDetail() {
                 <Box mb={6}>
                   <Text fontSize="lg" fontWeight="semibold" mb={2}>Assignment Instructions:</Text>
                   <Text color={textColor}>
-                    {`Implement a function that calculates the factorial of a given number.
-                    For example, factorial(5) should return 120.
-                    You can use any language you prefer, but JavaScript, Python, and Java are recommended.`}
+                    {`Implement a function that calculates the factorial of a given number.\n                    For example, factorial(5) should return 120.\n                    You can use any language you prefer, but JavaScript, Python, and Java are recommended.`}
                   </Text>
                   {showCodeEditor && (
                     <Box mt={4} p={4} bg={lightBg} borderRadius="md" borderColor={borderColor} borderWidth="1px">
@@ -618,4 +616,4 @@ export default function CourseDetail() {
       </Modal>
     </Box>
   );
-} 
+}

@@ -119,51 +119,49 @@ export default function Dashboard(props) {
           setCollapsed={setSidebarCollapsed}
           {...rest}
         />
-      </SidebarContext.Provider>
-      <Box
-        as="main"
-        flex="1"
-        minH="100vh"
-        height="100%"
-        overflow="auto"
-        position="relative"
-        transition="margin-left 0.3s cubic-bezier(0.685, 0.0473, 0.346, 1)"
-        marginLeft={sidebarCollapsed ? "80px" : "300px"}
-      >
-        <Portal>
+        <Box
+          as="main"
+          flex="1"
+          minH="100vh"
+          height="100%"
+          overflow="auto"
+          position="relative"
+          transition="margin-left 0.3s cubic-bezier(0.685, 0.0473, 0.346, 1)"
+          marginLeft={sidebarCollapsed ? "80px" : "300px"}
+          pt="110px"
+        >
+          <Navbar
+            onOpen={onOpen}
+            logoText={'Horizon UI Dashboard PRO'}
+            brandText={getActiveRoute(routes)}
+            secondary={getActiveNavbar(routes)}
+            message={getActiveNavbarText(routes)}
+            fixed={true}
+            sidebarCollapsed={sidebarCollapsed}
+            {...rest}
+          />
+          {getRoute() ? (
+            <Box
+              mx="auto"
+              p={{ base: '20px', md: '30px' }}
+              pe="20px"
+              minH="100vh"
+              pt="0px"
+            >
+              <Routes>
+                {getRoutes(routes)}
+                <Route
+                  path="/"
+                  element={<Navigate to="/admin/default" replace />}
+                />
+              </Routes>
+            </Box>
+          ) : null}
           <Box>
-            <Navbar
-              onOpen={onOpen}
-              logoText={'Horizon UI Dashboard PRO'}
-              brandText={getActiveRoute(routes)}
-              secondary={getActiveNavbar(routes)}
-              message={getActiveNavbarText(routes)}
-              fixed={true}
-              {...rest}
-            />
+            <Footer />
           </Box>
-        </Portal>
-        {getRoute() ? (
-          <Box
-            mx="auto"
-            p={{ base: '20px', md: '30px' }}
-            pe="20px"
-            minH="100vh"
-            pt="50px"
-          >
-            <Routes>
-              {getRoutes(routes)}
-              <Route
-                path="/"
-                element={<Navigate to="/admin/default" replace />}
-              />
-            </Routes>
-          </Box>
-        ) : null}
-        <Box>
-          <Footer />
         </Box>
-      </Box>
+      </SidebarContext.Provider>
     </Box>
   );
 }

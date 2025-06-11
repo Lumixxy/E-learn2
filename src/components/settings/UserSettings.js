@@ -301,8 +301,8 @@ const UserSettings = () => {
     "14px 17px 40px 4px rgba(112, 144, 176, 0.08)",
     "unset"
   );
-  const hoverBg = useColorModeValue("gray.100", "whiteAlpha.200");
-  const activeBg = useColorModeValue("gray.200", "whiteAlpha.300");
+  const hoverBg = useColorModeValue("gray.100", "navy.700");
+  const activeBg = useColorModeValue("gray.200", "navy.700");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
   const { isOpen, onOpen, onClose } = useDisclosure();
