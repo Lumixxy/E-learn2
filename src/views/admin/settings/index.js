@@ -34,6 +34,7 @@ import {
   MdAccessibility,
   MdEdit,
 } from "react-icons/md";
+import ProfileSettings from "components/profile/ProfileSettings";
 
 export default function Settings() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -91,28 +92,7 @@ export default function Settings() {
             <TabPanels>
               {/* Profile Settings */}
               <TabPanel>
-                <VStack spacing="20px" align="stretch">
-                  <Flex align="center" gap="4">
-                    <Avatar size="xl" name="User Name" />
-                    <IconButton
-                      aria-label="Edit profile picture"
-                      icon={<MdEdit />}
-                      size="sm"
-                    />
-                  </Flex>
-                  <FormControl>
-                    <FormLabel>Display Name</FormLabel>
-                    <Input placeholder="Enter your display name" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Email</FormLabel>
-                    <Input type="email" placeholder="Enter your email" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Bio</FormLabel>
-                    <Input placeholder="Tell us about yourself" />
-                  </FormControl>
-                </VStack>
+                <ProfileSettings />
               </TabPanel>
 
               {/* Notification Settings */}

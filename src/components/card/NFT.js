@@ -23,12 +23,12 @@ export default function NFT(props) {
     image, 
     name, 
     author, 
-    bidders, 
+    bidders = [],
     download, 
     currentPrice, 
     originalPrice, 
     discount, 
-    buttonText = "Place Bid" 
+    buttonText = "Buy the Course" 
   } = props;
   
   const [like, setLike] = useState(false);
@@ -120,22 +120,24 @@ export default function NFT(props) {
                 {author}
               </Text>
             </Flex>
-            <AvatarGroup
-              max={3}
-              color={textColorBid}
-              size='sm'
-              mt={{
-                base: "0px",
-                md: "10px",
-                lg: "0px",
-                xl: "10px",
-                "2xl": "0px",
-              }}
-              fontSize='12px'>
-              {bidders.map((avt, key) => (
-                <Avatar key={key} src={avt} />
-              ))}
-            </AvatarGroup>
+            {bidders.length > 0 && (
+              <AvatarGroup
+                max={3}
+                color={textColorBid}
+                size='sm'
+                mt={{
+                  base: "0px",
+                  md: "10px",
+                  lg: "0px",
+                  xl: "10px",
+                  "2xl": "0px",
+                }}
+                fontSize='12px'>
+                {bidders.map((avt, key) => (
+                  <Avatar key={key} src={avt} />
+                ))}
+              </AvatarGroup>
+            )}
           </Flex>
           <Flex
             align='start'
@@ -167,26 +169,16 @@ export default function NFT(props) {
                 )}
               </Flex>
             </Flex>
-            <Link
-              href={download}
-              mt={{
-                base: "0px",
-                md: "10px",
-                lg: "0px",
-                xl: "10px",
-                "2xl": "0px",
-              }}>
-              <Button
-                variant='darkBrand'
-                color='white'
-                fontSize='sm'
-                fontWeight='500'
-                borderRadius='70px'
-                px='24px'
-                py='5px'>
-                {buttonText}
-              </Button>
-            </Link>
+            <Button
+              variant='darkBrand'
+              color='white'
+              fontSize='sm'
+              fontWeight='500'
+              borderRadius='70px'
+              px='24px'
+              py='5px'>
+              Buy the Course
+            </Button>
           </Flex>
         </Flex>
       </Flex>

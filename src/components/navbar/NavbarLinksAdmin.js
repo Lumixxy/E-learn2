@@ -39,6 +39,7 @@ import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaCoins } from 'react-icons/fa';
 import { GiAchievement } from 'react-icons/gi';
 import { FaCrown } from 'react-icons/fa';
+import { FiZap } from "react-icons/fi";
 import routes from 'routes';
 
 // Keyframes for coin animation
@@ -78,6 +79,7 @@ export default function HeaderLinks(props) {
   const xpNeededToLevelUp = maxXP - currentXP;
   const currentLevel = 3; // Example level
   const xpTier = "Beginner"; // Example XP tier
+  const dayStreak = 7; // Hardcoded Day Streak value
 
   const progressGradient = `linear-gradient(to right, ${useColorModeValue("brand.500", "brand.400")}, ${useColorModeValue("blue.500", "blue.300")})`;
 
@@ -105,6 +107,23 @@ export default function HeaderLinks(props) {
       />
 
       <HStack spacing='12px'>
+        <Tooltip label={`${dayStreak}-day learning streak!`} aria-label='Day streak'>
+          <HStack
+            bg={ethBg}
+            borderRadius='30px'
+            p='6px 10px'
+            align='center'
+            cursor="pointer"
+            _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}
+            transition="all 0.2s ease-in-out"
+          >
+            <Icon as={FiZap} color="orange.400" w='18px' h='18px' me='4px' />
+            <Text color={textColor} fontSize='sm' fontWeight='700'>
+              {dayStreak} Day Streak
+            </Text>
+          </HStack>
+        </Tooltip>
+
         <Popover trigger="hover" placement="bottom-end">
           <PopoverTrigger>
             <HStack
@@ -274,6 +293,7 @@ export default function HeaderLinks(props) {
               _hover={{ cursor: 'pointer' }}
               color="white"
               name="Adela Parkson"
+              src="https://i.pravatar.cc/150?img=7"
               bg="#11047A"
               size="sm"
               w="40px"

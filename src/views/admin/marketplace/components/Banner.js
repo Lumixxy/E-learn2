@@ -1,69 +1,80 @@
 import React from "react";
-
-// Chakra imports
-import { Button, Flex, Link, Text } from "@chakra-ui/react";
-
-// Assets
-import banner from "assets/img/nfts/NftBanner1.png";
+import {
+  Box,
+  Button,
+  Flex,
+  Text,
+  Image,
+  useColorModeValue,
+} from "@chakra-ui/react";
 
 export default function Banner() {
-  // Chakra Color Mode
-  return (
-    <Flex
-      direction='column'
-      bgImage={banner}
-      bgSize='cover'
-      py={{ base: "30px", md: "56px" }}
-      px={{ base: "30px", md: "64px" }}
-      borderRadius='30px'>
-      <Text
-        fontSize={{ base: "24px", md: "34px" }}
-        color='white'
-        mb='14px'
-        maxW={{
-          base: "100%",
-          md: "64%",
-          lg: "46%",
-          xl: "70%",
-          "2xl": "50%",
-          "3xl": "42%",
-        }}
-        fontWeight='700'
-        lineHeight={{ base: "32px", md: "42px" }}>
-        Summer Sale is here!
-      </Text>
-      <Text
-        fontSize='md'
-        color='#E3DAFF'
-        maxW={{
-          base: "100%",
-          md: "64%",
-          lg: "40%",
-          xl: "56%",
-          "2xl": "46%",
-          "3xl": "34%",
-        }}
-        fontWeight='500'
-        mb='40px'
-        lineHeight='28px'>
-        Get up to 70% off on selected courses. Limited time offer!
-      </Text>
-      <Flex align='center'>
-        <Button
-          bg='white'
-          color='black'
-          _hover={{ bg: "whiteAlpha.900" }}
-          _active={{ bg: "white" }}
-          _focus={{ bg: "white" }}
-          fontWeight='500'
-          fontSize='14px'
-          py='20px'
-          px='27'
-          me='38px'>
-          Browse deals
-        </Button>
+  const textColor = useColorModeValue("white", "white");
+  const bgGradient = "linear(to-r, purple.600, purple.400)";
 
+  const scrollToTrending = () => {
+    const element = document.getElementById('trending');
+    element?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <Box
+      bgGradient={bgGradient}
+      borderRadius="20px"
+      p="30px"
+      mb="20px"
+      position="relative"
+      overflow="hidden"
+    >
+      <Flex
+        direction={{ base: "column", md: "row" }}
+        justify="space-between"
+        align="center"
+      >
+        <Box maxW={{ base: "100%", md: "60%" }}>
+          <Text
+            color={textColor}
+            fontSize={{ base: "2xl", md: "3xl" }}
+            fontWeight="bold"
+            mb="15px"
+          >
+            🎓 Summer Sale is here!
+          </Text>
+          <Text
+            color={textColor}
+            fontSize={{ base: "md", md: "lg" }}
+            mb="20px"
+            opacity={0.9}
+          >
+            Get up to 70% off on selected courses. Limited time offer!
+          </Text>
+          <Button
+            onClick={scrollToTrending}
+            bg="white"
+            color="purple.600"
+            _hover={{ bg: "whiteAlpha.900" }}
+            size="lg"
+            fontWeight="bold"
+          >
+            Browse Deals
+          </Button>
+        </Box>
+        <Box
+          display={{ base: "none", md: "block" }}
+          position="absolute"
+          right="30px"
+          top="50%"
+          transform="translateY(-50%)"
+        >
+          <Image
+            src="/images/graduation-cap.png"
+            alt="Graduation Cap"
+            w="200px"
+            h="200px"
+            objectFit="contain"
+          />
+        </Box>
       </Flex>
-    </Flex>
+    </Box>
   );
 }

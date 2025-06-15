@@ -1,13 +1,13 @@
 import React from "react";
 
 // Chakra imports
-import { Flex, useColorModeValue, Box, Image, Text, HStack } from "@chakra-ui/react";
+import { Flex, useColorModeValue, Box, Image, Text, HStack, Switch } from "@chakra-ui/react";
 
 // Custom components
 import { HSeparator } from "components/separator/Separator";
 import favicon from "assets/img/logo/favicon.ico";
 
-export function SidebarBrand({ isCollapsed = false }) {
+export function SidebarBrand({ isCollapsed = false, hoverToggleEnabled, setHoverToggleEnabled }) {
   //   Chakra color mode
   let logoColor = useColorModeValue("navy.700", "white");
 
@@ -42,6 +42,15 @@ export function SidebarBrand({ isCollapsed = false }) {
         >
           PyGenicArc
         </Text>
+        {!isCollapsed && (
+          <Switch
+            isChecked={hoverToggleEnabled}
+            onChange={() => setHoverToggleEnabled(!hoverToggleEnabled)}
+            colorScheme="brand"
+            size="sm"
+            ml="auto"
+          />
+        )}
       </HStack>
 
       <Box

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, HStack, Image, Progress, Button, useColorModeValue } from "@chakra-ui/react";
+import { Box, Text, Image, Progress, Button, useColorModeValue, SimpleGrid } from "@chakra-ui/react";
 import Card from "../card/Card";
 import { Link } from "react-router-dom";
 
@@ -34,26 +34,74 @@ const InProgressCoursesCard = () => {
   const textColor = useColorModeValue("gray.700", "white");
   const textColorSecondary = useColorModeValue("gray.500", "whiteAlpha.700");
   const textColorTertiary = useColorModeValue("gray.400", "whiteAlpha.600");
+  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBorder = useColorModeValue("gray.200", "gray.700");
 
   return (
     <Box>
-      <Text fontWeight="bold" fontSize="lg" mb={3} color={textColor}>In Progress</Text>
-      <HStack spacing={4} overflowX="auto">
+      <Text fontWeight="bold" fontSize="lg" mb={6} color={textColor}>In Progress</Text>
+      <SimpleGrid
+        columns={{ base: 1, md: 2, lg: 3 }}
+        spacing={6}
+        width="100%"
+      >
         {courses.map((course, idx) => (
-          <Card key={idx} minW="300px" maxW="300px" p={0}>
-            <Image src={course.image} alt={course.title} borderTopRadius="lg" h="120px" w="full" objectFit="cover" />
-            <Box p={4}>
-              <Text fontWeight="semibold" mb={1} color={textColor}>{course.title}</Text>
-              <Text fontSize="xs" color={textColorSecondary} mb={2}>Last viewed: {course.lastViewed}</Text>
-              <Progress value={course.progress} size="sm" colorScheme="blue" mb={2} />
-              <Text fontSize="xs" color={textColorTertiary} mb={2}>{course.lessons} lessons</Text>
+          <Card
+            key={idx}
+            p={0}
+            bg={cardBg}
+            border="1px solid"
+            borderColor={cardBorder}
+            transition="all 0.3s ease"
+            _hover={{
+              transform: "translateY(-4px)",
+              boxShadow: "lg",
+              borderColor: "blue.400"
+            }}
+            cursor="pointer"
+          >
+            <Image
+              src={course.image}
+              alt={course.title}
+              borderTopRadius="lg"
+              h="160px"
+              w="full"
+              objectFit="cover"
+            />
+            <Box p={5}>
+              <Text fontWeight="semibold" mb={2} color={textColor} noOfLines={2}>
+                {course.title}
+              </Text>
+              <Text fontSize="sm" color={textColorSecondary} mb={3}>
+                Last viewed: {course.lastViewed}
+              </Text>
+              <Progress
+                value={course.progress}
+                size="sm"
+                colorScheme="blue"
+                mb={3}
+                borderRadius="full"
+              />
+              <Text fontSize="sm" color={textColorTertiary} mb={4}>
+                {course.lessons} lessons
+              </Text>
               <Link to={`/admin/courses/${course.id}`}>
-                <Button colorScheme="blue" size="sm" w="full">Continue Learning</Button>
+                <Button
+                  colorScheme="blue"
+                  size="md"
+                  w="full"
+                  _hover={{
+                    transform: "scale(1.02)",
+                    transition: "transform 0.2s ease"
+                  }}
+                >
+                  Continue Learning
+                </Button>
               </Link>
             </Box>
           </Card>
         ))}
-      </HStack>
+      </SimpleGrid>
     </Box>
   );
 };

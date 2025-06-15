@@ -40,6 +40,7 @@ import {
 } from "@chakra-ui/react";
 // Custom components
 import Card from "components/card/Card.js";
+import ProfileSettings from "components/profile/ProfileSettings.js";
 // React imports
 import React, { useState, useEffect } from "react";
 // Assets
@@ -92,249 +93,55 @@ import CommunicationSettings from "./CommunicationSettings";
 import PrivacySettings from './PrivacySettings';
 
 const UserSettings = () => {
-  // State hooks
   const [activeTab, setActiveTab] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [hasChanges, setHasChanges] = useState(false);
   const [settings, setSettings] = useState({
-    // Learning Preferences
     learningPreferences: {
       style: "visual",
       primaryLanguage: "english",
-      skillLevel: "intermediate",
-      learningPace: "moderate",
-      preferredSessionDuration: 45,
-      preferredContentFormat: ["video", "text"]
+      skillLevel: "beginner"
     },
-    
-    // Accessibility
     accessibility: {
       visual: {
         fontSize: 16,
-        highContrast: false,
-        colorBlindMode: "none",
-        reducedMotion: false
-      },
-      motor: {
-        keyboardNavigation: true,
-        clickAndHoldDuration: 500,
-        touchTargetSize: "medium"
-      },
-      cognitive: {
-        simplifiedInterface: false,
-        readingGuide: false,
-        focusMode: false
-      },
-      hearing: {
-        autoCaptions: true,
-        volumeBoost: false,
-        visualAlerts: true
-      },
-      screenReader: {
-        enabled: true,
-        voiceSpeed: 1,
-        voiceType: "female"
-      },
-      dyslexia: {
-        enabled: false,
-        fontType: "opendyslexic",
-        letterSpacing: 1.2,
-        wordSpacing: 1.5
+        highContrast: false
       }
     },
-    
-    // Analytics & Progress
-    analytics: {
-      progressTracking: {
-        granularity: "detailed",
-        studyStreaks: true,
-        performanceInsights: true
-      },
-      studyTracking: {
-        timeTracking: true,
-        focusSessions: true,
-        breakReminders: true
-      },
-      reports: {
-        frequency: "weekly",
-        shareProgress: true,
-        achievementSharing: true
-      }
-    },
-    
-    // Content Interaction
     contentInteraction: {
       video: {
         quality: "auto",
-        playbackSpeed: 1,
-        autoPlay: false,
         subtitles: true
-      },
-      audio: {
-        quality: "high",
-        volumeBoost: false,
-        backgroundPlay: true
-      },
-      reading: {
-        fontSize: 16,
-        lineHeight: 1.5,
-        fontFamily: "default",
-        darkMode: false
-      },
-      interactive: {
-        animations: true,
-        hoverEffects: true,
-        dragAndDrop: true
-      },
-      offline: {
-        downloadQuality: "high",
-        autoDownload: false,
-        storageLimit: 2
       }
     },
-    
-    // Communication & Collaboration
-    communication: {
-      forum: {
-        notifications: true,
-        participationLevel: "active",
-        topicSubscriptions: true
-      },
-      peer: {
-        studyGroups: true,
-        peerReviews: true,
-        messaging: true
-      },
-      instructor: {
-        officeHours: true,
-        feedbackRequests: true,
-        progressUpdates: true
-      },
-      aiAssistant: {
-        enabled: true,
-        responseStyle: "detailed",
-        learningSuggestions: true
-      },
-      studyBuddy: {
-        matching: true,
-        availability: "flexible",
-        preferences: ["same-subject", "similar-level"]
-      },
-      community: {
-        events: true,
-        challenges: true,
-        achievements: true
-      }
-    },
-    
-    // Privacy & Security
-    privacy: {
-      profile: {
-        visibility: "public",
-        showProgress: true,
-        showAchievements: true
-      },
-      data: {
-        usageAnalytics: true,
-        personalizedContent: true,
-        thirdPartySharing: false
-      },
-      security: {
-        twoFactorAuth: false,
-        sessionTimeout: 30,
-        loginNotifications: true
-      }
-    },
-    
-    // Notifications
     notifications: {
       email: {
         enabled: true,
-        frequency: "daily",
-        types: ["progress", "achievements", "reminders"]
+        frequency: "realtime"
       },
       push: {
         enabled: true,
-        types: ["messages", "updates", "reminders"]
-      },
-      sms: {
-        enabled: false,
-        types: ["important", "urgent"]
-      },
-      inApp: {
-        enabled: true,
         types: ["all"]
-      }
-    },
-    
-    // Platform Customization
-    customization: {
-      theme: {
-        mode: "light",
-        primaryColor: "blue",
-        accentColor: "purple"
-      },
-      layout: {
-        density: "comfortable",
-        sidebar: "left",
-        navigation: "top"
-      },
-      language: {
-        interface: "english",
-        content: "english",
-        subtitles: "english"
       }
     }
   });
 
-  const [hasChanges, setHasChanges] = useState(false);
-  const [originalSettings, setOriginalSettings] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const toast = useToast();
-  const { colorMode, toggleColorMode } = useColorMode();
-  
-  // Color mode values
+  // Chakra Color Mode
   const textColorPrimary = useColorModeValue("secondaryGray.900", "white");
-  const textColorSecondary = useColorModeValue("secondaryGray.500", "secondaryGray.400");
+  const textColorSecondary = useColorModeValue("gray.400", "gray.500");
   const brandColor = useColorModeValue("brand.500", "brand.400");
   const cardBg = useColorModeValue("white", "navy.800");
-  const cardShadow = useColorModeValue(
-    "14px 17px 40px 4px rgba(112, 144, 176, 0.08)",
-    "unset"
-  );
-  const hoverBg = useColorModeValue("gray.100", "navy.700");
-  const activeBg = useColorModeValue("gray.200", "navy.700");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const toast = useToast();
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  useEffect(() => {
-    if (!originalSettings) {
-      setOriginalSettings(JSON.parse(JSON.stringify(settings)));
-    }
-  }, [settings]);
-
-  const handleChange = (category, key1, key2, val) => {
-    setSettings(prevSettings => {
-      const newSettings = { ...prevSettings };
-
-      if (val !== undefined) {
-        // This is the case for nested properties (4 arguments: category, subcategory, field, value)
-        // e.g., handleChange("accessibility", "visual", "fontSize", 16)
-        newSettings[category] = {
-          ...newSettings[category],
-          [key1]: {
-            ...newSettings[category][key1],
-            [key2]: val
-          }
-        };
+  const handleChange = (section, subsection, field, value) => {
+    setSettings(prev => {
+      const newSettings = { ...prev };
+      if (subsection) {
+        newSettings[section][subsection][field] = value;
       } else {
-        // This is the case for direct properties under a category (3 arguments: category, field, value)
-        // e.g., handleChange("learningPreferences", "style", "visual") from LearningPreferences.js
-        // or handleChange("learningPreferences", "style", style) from UserSettings.js's own buttons.
-        newSettings[category] = {
-          ...newSettings[category],
-          [key1]: key2 // key1 is the field name, key2 is the value
-        };
+        newSettings[section][field] = value;
       }
       return newSettings;
     });
@@ -342,30 +149,62 @@ const UserSettings = () => {
   };
 
   const handleSave = () => {
-    setOriginalSettings(JSON.parse(JSON.stringify(settings)));
-    setHasChanges(false);
     toast({
-      title: "Settings Saved",
+      title: "Settings saved",
       description: "Your settings have been updated successfully.",
       status: "success",
       duration: 3000,
       isClosable: true,
     });
+    setHasChanges(false);
   };
 
   const handleReset = () => {
-    setSettings(JSON.parse(JSON.stringify(originalSettings)));
-    setHasChanges(false);
-    toast({
-      title: "Settings Reset",
-      description: "Your settings have been reset to their original values.",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
+    setSettings({
+      learningPreferences: {
+        style: "visual",
+        primaryLanguage: "english",
+        skillLevel: "beginner"
+      },
+      accessibility: {
+        visual: {
+          fontSize: 16,
+          highContrast: false
+        }
+      },
+      contentInteraction: {
+        video: {
+          quality: "auto",
+          subtitles: true
+        }
+      },
+      notifications: {
+        email: {
+          enabled: true,
+          frequency: "realtime"
+        },
+        push: {
+          enabled: true,
+          types: ["all"]
+        }
+      }
     });
+    setHasChanges(false);
   };
 
   const tabs = [
+    {
+      name: "Profile",
+      icon: MdPerson,
+      component: (
+        <ScaleFade initialScale={0.9} in={true}>
+          <ProfileSettings
+            avatar={require("assets/img/avatars/avatar4.png")}
+            name="Adela Parkson"
+          />
+        </ScaleFade>
+      )
+    },
     {
       name: "Learning Preferences",
       icon: MdSchool,
@@ -387,7 +226,7 @@ const UserSettings = () => {
                         w="100%"
                         variant={settings.learningPreferences.style === style ? "solid" : "outline"}
                         colorScheme="brand"
-                        onClick={() => handleChange("learningPreferences", "style", style)}
+                        onClick={() => handleChange("learningPreferences", null, "style", style)}
                         _hover={{ transform: "translateY(-2px)", shadow: "md" }}
                         transition="all 0.2s"
                       >
@@ -413,7 +252,7 @@ const UserSettings = () => {
                       <Text color={textColorSecondary}>Primary Language</Text>
                       <Select
                         value={settings.learningPreferences.primaryLanguage}
-                        onChange={(e) => handleChange("learningPreferences", "primaryLanguage", e.target.value)}
+                        onChange={(e) => handleChange("learningPreferences", null, "primaryLanguage", e.target.value)}
                         bg={cardBg}
                         borderColor={borderColor}
                       >
@@ -429,7 +268,7 @@ const UserSettings = () => {
                       <Text color={textColorSecondary}>Skill Level</Text>
                       <Select
                         value={settings.learningPreferences.skillLevel}
-                        onChange={(e) => handleChange("learningPreferences", "skillLevel", e.target.value)}
+                        onChange={(e) => handleChange("learningPreferences", null, "skillLevel", e.target.value)}
                         bg={cardBg}
                         borderColor={borderColor}
                       >
@@ -439,33 +278,6 @@ const UserSettings = () => {
                       </Select>
                     </VStack>
                   </GridItem>
-                </Grid>
-              </VStack>
-            </ChakraCard>
-
-            <ChakraCard p={6} bg={cardBg} borderWidth="1px" borderColor={borderColor} _hover={{ shadow: "lg" }}>
-              <VStack spacing={4} align="stretch">
-                <HStack>
-                  <Icon as={MdSpeed} color={brandColor} boxSize={6} />
-                  <Text fontSize="lg" fontWeight="bold" color={textColorPrimary}>
-                    Learning Pace
-                  </Text>
-                </HStack>
-                <Grid templateColumns="repeat(3, 1fr)" gap={4}>
-                  {["slow", "moderate", "fast"].map((pace) => (
-                    <GridItem key={pace}>
-                      <Button
-                        w="100%"
-                        variant={settings.learningPreferences.learningPace === pace ? "solid" : "outline"}
-                        colorScheme="brand"
-                        onClick={() => handleChange("learningPreferences", "learningPace", pace)}
-                        _hover={{ transform: "translateY(-2px)", shadow: "md" }}
-                        transition="all 0.2s"
-                      >
-                        {pace.charAt(0).toUpperCase() + pace.slice(1)}
-                      </Button>
-                    </GridItem>
-                  ))}
                 </Grid>
               </VStack>
             </ChakraCard>
@@ -513,44 +325,6 @@ const UserSettings = () => {
                 </Grid>
               </VStack>
             </ChakraCard>
-
-            <ChakraCard p={6} bg={cardBg} borderWidth="1px" borderColor={borderColor} _hover={{ shadow: "lg" }}>
-              <VStack spacing={4} align="stretch">
-                <HStack>
-                  <Icon as={MdKeyboard} color={brandColor} boxSize={6} />
-                  <Text fontSize="lg" fontWeight="bold" color={textColorPrimary}>
-                    Motor Settings
-                  </Text>
-                </HStack>
-                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                  <GridItem>
-                    <VStack align="stretch" spacing={2}>
-                      <Text color={textColorSecondary}>Keyboard Navigation</Text>
-                      <Switch
-                        isChecked={settings.accessibility.motor.keyboardNavigation}
-                        onChange={(e) => handleChange("accessibility", "motor", "keyboardNavigation", e.target.checked)}
-                        colorScheme="brand"
-                      />
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack align="stretch" spacing={2}>
-                      <Text color={textColorSecondary}>Touch Target Size</Text>
-                      <Select
-                        value={settings.accessibility.motor.touchTargetSize}
-                        onChange={(e) => handleChange("accessibility", "motor", "touchTargetSize", e.target.value)}
-                        bg={cardBg}
-                        borderColor={borderColor}
-                      >
-                        <option value="small">Small</option>
-                        <option value="medium">Medium</option>
-                        <option value="large">Large</option>
-                      </Select>
-                    </VStack>
-                  </GridItem>
-                </Grid>
-              </VStack>
-            </ChakraCard>
           </VStack>
         </SlideFade>
       )
@@ -592,44 +366,6 @@ const UserSettings = () => {
                       <Switch
                         isChecked={settings.contentInteraction.video.subtitles}
                         onChange={(e) => handleChange("contentInteraction", "video", "subtitles", e.target.checked)}
-                        colorScheme="brand"
-                      />
-                    </VStack>
-                  </GridItem>
-                </Grid>
-              </VStack>
-            </ChakraCard>
-
-            <ChakraCard p={6} bg={cardBg} borderWidth="1px" borderColor={borderColor} _hover={{ shadow: "lg" }}>
-              <VStack spacing={4} align="stretch">
-                <HStack>
-                  <Icon as={MdVolumeUp} color={brandColor} boxSize={6} />
-                  <Text fontSize="lg" fontWeight="bold" color={textColorPrimary}>
-                    Audio Settings
-                  </Text>
-                </HStack>
-                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                  <GridItem>
-                    <VStack align="stretch" spacing={2}>
-                      <Text color={textColorSecondary}>Quality</Text>
-                      <Select
-                        value={settings.contentInteraction.audio.quality}
-                        onChange={(e) => handleChange("contentInteraction", "audio", "quality", e.target.value)}
-                        bg={cardBg}
-                        borderColor={borderColor}
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </Select>
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack align="stretch" spacing={2}>
-                      <Text color={textColorSecondary}>Background Play</Text>
-                      <Switch
-                        isChecked={settings.contentInteraction.audio.backgroundPlay}
-                        onChange={(e) => handleChange("contentInteraction", "audio", "backgroundPlay", e.target.checked)}
                         colorScheme="brand"
                       />
                     </VStack>

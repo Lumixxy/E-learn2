@@ -9,7 +9,7 @@ import React from "react";
 // FUNCTIONS
 
 function SidebarContent(props) {
-  const { routes, isCollapsed = false, contentVisible = true } = props;
+  const { routes, isCollapsed = false, contentVisible = true, hoverToggleEnabled, setHoverToggleEnabled } = props;
 
   const smoothTransition = "all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)";
 
@@ -31,7 +31,7 @@ function SidebarContent(props) {
         opacity={contentVisible ? 1 : 0}
         transform={contentVisible ? "translateY(0)" : "translateY(-5px)"}
       >
-        <Brand isCollapsed={isCollapsed} />
+        <Brand isCollapsed={isCollapsed} hoverToggleEnabled={hoverToggleEnabled} setHoverToggleEnabled={setHoverToggleEnabled} />
       </Box>
 
       <Stack

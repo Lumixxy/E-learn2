@@ -34,7 +34,6 @@ import Card from "components/card/Card.js";
 import React, { useState } from "react";
 // Assets
 import { MdEdit, MdSave, MdCancel, MdPhotoCamera, MdDownload, MdVerified, MdSchool } from "react-icons/md";
-import UserSettings from "../settings/UserSettings";
 
 export default function ProfileSettings(props) {
   const { avatar, name, ...rest } = props;
@@ -292,11 +291,6 @@ export default function ProfileSettings(props) {
             </VStack>
           </VStack>
         </SimpleGrid>
-
-        <Divider />
-
-        {/* Settings Section */}
-        <UserSettings />
       </VStack>
 
       {/* Certificate Preview Modal */}
@@ -307,7 +301,7 @@ export default function ProfileSettings(props) {
           <ModalCloseButton />
           <ModalBody>
             {selectedCertificate && (
-              <VStack spacing={4}>
+              <VStack spacing={4} align="stretch">
                 <Image
                   src={selectedCertificate.image}
                   alt={selectedCertificate.name}

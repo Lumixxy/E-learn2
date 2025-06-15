@@ -14,6 +14,7 @@ export default function Dashboard(props) {
   const { ...rest } = props;
   // Sidebar collapsed state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // collapsed by default
+  const [hoverToggleEnabled, setHoverToggleEnabled] = useState(true); // new state for hover toggle
 
   // functions for changing the states from components
   const getRoute = () => {
@@ -117,6 +118,8 @@ export default function Dashboard(props) {
           routes={routes}
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
+          hoverToggleEnabled={hoverToggleEnabled}
+          setHoverToggleEnabled={setHoverToggleEnabled}
           {...rest}
         />
         <Box
@@ -127,7 +130,7 @@ export default function Dashboard(props) {
           overflow="auto"
           position="relative"
           transition="margin-left 0.3s cubic-bezier(0.685, 0.0473, 0.346, 1)"
-          marginLeft={sidebarCollapsed ? "80px" : "300px"}
+          marginLeft={{ base: "0", md: sidebarCollapsed ? "80px" : "300px" }}
           pt="110px"
         >
           <Navbar
@@ -146,7 +149,7 @@ export default function Dashboard(props) {
               p={{ base: '20px', md: '30px' }}
               pe="20px"
               minH="100vh"
-              pt="0px"
+              pt={{ base: '0px', md: '0px' }}
             >
               <Routes>
                 {getRoutes(routes)}

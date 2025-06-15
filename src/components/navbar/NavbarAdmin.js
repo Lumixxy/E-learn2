@@ -22,7 +22,7 @@ export default function AdminNavbar(props) {
 	let navbarPosition = 'fixed';
 	let navbarFilter = 'none';
 	let navbarBackdrop = 'none';
-	let navbarShadow = useColorModeValue('0px 7px 23px rgba(0, 0, 0, 0.05)', 'none');
+	let navbarShadow = useColorModeValue('none', 'none');
 	let navbarBg = useColorModeValue('white', 'navy.800');
 	let navbarBorder = 'transparent';
 	let secondaryMargin = '0px';

@@ -28,18 +28,21 @@ import PropTypes from "prop-types";
 import { IoMenuOutline } from "react-icons/io5";
 
 function Sidebar(props) {
-  const { routes, collapsed, setCollapsed } = props;
+  const { routes, collapsed, setCollapsed, hoverToggleEnabled, setHoverToggleEnabled } = props;
   const location = useLocation();
 
   // Auto-collapse sidebar when route changes (when user clicks a link)
   useEffect(() => {
-    setCollapsed(true);
-  }, [location.pathname, setCollapsed]);
+    // Only auto-collapse sidebar when hoverToggleEnabled is true
+    if (hoverToggleEnabled) {
+      setCollapsed(true);
+    }
+  }, [location.pathname, hoverToggleEnabled, setCollapsed]);
 
   let variantChange = "0.3s ease";
   let shadow = useColorModeValue(
-    "14px 17px 40px 4px rgba(112, 144, 176, 0.08)",
-    "unset"
+    "none",
+    "none"
   );
   // Chakra Color Mode
   let sidebarBg = useColorModeValue("white", "navy.800");
@@ -67,15 +70,15 @@ function Sidebar(props) {
         overflowX='hidden'
         boxShadow={shadow}
         position="relative"
-        onMouseEnter={() => setCollapsed(false)}
-        onMouseLeave={() => setCollapsed(true)}
+        onMouseEnter={hoverToggleEnabled ? () => setCollapsed(false) : undefined}
+        onMouseLeave={hoverToggleEnabled ? () => setCollapsed(true) : undefined}
         zIndex={1000}>
         <Scrollbars
           autoHide
           renderTrackVertical={renderTrack}
           renderThumbVertical={renderThumb}
           renderView={renderView}>
-          <Content routes={routes} isCollapsed={collapsed} />
+          <Content routes={routes} isCollapsed={collapsed} hoverToggleEnabled={hoverToggleEnabled} setHoverToggleEnabled={setHoverToggleEnabled} />
         </Scrollbars>
       </Box>
     </Box>
@@ -142,6 +145,8 @@ Sidebar.propTypes = {
   variant: PropTypes.string,
   collapsed: PropTypes.bool,
   setCollapsed: PropTypes.func,
+  hoverToggleEnabled: PropTypes.bool,
+  setHoverToggleEnabled: PropTypes.func,
 };
 
 export default Sidebar;

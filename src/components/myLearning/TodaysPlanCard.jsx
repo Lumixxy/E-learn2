@@ -3,9 +3,9 @@ import { Text, VStack, HStack, Badge, useColorModeValue } from "@chakra-ui/react
 import Card from "../card/Card";
 
 const tasks = [
-  { time: "11:30", task: "Watch: Neural Networks", status: "upcoming" },
-  { time: "13:00", task: "Smart Recall", status: "pending" },
-  { time: "15:30", task: "Data Structures Quiz", status: "pending" },
+  { time: "11:30", task: "Watch: CSS Grid Layout", status: "upcoming" },
+  { time: "13:00", task: "Practice: Flexbox Challenges", status: "pending" },
+  { time: "15:30", task: "JavaScript Functions Quiz", status: "pending" },
 ];
 
 const TodaysPlanCard = () => {

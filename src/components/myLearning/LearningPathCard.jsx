@@ -3,11 +3,11 @@ import { Text, VStack, HStack, Badge, useColorModeValue } from "@chakra-ui/react
 import Card from "../card/Card";
 
 const modules = [
-  { name: "Functions", status: "required", color: "green" },
-  { name: "Libraries", status: "recommended", color: "blue" },
-  { name: "NumPy & Pandas", status: "required", color: "green" },
-  { name: "Data Visualization", status: "optional", color: "yellow" },
-  { name: "Machine Learning Basics", status: "required", color: "green" },
+  { name: "HTML & CSS Fundamentals", status: "required", color: "green" },
+  { name: "JavaScript Basics", status: "required", color: "green" },
+  { name: "Responsive Design", status: "required", color: "green" },
+  { name: "React.js Core Concepts", status: "recommended", color: "blue" },
+  { name: "Node.js & Express", status: "optional", color: "yellow" },
 ];
 
 const LearningPathCard = () => {

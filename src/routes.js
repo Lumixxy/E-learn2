@@ -9,6 +9,7 @@ import {
   MdSchool,
   MdLeaderboard,
   MdMap,
+  MdLibraryBooks,
 } from "react-icons/md";
 
 // Admin Imports
@@ -20,6 +21,7 @@ import Leaderboard from "views/admin/leaderboard";
 import Home from "views/admin/home";
 import Roadmap from "views/admin/roadmap";
 import CourseDetail from "views/admin/courses/CourseDetail";
+import Courses from "views/admin/courses/Courses";
 
 
 // Auth Imports
@@ -31,6 +33,13 @@ const routes = [
     path: "/home",
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: <Home />,
+  },
+  {
+    name: "Courses",
+    layout: "/admin",
+    path: "/courses",
+    icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
+    component: <Courses />,
   },
   {
     name: "My Learning",
@@ -75,19 +84,20 @@ const routes = [
     icon: <Icon as={MdDescription} width="20px" height="20px" color="inherit" />,
     component: <ResumeGenerator />,
   },
-  {
-    name: "Profile",
-    layout: "/admin",
-    path: "/profile",
-    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: <Profile />,
-  },
+  
   {
     name: "Leaderboard",
     layout: "/admin",
     path: "/leaderboard",
     icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,
     component: <Leaderboard />,
+  },
+  {
+    name: "Profile",
+    layout: "/admin",
+    path: "/profile",
+    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
+    component: <Profile />,
   },
   
 ];
