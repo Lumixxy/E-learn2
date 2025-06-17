@@ -282,12 +282,15 @@ const Leaderboard = () => {
   const [category, setCategory] = useState("all");
   const [level, setLevel] = useState("all");
 
+  // Chakra UI hooks
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
   const textColor = useColorModeValue("gray.800", "white");
   const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
   const achievementBg = useColorModeValue("gray.50", "gray.700");
   const activityBg = useColorModeValue("gray.50", "gray.700");
   const userRankBg = useColorModeValue("blue.50", "blue.900");
+  const pageBg = useColorModeValue("gray.50", "gray.900");
 
   // Reorder podium data to show 1st in middle, 2nd on right, 3rd on left
   const podiumData = [
@@ -321,7 +324,7 @@ const Leaderboard = () => {
   };
 
   return (
-    <Box minH="100vh" bg={useColorModeValue("gray.50", "gray.900")} py={8}>
+    <Box minH="100vh" bg={pageBg} py={8}>
       <Container maxW="container.xl">
         {/* Search and Filter Bar */}
         <MotionBox

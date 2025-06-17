@@ -56,6 +56,7 @@ import {
   SliderMark,
   Badge,
   CardBody,
+  CheckboxGroup,
 } from "@chakra-ui/react";
 import { SearchIcon, ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { useCart } from "contexts/CartContext";
@@ -66,24 +67,35 @@ import Banner from "./components/Banner";
 
 export default function Marketplace() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedLevel, setSelectedLevel] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedLevels, setSelectedLevels] = useState([]);
+  const [selectedSkills, setSelectedSkills] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [minRating, setMinRating] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+
+  // Chakra UI hooks
   const textColor = useColorModeValue("navy.700", "white");
   const textColorSecondary = useColorModeValue("secondaryGray.600", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.200");
   const bgColor = useColorModeValue("white", "navy.800");
   const shadow = useColorModeValue(
     "14px 17px 40px 4px rgba(112, 144, 176, 0.08)",
-    "unset"
+    "0px 0px 0px 0px rgba(112, 144, 176, 0.08)"
   );
+  const inputBg = useColorModeValue("gray.100", "whiteAlpha.100");
+  const inputHoverBg = useColorModeValue("gray.200", "whiteAlpha.200");
+  const inputFocusBg = useColorModeValue("white", "whiteAlpha.300");
 
   const coursesPerPage = 12;
+
+  // Extract unique categories, levels, and skills
+  const allCategories = [...new Set(courses.map((course) => course.category))];
+  const allLevels = [...new Set(courses.map((course) => course.level))];
+  const allSkills = [...new Set(courses.flatMap((course) => course.tags))]; // Assuming 'tags' are skills
 
   // Initialize filtered courses on component mount
   useEffect(() => {
@@ -93,7 +105,7 @@ export default function Marketplace() {
 
   useEffect(() => {
     filterCourses();
-  }, [searchQuery, selectedCategory, selectedLevel, priceRange, minRating]);
+  }, [searchQuery, selectedCategories, selectedLevels, selectedSkills, priceRange, minRating]);
 
   const filterCourses = () => {
     let filtered = [...courses];
@@ -112,18 +124,28 @@ export default function Marketplace() {
       console.log('After search filter:', filtered.length);
     }
 
-    // Apply category filter
-    if (selectedCategory) {
-      filtered = filtered.filter(
-        (course) => course.category === selectedCategory
+    // Apply category filter (multiple selection)
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((course) =>
+        selectedCategories.includes(course.category)
       );
       console.log('After category filter:', filtered.length);
     }
 
-    // Apply level filter
-    if (selectedLevel) {
-      filtered = filtered.filter((course) => course.level === selectedLevel);
+    // Apply level filter (multiple selection)
+    if (selectedLevels.length > 0) {
+      filtered = filtered.filter((course) =>
+        selectedLevels.includes(course.level)
+      );
       console.log('After level filter:', filtered.length);
+    }
+
+    // Apply skills filter (multiple selection)
+    if (selectedSkills.length > 0) {
+      filtered = filtered.filter((course) =>
+        selectedSkills.some((skill) => course.tags.includes(skill))
+      );
+      console.log('After skills filter:', filtered.length);
     }
 
     // Apply price range filter
@@ -160,9 +182,6 @@ export default function Marketplace() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const categories = [...new Set(courses.map((course) => course.category))];
-  const levels = [...new Set(courses.map((course) => course.level))];
-
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       <Banner />
@@ -184,12 +203,12 @@ export default function Marketplace() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   borderRadius="70px"
-                  bg={useColorModeValue("gray.100", "whiteAlpha.100")}
+                  bg={inputBg}
                   _hover={{
-                    bg: useColorModeValue("gray.200", "whiteAlpha.200"),
+                    bg: inputHoverBg,
                   }}
                   _focus={{
-                    bg: useColorModeValue("white", "whiteAlpha.300"),
+                    bg: inputFocusBg,
                     borderColor: "brand.500",
                   }}
                 />
@@ -271,36 +290,47 @@ export default function Marketplace() {
             <VStack spacing="20px" align="stretch">
               <Box>
                 <Text fontWeight="bold" mb="10px">
-                  Categories
+                  Subject
                 </Text>
-                <Select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  placeholder="All Categories"
-                >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </Select>
+                <CheckboxGroup value={selectedCategories} onChange={setSelectedCategories}>
+                  <VStack align="start">
+                    {allCategories.map((category) => (
+                      <Checkbox key={category} value={category}>
+                        {category}
+                      </Checkbox>
+                    ))}
+                  </VStack>
+                </CheckboxGroup>
+              </Box>
+
+              <Box>
+                <Text fontWeight="bold" mb="10px">
+                  Skills
+                </Text>
+                <CheckboxGroup value={selectedSkills} onChange={setSelectedSkills}>
+                  <VStack align="start">
+                    {allSkills.map((skill) => (
+                      <Checkbox key={skill} value={skill}>
+                        {skill}
+                      </Checkbox>
+                    ))}
+                  </VStack>
+                </CheckboxGroup>
               </Box>
 
               <Box>
                 <Text fontWeight="bold" mb="10px">
                   Level
                 </Text>
-                <Select
-                  value={selectedLevel}
-                  onChange={(e) => setSelectedLevel(e.target.value)}
-                  placeholder="All Levels"
-                >
-                  {levels.map((level) => (
-                    <option key={level} value={level}>
-                      {level}
-                    </option>
-                  ))}
-                </Select>
+                <CheckboxGroup value={selectedLevels} onChange={setSelectedLevels}>
+                  <VStack align="start">
+                    {allLevels.map((level) => (
+                      <Checkbox key={level} value={level}>
+                        {level}
+                      </Checkbox>
+                    ))}
+                  </VStack>
+                </CheckboxGroup>
               </Box>
 
               <Box>
@@ -313,26 +343,25 @@ export default function Marketplace() {
                   max={50000}
                   step={1000}
                   onChange={(val) => setPriceRange(val)}
+                  value={priceRange}
                 >
                   <SliderMark value={0} mt="2" fontSize="sm">
-                    0
+                    ₹0
                   </SliderMark>
                   <SliderMark value={25000} mt="2" fontSize="sm">
-                    25,000
+                    ₹25k
                   </SliderMark>
                   <SliderMark value={50000} mt="2" fontSize="sm">
-                    50,000
+                    ₹50k
                   </SliderMark>
                   <SliderTrack>
                     <SliderFilledTrack />
                   </SliderTrack>
-                  <SliderThumb index={0} />
-                  <SliderThumb index={1} />
+                  <SliderThumb />
                 </Slider>
-                <Flex justify="space-between" mt="2">
-                  <Text fontSize="sm">₹{priceRange[0]}</Text>
-                  <Text fontSize="sm">₹{priceRange[1]}</Text>
-                </Flex>
+                <Text fontSize="sm" textAlign="center" mt="2">
+                  ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
+                </Text>
               </Box>
 
               <Box>
@@ -345,6 +374,7 @@ export default function Marketplace() {
                   max={5}
                   step={0.5}
                   onChange={(val) => setMinRating(val)}
+                  value={minRating}
                 >
                   <SliderMark value={0} mt="2" fontSize="sm">
                     0

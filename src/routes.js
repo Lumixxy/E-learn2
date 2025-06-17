@@ -22,6 +22,12 @@ import Home from "views/admin/home";
 import Roadmap from "views/admin/roadmap";
 import CourseDetail from "views/admin/courses/CourseDetail";
 import Courses from "views/admin/courses/Courses";
+import CourseEnroll from "views/admin/courses/CourseEnroll";
+import CourseLearn from "views/admin/courses/CourseLearn";
+import Syllabus from "views/admin/mit-course/Syllabus";
+import Readings from "views/admin/mit-course/Readings";
+import Assignments from "views/admin/mit-course/Assignments";
+import CourseImport from "views/admin/courses/CourseImport";
 
 
 // Auth Imports
@@ -53,6 +59,20 @@ const routes = [
     layout: "/admin",
     path: "/courses/:courseId",
     component: <CourseDetail />,
+    hidden: true,
+  },
+  {
+    name: "Course Enroll",
+    layout: "/admin",
+    path: "/courses/:courseId/enroll",
+    component: <CourseEnroll />,
+    hidden: true,
+  },
+  {
+    name: "Course Learn",
+    layout: "/admin",
+    path: "/courses/:courseId/learn",
+    component: <CourseLearn />,
     hidden: true,
   },
   {
@@ -99,7 +119,10 @@ const routes = [
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: <Profile />,
   },
-  
+  {
+    path: "courses/import",
+    element: <CourseImport />,
+  },
 ];
 
 export default routes;
