@@ -19,13 +19,20 @@ import {
   ListItem,
   ListIcon,
   useToast,
+  Input,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import { FaCheck, FaClock, FaBook, FaCertificate, FaStar, FaLock } from 'react-icons/fa';
+import courseData from '../../../data/course_enroll_data.json';
 
 const CourseEnroll = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [usn, setUsn] = useState('');
+  const [usnError, setUsnError] = useState('');
   const toast = useToast();
 
   // Color mode values
@@ -34,87 +41,16 @@ const CourseEnroll = () => {
   const textColor = useColorModeValue("gray.800", "white");
   const mutedColor = useColorModeValue("gray.600", "gray.400");
 
-  // Mock course data - replace with actual data from your backend
-  const courseData = {
-    title: "Introduction to Programming in Python",
-    provider: "MIT OpenCourseWare",
-    description: "Learn Python programming from scratch using MIT's open courseware materials. Master fundamental programming concepts, data structures, and algorithms using Python. Build real-world applications and prepare for a career in software development.",
-    imageUrl: "https://via.placeholder.com/800x400",
-    duration: "8 weeks",
-    level: "Beginner",
-    rating: 4.8,
-    totalRatings: 1250,
-    price: "Free",
-    outcomes: [
-      "Understand fundamental programming concepts",
-      "Master Python syntax and data structures",
-      "Build real-world applications",
-      "Prepare for professional development",
-      "Earn industry-recognized certificates"
-    ],
-    modules: [
-      {
-        title: "Introduction to Python",
-        duration: "2 weeks",
-        topics: [
-          "Python basics and syntax",
-          "Variables and data types",
-          "Control structures",
-          "Functions and modules"
-        ],
-        content: "Based on MIT's Introduction to Computer Science and Programming in Python"
-      },
-      {
-        title: "Data Structures",
-        duration: "2 weeks",
-        topics: [
-          "Lists and tuples",
-          "Dictionaries and sets",
-          "Stacks and queues",
-          "Trees and graphs"
-        ],
-        content: "Based on MIT's Data Structures and Algorithms"
-      },
-      {
-        title: "Object-Oriented Programming",
-        duration: "2 weeks",
-        topics: [
-          "Classes and objects",
-          "Inheritance and polymorphism",
-          "Encapsulation and abstraction",
-          "Design patterns"
-        ],
-        content: "Based on MIT's Object-Oriented Programming Concepts"
-      },
-      {
-        title: "Final Project",
-        duration: "2 weeks",
-        topics: [
-          "Project planning",
-          "Implementation",
-          "Testing and deployment",
-          "Documentation"
-        ],
-        content: "Capstone project combining all learned concepts"
-      }
-    ],
-    certificates: [
-      {
-        name: "PygenicArc Certificate",
-        description: "Official completion certificate from PygenicArc"
-      },
-      {
-        name: "MIT OpenCourseWare Certificate",
-        description: "Completion certificate based on MIT's open courseware materials"
-      }
-    ]
-  };
-
   const handleEnroll = () => {
+    if (!usn || !/^\w{10,}$/.test(usn)) {
+      setUsnError('Please enter a valid USN (e.g., 1KG22CS030)');
+      return;
+    }
     setIsEnrolled(true);
+    setUsnError('');
     toast({
       title: "Enrollment Successful!",
-      description: "You have successfully enrolled in the course. You can now start learning!",
+      description: `You have successfully enrolled with USN: ${usn}. You can now start learning!`,
       status: "success",
       duration: 5000,
       isClosable: true,
@@ -123,58 +59,64 @@ const CourseEnroll = () => {
   };
 
   const handleStartCourse = () => {
-    navigate(`/admin/courses/${courseId}/learn`);
+    navigate(`/admin/courses/${courseId}/roadmap`);
   };
 
   return (
     <Box minH="100vh" bg={bgColor} py={8}>
       <Container maxW="container.xl">
         <VStack spacing={8} align="stretch">
-          {/* Course Header */}
-          <Card bg={cardBg} borderRadius="xl" overflow="hidden">
-            <Image src={courseData.imageUrl} alt={courseData.title} h="400px" w="100%" objectFit="cover" />
-            <CardBody p={8}>
-              <VStack spacing={6} align="stretch">
-                <Box>
-                  <HStack spacing={4} mb={2}>
-                    <Image src="https://via.placeholder.com/60x60/1f77b4/ffffff?text=MIT" alt="MIT" w="60px" h="60px" />
-                    <Text fontSize="sm" color={mutedColor}>{courseData.provider}</Text>
-                  </HStack>
-                  <Text fontSize="3xl" fontWeight="bold" color={textColor} mb={4}>
-                    {courseData.title}
-                  </Text>
-                  <Text fontSize="lg" color={mutedColor} mb={4}>
-                    {courseData.description}
-                  </Text>
-                </Box>
-
-                <HStack spacing={6} flexWrap="wrap">
-                  <HStack>
-                    <Icon as={FaClock} color={mutedColor} />
-                    <Text color={mutedColor}>{courseData.duration}</Text>
-                  </HStack>
-                  <HStack>
-                    <Icon as={FaBook} color={mutedColor} />
-                    <Text color={mutedColor}>{courseData.level}</Text>
-                  </HStack>
-                  <HStack>
-                    <Icon as={FaStar} color="yellow.400" />
-                    <Text color={mutedColor}>{courseData.rating} ({courseData.totalRatings} ratings)</Text>
-                  </HStack>
-                </HStack>
-
-                {!isEnrolled ? (
+          {/* Enrollment Form */}
+          {!isEnrolled ? (
+            <Card bg={cardBg} borderRadius="xl" overflow="hidden">
+              <CardBody p={8}>
+                <VStack spacing={6} align="stretch">
+                  <Box>
+                    <HStack spacing={4} mb={2}>
+                      <Image src="https://via.placeholder.com/60x60/1f77b4/ffffff?text=MIT" alt="MIT" w="60px" h="60px" />
+                      <Text fontSize="sm" color={mutedColor}>{courseData.provider}</Text>
+                    </HStack>
+                    <Text fontSize="3xl" fontWeight="bold" color={textColor} mb={4}>
+                      {courseData.title}
+                    </Text>
+                    <Text fontSize="lg" color={mutedColor} mb={4}>
+                      {courseData.description}
+                    </Text>
+                  </Box>
+                  <FormControl isInvalid={!!usnError}>
+                    <FormLabel htmlFor="usn">Enter your USN</FormLabel>
+                    <Input
+                      id="usn"
+                      placeholder="e.g., 1KG22CS030"
+                      value={usn}
+                      onChange={e => setUsn(e.target.value)}
+                      maxW="300px"
+                    />
+                    {usnError && <FormErrorMessage>{usnError}</FormErrorMessage>}
+                  </FormControl>
                   <Button colorScheme="purple" size="lg" onClick={handleEnroll}>
                     Enroll Now - {courseData.price}
                   </Button>
-                ) : (
+                </VStack>
+              </CardBody>
+            </Card>
+          ) : (
+            <Card bg={cardBg} borderRadius="xl" overflow="hidden">
+              <CardBody p={8}>
+                <VStack spacing={6} align="stretch">
+                  <Text fontSize="2xl" fontWeight="bold" color={textColor}>
+                    Enrollment Successful!
+                  </Text>
+                  <Text color={mutedColor}>
+                    USN: <b>{usn}</b>
+                  </Text>
                   <Button colorScheme="green" size="lg" onClick={handleStartCourse}>
                     Start Course
                   </Button>
-                )}
-              </VStack>
-            </CardBody>
-          </Card>
+                </VStack>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Course Content */}
           <Card bg={cardBg} borderRadius="xl">

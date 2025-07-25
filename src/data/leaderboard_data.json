@@ -1,0 +1,69 @@
+{
+  "leaderboardData": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "avatar": "https://i.pravatar.cc/150?img=1",
+      "points": 2500,
+      "level": "Expert",
+      "streak": 15,
+      "achievements": ["First Place", "Perfect Score", "Early Bird"],
+      "recentActivity": ["Completed Advanced Course", "Helped 5 Students", "Achieved Perfect Score"],
+      "progress": 85
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "avatar": "https://i.pravatar.cc/150?img=2",
+      "points": 2200,
+      "level": "Advanced",
+      "streak": 12,
+      "achievements": ["Second Place", "Quick Learner", "Team Player"],
+      "recentActivity": ["Completed Intermediate Course", "Created Study Group", "Helped 3 Students"],
+      "progress": 75
+    },
+    {
+      "id": 3,
+      "name": "Mike Johnson",
+      "avatar": "https://i.pravatar.cc/150?img=3",
+      "points": 2000,
+      "level": "Advanced",
+      "streak": 10,
+      "achievements": ["Third Place", "Consistent Learner", "Active Participant"],
+      "recentActivity": ["Completed Basic Course", "Joined Study Group", "Posted 5 Questions"],
+      "progress": 65
+    },
+    {
+      "id": 4,
+      "name": "Sarah Wilson",
+      "avatar": "https://i.pravatar.cc/150?img=4",
+      "points": 1800,
+      "level": "Intermediate",
+      "streak": 8,
+      "achievements": ["Quick Starter", "Team Player"],
+      "recentActivity": ["Completed Basic Course", "Joined Study Group"],
+      "progress": 55
+    },
+    {
+      "id": 5,
+      "name": "David Brown",
+      "avatar": "https://i.pravatar.cc/150?img=5",
+      "points": 1600,
+      "level": "Intermediate",
+      "streak": 7,
+      "achievements": ["Consistent Learner"],
+      "recentActivity": ["Completed Basic Course"],
+      "progress": 45
+    }
+  ],
+  "podiumColors": [
+    "linear(to-b, gray.100, gray.200)",
+    "linear(to-b, yellow.100, yellow.200)",
+    "linear(to-b, gray.100, gray.200)"
+  ],
+  "crownColors": [
+    "gray.400",
+    "yellow.400",
+    "gray.400"
+  ]
+} 

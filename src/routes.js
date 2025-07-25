@@ -24,6 +24,8 @@ import CourseDetail from "views/admin/courses/CourseDetail";
 import Courses from "views/admin/courses/Courses";
 import CourseEnroll from "views/admin/courses/CourseEnroll";
 import CourseLearn from "views/admin/courses/CourseLearn";
+import CourseRoadmap from "views/admin/courses/CourseRoadmap";
+import PythonRoadmap from "views/admin/courses/PythonRoadmap";
 import Syllabus from "views/admin/mit-course/Syllabus";
 import Readings from "views/admin/mit-course/Readings";
 import Assignments from "views/admin/mit-course/Assignments";
@@ -76,6 +78,20 @@ const routes = [
     hidden: true,
   },
   {
+    name: "Course Roadmap",
+    layout: "/admin",
+    path: "/courses/:courseId/roadmap",
+    component: <CourseRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "Python Roadmap",
+    layout: "/admin",
+    path: "/courses/:courseId/roadmap",
+    component: <PythonRoadmap />,
+    hidden: false,
+  },
+  {
     name: "Roadmap",
     layout: "/admin",
     path: "/roadmap",
@@ -104,7 +120,7 @@ const routes = [
     icon: <Icon as={MdDescription} width="20px" height="20px" color="inherit" />,
     component: <ResumeGenerator />,
   },
-  
+
   {
     name: "Leaderboard",
     layout: "/admin",

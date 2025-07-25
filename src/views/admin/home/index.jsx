@@ -27,6 +27,10 @@ import {
 } from "react-icons/fi";
 import { MdArrowForward } from "react-icons/md";
 import { FAQAccordion } from "components/home/FAQAccordion.jsx";
+import homeFeatures from '../../../data/home_features.json';
+import homeCourses from '../../../data/home_courses.json';
+import testimonials from '../../../data/testimonials.json';
+import learningPaths from '../../../data/learning_paths.json';
 
 function Home() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -37,38 +41,21 @@ function Home() {
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
   // Features data
-  const features = [
-    {
-      icon: FiBookOpen,
-      title: "Interactive Learning",
-      description: "Engage with our interactive courses designed to make learning programming enjoyable and effective."
-    },
-    {
-      icon: FiAward,
-      title: "Earn Certificates",
-      description: "Complete courses and earn certificates to showcase your skills to potential employers."
-    },
-    {
-      icon: FiTrendingUp,
-      title: "Track Progress",
-      description: "Monitor your learning journey with detailed analytics and progress tracking."
-    },
-    {
-      icon: FiUsers,
-      title: "Community Support",
-      description: "Join our community of learners and get help from peers and mentors."
-    },
-    {
-      icon: FiCode,
-      title: "Hands-on Projects",
-      description: "Apply your knowledge with real-world projects that build your portfolio."
-    },
-    {
-      icon: FiLayers,
-      title: "Comprehensive Curriculum",
-      description: "From basics to advanced topics, our curriculum covers everything you need to succeed."
-    }
-  ];
+  const features = homeFeatures;
+
+  // Popular Courses data
+  const popularCourses = homeCourses;
+
+  // Helper to map icon string to actual icon component
+  const iconMap = {
+    FiBookOpen,
+    FiAward,
+    FiTrendingUp,
+    FiUsers,
+    FiCode,
+    FiLayers,
+    FiStar,
+  };
 
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
@@ -173,7 +160,7 @@ function Home() {
               }}
             >
               <Icon 
-                as={feature.icon} 
+                as={iconMap[feature.icon]} 
                 w={10} 
                 h={10} 
                 color={brandColor} 
@@ -202,36 +189,7 @@ function Home() {
         </Flex>
 
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing="20px">
-          {[
-            {
-              title: "Python Fundamentals",
-              image: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-              level: "Beginner",
-              duration: "4 weeks",
-              rating: 4.9
-            },
-            {
-              title: "Data Science with Python",
-              image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-              level: "Intermediate",
-              duration: "8 weeks",
-              rating: 4.8
-            },
-            {
-              title: "Web Development Bootcamp",
-              image: "https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-              level: "Beginner to Intermediate",
-              duration: "12 weeks",
-              rating: 4.9
-            },
-            {
-              title: "Machine Learning A-Z",
-              image: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-              level: "Advanced",
-              duration: "10 weeks",
-              rating: 4.7
-            }
-          ].map((course, index) => (
+          {popularCourses.map((course, index) => (
             <Box 
               key={index} 
               borderRadius="xl" 
@@ -282,29 +240,7 @@ function Home() {
         </VStack>
 
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing="30px">
-          {[
-            {
-              name: "Sarah Johnson",
-              role: "Software Developer",
-              company: "Tech Innovations Inc.",
-              image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
-              testimonial: "PyGenicArc transformed my career. I went from knowing nothing about programming to landing my dream job as a software developer in just 6 months."
-            },
-            {
-              name: "Michael Chen",
-              role: "Data Scientist",
-              company: "DataCorp Analytics",
-              image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
-              testimonial: "The data science course was comprehensive and practical. The projects helped me build a strong portfolio that impressed my current employer."
-            },
-            {
-              name: "Emily Rodriguez",
-              role: "Full Stack Developer",
-              company: "WebSolutions",
-              image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
-              testimonial: "The community support at PyGenicArc is unmatched. Whenever I got stuck, there was always someone ready to help me understand and move forward."
-            }
-          ].map((testimonial, index) => (
+          {testimonials.map((testimonial, index) => (
             <Card key={index} p="25px" variant="elevated">
               <VStack spacing="20px" align="start">
                 <Text fontSize="lg" fontStyle="italic" color={textColor}>
@@ -343,32 +279,10 @@ function Home() {
           </Button>
         </Flex>
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing="20px">
-          {[
-            {
-              title: "Web Developer",
-              description: "Master HTML, CSS, JavaScript, and modern frameworks to build responsive and dynamic websites.",
-              courses: 8,
-              duration: "6 months",
-              icon: FiCode
-            },
-            {
-              title: "Data Scientist",
-              description: "Learn data analysis, visualization, machine learning, and AI to extract insights from complex datasets.",
-              courses: 10,
-              duration: "8 months",
-              icon: FiTrendingUp
-            },
-            {
-              title: "Full Stack Engineer",
-              description: "Become proficient in both frontend and backend technologies to build complete web applications.",
-              courses: 12,
-              duration: "10 months",
-              icon: FiLayers
-            }
-          ].map((path, index) => (
+          {learningPaths.map((path, index) => (
             <Card key={index} p="25px" variant="outline">
               <VStack spacing="20px" align="start">
-                <Icon as={path.icon} w={10} h={10} color={brandColor} />
+                <Icon as={iconMap[path.icon]} w={10} h={10} color={brandColor} />
                 <Heading as="h3" size="md" color={textColor}>
                   {path.title}
                 </Heading>

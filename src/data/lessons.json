@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1001,
+    "title": "What is a Variable?",
+    "content": "A variable is a container for storing data values in Python."
+  },
+  {
+    "id": 1002,
+    "title": "Data Types",
+    "content": "Python has several built-in data types, such as int, float, str, and bool."
+  },
+  {
+    "id": 1003,
+    "title": "If Statements",
+    "content": "If statements are used for conditional execution in Python."
+  },
+  {
+    "id": 1004,
+    "title": "Loops",
+    "content": "Loops allow you to repeat a block of code multiple times."
+  },
+  {
+    "id": 2001,
+    "title": "Introduction to Arrays",
+    "content": "Arrays are used to store multiple values in a single variable."
+  },
+  {
+    "id": 2002,
+    "title": "Lists in Python",
+    "content": "Lists are dynamic arrays in Python."
+  },
+  {
+    "id": 2003,
+    "title": "Stacks",
+    "content": "A stack is a LIFO data structure."
+  },
+  {
+    "id": 2004,
+    "title": "Queues",
+    "content": "A queue is a FIFO data structure."
+  }
+] 

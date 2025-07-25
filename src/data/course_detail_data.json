@@ -1,0 +1,45 @@
+{
+  "title": "Introduction to Programming in Java",
+  "provider": "IBM",
+  "description": "Learn Java programming from scratch. Master object-oriented programming, data structures, and algorithms using Java. Build real-world applications and prepare for a career in software development.",
+  "totalModules": 5,
+  "completedModules": 1,
+  "modules": [
+    {
+      "id": 1,
+      "title": "Introduction to Java Programming",
+      "description": "Get started with Java programming language. Learn about its features, syntax, and basic programming concepts.",
+      "duration": "33 min",
+      "videoDuration": "33 min of videos left",
+      "readingDuration": "10 min of readings left",
+      "assessments": "1 graded assessment left",
+      "completed": true
+    },
+    {
+      "id": 2,
+      "title": "Object-Oriented Programming in Java",
+      "description": "Master object-oriented programming concepts in Java including classes, objects, inheritance, and polymorphism.",
+      "duration": "45 min",
+      "videoDuration": "35 min of videos left",
+      "readingDuration": "15 min of readings left",
+      "assessments": "2 graded assessments left",
+      "completed": false,
+      "lessons": [
+        {
+          "id": 4,
+          "title": "Classes and Objects",
+          "type": "video",
+          "duration": "10 min",
+          "completed": false,
+          "content": {
+            "description": "Learn about classes and objects, the fundamental building blocks of object-oriented programming in Java.",
+            "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+            "materials": [
+              { "title": "OOP Concepts Guide", "type": "pdf", "url": "#" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+} 

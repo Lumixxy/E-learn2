@@ -1,0 +1,74 @@
+{
+  "title": "Introduction to Programming in Python",
+  "provider": "MIT OpenCourseWare",
+  "description": "Learn Python programming from scratch using MIT's open courseware materials. Master fundamental programming concepts, data structures, and algorithms using Python. Build real-world applications and prepare for a career in software development.",
+  "imageUrl": "https://via.placeholder.com/800x400",
+  "duration": "8 weeks",
+  "level": "Beginner",
+  "rating": 4.8,
+  "totalRatings": 1250,
+  "price": "Free",
+  "outcomes": [
+    "Understand fundamental programming concepts",
+    "Master Python syntax and data structures",
+    "Build real-world applications",
+    "Prepare for professional development",
+    "Earn industry-recognized certificates"
+  ],
+  "modules": [
+    {
+      "title": "Introduction to Python",
+      "duration": "2 weeks",
+      "topics": [
+        "Python basics and syntax",
+        "Variables and data types",
+        "Control structures",
+        "Functions and modules"
+      ],
+      "content": "Based on MIT's Introduction to Computer Science and Programming in Python"
+    },
+    {
+      "title": "Data Structures",
+      "duration": "2 weeks",
+      "topics": [
+        "Lists and tuples",
+        "Dictionaries and sets",
+        "Stacks and queues",
+        "Trees and graphs"
+      ],
+      "content": "Based on MIT's Data Structures and Algorithms"
+    },
+    {
+      "title": "Object-Oriented Programming",
+      "duration": "2 weeks",
+      "topics": [
+        "Classes and objects",
+        "Inheritance and polymorphism",
+        "Encapsulation and abstraction",
+        "Design patterns"
+      ],
+      "content": "Based on MIT's Object-Oriented Programming Concepts"
+    },
+    {
+      "title": "Final Project",
+      "duration": "2 weeks",
+      "topics": [
+        "Project planning",
+        "Implementation",
+        "Testing and deployment",
+        "Documentation"
+      ],
+      "content": "Capstone project combining all learned concepts"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "PygenicArc Certificate",
+      "description": "Official completion certificate from PygenicArc"
+    },
+    {
+      "name": "MIT OpenCourseWare Certificate",
+      "description": "Completion certificate based on MIT's open courseware materials"
+    }
+  ]
+} 

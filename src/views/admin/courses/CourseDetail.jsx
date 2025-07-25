@@ -43,6 +43,7 @@ import {
   FiCode,
   FiMessageSquare,
 } from 'react-icons/fi';
+import courseData from '../../../data/course_detail_data.json';
 
 export default function CourseDetail() {
   const { courseId } = useParams();
@@ -64,100 +65,6 @@ export default function CourseDetail() {
   const mutedColor = useColorModeValue("gray.600", "gray.400");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const completedColor = useColorModeValue("green.500", "green.300");
-
-  // Course data
-  const courseData = {
-    title: "Introduction to Programming in Java",
-    provider: "IBM",
-    description: "Learn Java programming from scratch. Master object-oriented programming, data structures, and algorithms using Java. Build real-world applications and prepare for a career in software development.",
-    totalModules: 5,
-    completedModules: 1,
-    modules: [
-      {
-        id: 1,
-        title: "Introduction to Java Programming",
-        description: "Get started with Java programming language. Learn about its features, syntax, and basic programming concepts.",
-        duration: "33 min",
-        videoDuration: "33 min of videos left",
-        readingDuration: "10 min of readings left",
-        assessments: "1 graded assessment left",
-        completed: true,
-        lessons: [
-          {
-            id: 1,
-            title: "Welcome to Java Programming",
-            type: "video",
-            duration: "5 min",
-            completed: true,
-            content: {
-              description: "Welcome to Java Programming! This course will teach you the fundamentals of Java programming language.",
-              videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-              materials: [
-                { title: "Course Syllabus", type: "pdf", url: "#" },
-                { title: "Java Setup Guide", type: "pdf", url: "#" }
-              ]
-            }
-          },
-          {
-            id: 2,
-            title: "Java Basics and Syntax",
-            type: "video",
-            duration: "7 min",
-            completed: true,
-            content: {
-              description: "Learn about Java syntax, variables, data types, and basic programming concepts.",
-              videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-              materials: [
-                { title: "Java Syntax Guide", type: "link", url: "#" },
-                { title: "Java Best Practices", type: "pdf", url: "#" }
-              ]
-            }
-          },
-          {
-            id: 3,
-            title: "Control Structures",
-            type: "video",
-            duration: "8 min",
-            completed: false,
-            content: {
-              description: "Learn about if-else statements, loops, and switch cases in Java.",
-              videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-              materials: [
-                { title: "Control Flow Examples", type: "link", url: "#" },
-                { title: "Practice Exercises", type: "pdf", url: "#" }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        id: 2,
-        title: "Object-Oriented Programming in Java",
-        description: "Master object-oriented programming concepts in Java including classes, objects, inheritance, and polymorphism.",
-        duration: "45 min",
-        videoDuration: "35 min of videos left",
-        readingDuration: "15 min of readings left",
-        assessments: "2 graded assessments left",
-        completed: false,
-        lessons: [
-          {
-            id: 4,
-            title: "Classes and Objects",
-            type: "video",
-            duration: "10 min",
-            completed: false,
-            content: {
-              description: "Learn about classes and objects, the fundamental building blocks of object-oriented programming in Java.",
-              videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-              materials: [
-                { title: "OOP Concepts Guide", type: "pdf", url: "#" }
-              ]
-            }
-          }
-        ]
-      }
-    ]
-  };
 
   const getTypeIcon = (type) => {
     switch (type) {

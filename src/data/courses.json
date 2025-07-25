@@ -1,0 +1,121 @@
+[
+  {
+    "id": "course_001",
+    "title": "Full Stack Web Development",
+    "author": "John Doe",
+    "category": "Development",
+    "level": "Intermediate",
+    "price": 1499,
+    "originalPrice": 2999,
+    "discountPercentage": 50,
+    "rating": 4.5,
+    "isFree": false,
+    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=2072&auto=format&fit=crop",
+    "tags": ["Technology", "Development"],
+    "description": "Master front-end and back-end development with real-world projects.",
+    "type": "coding",
+    "language": "JavaScript",
+    "modules": [],
+    "certificate": { "unlocked": false, "threshold": 70 }
+  },
+  {
+    "id": "course_002",
+    "title": "React.js Masterclass",
+    "author": "Sarah Wilson",
+    "category": "Development",
+    "level": "Intermediate",
+    "price": 1999,
+    "originalPrice": 3999,
+    "discountPercentage": 50,
+    "rating": 4.7,
+    "isFree": false,
+    "image": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop",
+    "tags": ["Technology", "Development", "React"],
+    "description": "Build modern web applications with React.js and Redux.",
+    "type": "coding",
+    "language": "JavaScript",
+    "modules": [],
+    "certificate": { "unlocked": false, "threshold": 70 }
+  },
+  {
+    "id": "course_003",
+    "title": "Intro to Data Science with Python",
+    "author": "Jane Smith",
+    "category": "Data Science",
+    "level": "Beginner",
+    "price": 0,
+    "originalPrice": 1999,
+    "discountPercentage": 100,
+    "rating": 4.2,
+    "isFree": true,
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
+    "tags": ["Data Science", "Technology", "AI Developer", "Full Stack Dev", "Backend Dev", "Frontend Dev", "React JS", "Django"],
+    "description": "Learn the basics of data science using Python and popular libraries.",
+    "type": "coding",
+    "language": "Python",
+    "company": "Google",
+    "modules": [
+      {
+        "id": "module_003_1",
+        "title": "Module 1: Fundamentals of Python",
+        "description": "Basic Python syntax, variables, data types, and control flow.",
+        "url": "https://www.edx.org/learn/python/harvard-university-cs50-s-introduction-to-programming-with-python?index=product&queryId=51d8f4d70a504533dec328bc6c70eadb&position=2",
+        "locked": false,
+        "completed": false,
+        "quizCompleted": false,
+        "quizScore": 0,
+        "quiz": [
+          { "question": "What is the output of `2 + 3 * 4` in Python?", "options": ["20", "14", "24", "10"], "correctAnswer": "14" },
+          { "question": "Which of the following is a mutable data type in Python?", "options": ["Tuple", "String", "List", "Integer"], "correctAnswer": "List" },
+          { "question": "How do you comment a single line in Python?", "options": ["// Comment", "/* Comment */", "# Comment", "<!-- Comment -->"], "correctAnswer": "# Comment" }
+        ]
+      },
+      {
+        "id": "module_003_2",
+        "title": "Module 2: Advanced Python Topics",
+        "description": "Functions, modules, packages, and object-oriented programming.",
+        "url": "#",
+        "locked": true,
+        "completed": false,
+        "quizCompleted": false,
+        "quizScore": 0,
+        "quiz": [
+          { "question": "What keyword is used to define a function in Python?", "options": ["func", "def", "function", "define"], "correctAnswer": "def" },
+          { "question": "Which of the following is used to import modules in Python?", "options": ["include", "require", "import", "use"], "correctAnswer": "import" },
+          { "question": "What is the purpose of `__init__` method in a Python class?", "options": ["Constructor", "Destructor", "Main method", "Static method"], "correctAnswer": "Constructor" }
+        ]
+      },
+      {
+        "id": "module_003_3",
+        "title": "Module 3: Data Structures and Algorithms",
+        "description": "Understanding and implementing common data structures and algorithms.",
+        "url": "#",
+        "locked": true,
+        "completed": false,
+        "quizCompleted": false,
+        "quizScore": 0,
+        "quiz": [
+          { "question": "Which data structure uses LIFO (Last In, First Out) principle?", "options": ["Queue", "Stack", "Array", "Linked List"], "correctAnswer": "Stack" },
+          { "question": "What is the time complexity of searching an element in a sorted array using binary search?", "options": ["O(n)", "O(log n)", "O(n log n)", "O(1)"], "correctAnswer": "O(log n)" },
+          { "question": "Which sorting algorithm has the worst-case time complexity of O(n^2)?", "options": ["Merge Sort", "Quick Sort", "Bubble Sort", "Heap Sort"], "correctAnswer": "Bubble Sort" }
+        ]
+      },
+      {
+        "id": "module_003_5",
+        "title": "Module 5: Introduction to Machine Learning",
+        "description": "Basics of machine learning concepts and libraries.",
+        "url": "#",
+        "locked": true,
+        "completed": false,
+        "quizCompleted": false,
+        "quizScore": 0,
+        "quiz": [
+          { "question": "Which library is commonly used for numerical operations in Python for Machine Learning?", "options": ["Pandas", "NumPy", "Matplotlib", "Seaborn"], "correctAnswer": "NumPy" },
+          { "question": "What is supervised learning?", "options": ["Learning from unlabeled data", "Learning with labeled data", "Learning through trial and error", "Learning from rewards"], "correctAnswer": "Learning with labeled data" },
+          { "question": "Which algorithm is used for classification and regression tasks?", "options": ["K-Means", "Principal Component Analysis", "Linear Regression", "Apriori"], "correctAnswer": "Linear Regression" }
+        ]
+      }
+    ],
+    "certificate": { "unlocked": false, "threshold": 70 }
+  }
+] 

@@ -1,0 +1,25 @@
+{
+  "nodes": [
+    { "id": "1", "type": "input", "data": { "label": "Python Basics", "description": "Python is a high-level, interpreted, general-purpose programming language. Its design philosophy emphasizes code readability with the use of significant indentation. Python is dynamically-typed and garbage-collected." }, "position": { "x": 400, "y": 0 } },
+    { "id": "2", "data": { "label": "Data Structures", "description": "Learn about arrays, linked lists, stacks, queues, and more." }, "position": { "x": 100, "y": 150 } },
+    { "id": "3", "data": { "label": "Algorithms", "description": "Sorting, searching, recursion, and algorithmic thinking." }, "position": { "x": 400, "y": 150 } },
+    { "id": "4", "data": { "label": "OOP & Advanced Topics", "description": "Object-oriented programming, decorators, iterators, and more." }, "position": { "x": 700, "y": 150 } },
+    { "id": "5", "data": { "label": "Version Control", "description": "Git, GitHub, and collaborative workflows." }, "position": { "x": 100, "y": 300 } },
+    { "id": "6", "data": { "label": "Repo Hosting", "description": "GitHub, GitLab, Bitbucket, and open source." }, "position": { "x": 400, "y": 300 } },
+    { "id": "7", "data": { "label": "Package Managers", "description": "pip, Poetry, and dependency management." }, "position": { "x": 700, "y": 300 } },
+    { "id": "8", "data": { "label": "Frameworks", "description": "Django, Flask, FastAPI, and more." }, "position": { "x": 1000, "y": 300 } },
+    { "id": "9", "type": "output", "data": { "label": "Testing", "description": "Unit testing, pytest, and test-driven development." }, "position": { "x": 550, "y": 450 } }
+  ],
+  "edges": [
+    { "id": "e1-2", "source": "1", "target": "2", "animated": true },
+    { "id": "e1-3", "source": "1", "target": "3", "animated": true },
+    { "id": "e1-4", "source": "1", "target": "4", "animated": true },
+    { "id": "e2-5", "source": "2", "target": "5", "animated": true },
+    { "id": "e3-6", "source": "3", "target": "6", "animated": true },
+    { "id": "e4-7", "source": "4", "target": "7", "animated": true },
+    { "id": "e7-8", "source": "7", "target": "8", "animated": true },
+    { "id": "e5-9", "source": "5", "target": "9", "animated": true },
+    { "id": "e6-9", "source": "6", "target": "9", "animated": true },
+    { "id": "e8-9", "source": "8", "target": "9", "animated": true }
+  ]
+} 

@@ -1,0 +1,32 @@
+[
+  {
+    "icon": "FiBookOpen",
+    "title": "Interactive Learning",
+    "description": "Engage with our interactive courses designed to make learning programming enjoyable and effective."
+  },
+  {
+    "icon": "FiAward",
+    "title": "Earn Certificates",
+    "description": "Complete courses and earn certificates to showcase your skills to potential employers."
+  },
+  {
+    "icon": "FiTrendingUp",
+    "title": "Track Progress",
+    "description": "Monitor your learning journey with detailed analytics and progress tracking."
+  },
+  {
+    "icon": "FiUsers",
+    "title": "Community Support",
+    "description": "Join our community of learners and get help from peers and mentors."
+  },
+  {
+    "icon": "FiCode",
+    "title": "Hands-on Projects",
+    "description": "Apply your knowledge with real-world projects that build your portfolio."
+  },
+  {
+    "icon": "FiLayers",
+    "title": "Comprehensive Curriculum",
+    "description": "From basics to advanced topics, our curriculum covers everything you need to succeed."
+  }
+] 

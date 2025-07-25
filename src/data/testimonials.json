@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Sarah Johnson",
+    "role": "Software Developer",
+    "company": "Tech Innovations Inc.",
+    "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+    "testimonial": "PyGenicArc transformed my career. I went from knowing nothing about programming to landing my dream job as a software developer in just 6 months."
+  },
+  {
+    "name": "Michael Chen",
+    "role": "Data Scientist",
+    "company": "DataCorp Analytics",
+    "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+    "testimonial": "The data science course was comprehensive and practical. The projects helped me build a strong portfolio that impressed my current employer."
+  },
+  {
+    "name": "Emily Rodriguez",
+    "role": "Full Stack Developer",
+    "company": "WebSolutions",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+    "testimonial": "The community support at PyGenicArc is unmatched. Whenever I got stuck, there was always someone ready to help me understand and move forward."
+  }
+] 
