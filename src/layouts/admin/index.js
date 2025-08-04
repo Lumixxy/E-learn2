@@ -1,5 +1,5 @@
 // Chakra imports
-import { Portal, Box, useDisclosure } from '@chakra-ui/react';
+import { Portal, Box, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
 import Footer from 'components/footer/FooterAdmin.js';
 // Layout components
 import Navbar from 'components/navbar/NavbarAdmin.js';
@@ -8,6 +8,9 @@ import { SidebarContext } from 'contexts/SidebarContext';
 import React, { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import routes from 'routes.js';
+import { MessageCircle } from "lucide-react";
+import AIAssistant from 'components/ai/AIAssistant.jsx';
+import CartDrawer from 'components/cart/CartDrawer';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
@@ -15,6 +18,7 @@ export default function Dashboard(props) {
   // Sidebar collapsed state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // collapsed by default
   const [hoverToggleEnabled, setHoverToggleEnabled] = useState(true); // new state for hover toggle
+  const [aiOpen, setAiOpen] = useState(false);
 
   // functions for changing the states from components
   const getRoute = () => {
@@ -165,6 +169,62 @@ export default function Dashboard(props) {
           </Box>
         </Box>
       </SidebarContext.Provider>
+      {/* Floating AI Button */}
+      <Box
+        position="fixed"
+        right={10}
+        bottom={8}
+        zIndex={200}
+      >
+        <Box
+          as="button"
+          onClick={() => setAiOpen(true)}
+          w={16}
+          h={16}
+          borderRadius="full"
+          bgGradient="linear(to-br, #7F7CFF, #3FE0D0)"
+          boxShadow="0 4px 32px 0 #3FE0D099"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          border="4px solid #181c2f"
+          _hover={{ boxShadow: "0 0 0 4px #a259ff55", transform: "scale(1.08)" }}
+          transition="all 0.2s"
+          cursor="pointer"
+        >
+          <MessageCircle size={36} color="white" />
+        </Box>
+      </Box>
+      {/* AI Assistant Modal */}
+      <Modal isOpen={aiOpen} onClose={() => setAiOpen(false)} size="xl">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(10px)" />
+        <ModalContent 
+          bg="#181c2f" 
+          color="white" 
+          borderRadius="xl"
+          boxShadow="0 20px 60px rgba(0, 0, 0, 0.5)"
+          maxW="700px"
+          mx={4}
+          h="600px"
+          position="fixed"
+          bottom="120px"
+          right="40px"
+          top="auto"
+          left="auto"
+          transform="none"
+          margin="0"
+        >
+          <ModalCloseButton 
+            color="white" 
+            _hover={{ bg: "whiteAlpha.200" }}
+            top={4}
+            right={4}
+            zIndex={10}
+          />
+          <AIAssistant />
+        </ModalContent>
+      </Modal>
+      <CartDrawer />
     </Box>
   );
 }

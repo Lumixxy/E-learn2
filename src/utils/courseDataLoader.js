@@ -1,7 +1,6 @@
 import * as XLSX from 'xlsx';
-import courseSampleData from '../data/course_sample_data.json';
 
-export const loadCourseData = () => {
+export const loadCourseData = async () => {
   try {
     console.log('Attempting to load course data...');
     
@@ -39,6 +38,15 @@ export const loadCourseData = () => {
     return transformedData;
   } catch (error) {
     console.error('Error loading course data:', error);
-    return courseSampleData;
+    // Fallback: fetch sample data from public/data
+    try {
+      const response = await fetch('/data/course_sample_data.json');
+      if (!response.ok) throw new Error('Failed to fetch course sample data');
+      const fallbackData = await response.json();
+      return fallbackData;
+    } catch (fetchError) {
+      console.error('Error fetching fallback course sample data:', fetchError);
+      return [];
+    }
   }
 }; 

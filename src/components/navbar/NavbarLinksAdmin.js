@@ -5,7 +5,6 @@ import {
   Flex,
   Icon,
   Image,
-  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -17,14 +16,6 @@ import {
   Progress,
   Tooltip,
   Box,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
-  PopoverBody,
-  VStack,
-  keyframes,
-  Badge
 } from '@chakra-ui/react';
 // Custom Components
 import { ItemContent } from 'components/menu/ItemContent';
@@ -33,25 +24,14 @@ import { SidebarResponsive } from 'components/sidebar/Sidebar';
 import PropTypes from 'prop-types';
 import React from 'react';
 // Assets
-import navImage from 'assets/img/layout/Navbar.png';
-import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
+import { MdNotificationsNone } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
-import { FaCoins } from 'react-icons/fa';
 import { GiAchievement } from 'react-icons/gi';
-import { FaCrown } from 'react-icons/fa';
 import { FiZap } from "react-icons/fi";
 import routes from 'routes';
+import CartIcon from '../cart/CartIcon';
 
-// Keyframes for coin animation
-const spin = keyframes`
-  from { transform: rotateY(0deg); }
-  to { transform: rotateY(360deg); }
-`;
 
-const shimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`;
 
 export default function HeaderLinks(props) {
   const { secondary } = props;
@@ -62,23 +42,17 @@ export default function HeaderLinks(props) {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorBrand = useColorModeValue('brand.700', 'brand.400');
   const ethColor = useColorModeValue('gray.700', 'white');
-  const borderColor = useColorModeValue('#E6ECFA', 'rgba(135, 140, 189, 0.3)');
   const ethBg = useColorModeValue('secondaryGray.300', 'navy.800');
-  const ethBox = useColorModeValue('white', 'navy.800');
   const shadow = useColorModeValue(
     '14px 17px 40px 4px rgba(112, 144, 176, 0.18)',
     '14px 17px 40px 4px rgba(112, 144, 176, 0.06)',
   );
-  const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
 
   // Hardcoded values for demonstration
-  const coins = 1250;
   const currentXP = 200;
   const maxXP = 1500;
   const xpPercentage = (currentXP / maxXP) * 100;
   const xpNeededToLevelUp = maxXP - currentXP;
-  const currentLevel = 3; // Example level
-  const xpTier = "Beginner"; // Example XP tier
   const dayStreak = 7; // Hardcoded Day Streak value
 
   const progressGradient = `linear-gradient(to right, ${useColorModeValue("brand.500", "brand.400")}, ${useColorModeValue("blue.500", "blue.300")})`;
@@ -93,7 +67,8 @@ export default function HeaderLinks(props) {
       p='10px'
       borderRadius='0px'
       boxShadow='none'
-      justifyContent="space-between"
+      justifyContent="flex-end"
+      gap="16px"
     >
       <SearchBar
         mb={() => {
@@ -102,11 +77,11 @@ export default function HeaderLinks(props) {
           }
           return 'unset';
         }}
-        me={{ base: '0px', md: '10px' }}
+        me={{ base: '0px', md: '16px' }}
         borderRadius='30px'
       />
 
-      <HStack spacing='12px'>
+      <HStack spacing='8px'>
         <Tooltip label={`${dayStreak}-day learning streak!`} aria-label='Day streak'>
           <HStack
             bg={ethBg}
@@ -124,52 +99,7 @@ export default function HeaderLinks(props) {
           </HStack>
         </Tooltip>
 
-        <Popover trigger="hover" placement="bottom-end">
-          <PopoverTrigger>
-            <HStack
-              bg={ethBg}
-              borderRadius='30px'
-              p='6px 10px'
-              align='center'
-              cursor="pointer"
-              _hover={{
-                // animation: `${spin} 1s linear infinite`,
-              }}
-              display={{ base: 'none', md: 'flex' }}
-            >
-              <Icon as={FaCoins} color={ethColor} w='18px' h='18px' me='4px' />
-              <Text color={ethColor} fontSize='sm' fontWeight='700'>
-                {coins}
-              </Text>
-            </HStack>
-          </PopoverTrigger>
-          <PopoverContent
-            bg={menuBg}
-            borderColor={borderColor}
-            borderRadius="16px"
-            boxShadow={shadow}
-            p="10px"
-            mt="10px"
-            zIndex="9999"
-          >
-            <PopoverArrow bg={menuBg} />
-            <PopoverBody>
-              <VStack align="stretch" spacing="8px">
-                <Text fontSize="sm" fontWeight="bold" color={textColor}>
-                  Total Coins: {coins}
-                </Text>
-                <Text fontSize="xs" color={textColor}>
-                  Recent: +50 (Course Completion)
-                </Text>
-                <Button size="sm" variant="brand">
-                  View Transactions
-                </Button>
-              </VStack>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
-
-        <Tooltip label={`You need ${xpNeededToLevelUp} XP to level up! Level: ${currentLevel}`} aria-label='XP progress'>
+        <Tooltip label={`You need ${xpNeededToLevelUp} XP to level up!`} aria-label='XP progress'>
           <HStack
             bg={ethBg}
             borderRadius='30px'
@@ -196,20 +126,12 @@ export default function HeaderLinks(props) {
                 }}
               />
             </Box>
-            <Badge
-              colorScheme="purple"
-              borderRadius="full"
-              px="8px"
-              py="2px"
-              fontSize="0.7em"
-              display={{ base: 'none', "xl": 'flex' }}
-            >
-              Level {currentLevel}
-            </Badge>
+
           </HStack>
         </Tooltip>
 
         <SidebarResponsive routes={routes} />
+        <CartIcon />
         <Menu>
           <MenuButton p='0px'>
             <Icon

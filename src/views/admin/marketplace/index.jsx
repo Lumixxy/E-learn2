@@ -1,85 +1,91 @@
-/*!
-  _   _  ___  ____  ___ ________  _   _   _   _ ___   
- | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
- | |_| | | | | |_) || |  / / | | |  \| | | | | || | 
- |  _  | |_| |  _ < | | / /| |_| | |\  | | |_| || |
- |_| |_|\___/|_| \_\___/____\___/|_| \_|  \___/|___|
-                                                                                                                                                                                                                                                                                                                                       
-=========================================================
-* Horizon UI - v1.1.0
-=========================================================
 
-* Product Page: https://www.horizon-ui.com/
-* Copyright 2023 Horizon UI (https://www.horizon-ui.com/)
-
-* Designed and Coded by Simmmple
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  Button,
   Flex,
-  Grid,
   Text,
+  Button,
+  Icon,
+  VStack,
   useColorModeValue,
-  SimpleGrid,
   Input,
   InputGroup,
   InputLeftElement,
-  VStack,
-  HStack,
-  Checkbox,
-  useToast,
-  IconButton,
-  Collapse,
-  Divider,
-  Card,
   useDisclosure,
+  SimpleGrid,
+  Card,
+  CardBody,
   Drawer,
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
   DrawerHeader,
   DrawerBody,
-  Icon,
-  Select,
+  CheckboxGroup,
+  Checkbox,
   Slider,
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
   SliderMark,
-  Badge,
-  CardBody,
-  CheckboxGroup,
+  IconButton,
 } from "@chakra-ui/react";
-import { SearchIcon, ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { useCart } from "contexts/CartContext";
-import { courses, categories, levels, priceRanges } from "data/courses";
+import { ChevronDownIcon, SearchIcon } from "@chakra-ui/icons";
+
+import { useToast } from "@chakra-ui/react";
 import { convertToINR, formatPrice } from "utils/priceUtils";
 import NFT from "components/card/NFT";
 import Banner from "./components/Banner";
+import { useCart } from "../../../contexts/CartContext";
+
 
 export default function Marketplace() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedLevels, setSelectedLevels] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 50000]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
   const [minRating, setMinRating] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filteredCourses, setFilteredCourses] = useState([]);
+  const [courses, setCourses] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { addToCart, isInCart } = useCart();
   const toast = useToast();
+
+
+  // Load courses data
+  useEffect(() => {
+    const fetchCoursesData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/data/courses.json');
+        if (!response.ok) throw new Error('Failed to fetch courses data');
+        const data = await response.json();
+        const arr = Array.isArray(data) ? data : [];
+        if (Array.isArray(arr) && arr.length > 0) {
+          setFilteredCourses(arr);
+          setCourses(arr);
+        } else {
+          setFilteredCourses([]);
+          setCourses([]);
+        }
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching courses data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCoursesData();
+  }, []);
 
   // Chakra UI hooks
   const textColor = useColorModeValue("navy.700", "white");
-  const textColorSecondary = useColorModeValue("secondaryGray.600", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.200");
   const bgColor = useColorModeValue("white", "navy.800");
   const shadow = useColorModeValue(
@@ -90,25 +96,17 @@ export default function Marketplace() {
   const inputHoverBg = useColorModeValue("gray.200", "whiteAlpha.200");
   const inputFocusBg = useColorModeValue("white", "whiteAlpha.300");
 
-  const coursesPerPage = 12;
+  // Defensive checks for arrays
+  const safeCourses = Array.isArray(courses) ? courses : [];
+  const safeFilteredCourses = Array.isArray(filteredCourses) ? filteredCourses : [];
+  // Define allCategories, allLevels, allSkills
+  const allCategories = [...new Set(safeCourses.map((course) => course.category))];
+  const allLevels = [...new Set(safeCourses.map((course) => course.level))];
+  const allSkills = [...new Set(safeCourses.flatMap((course) => course.tags))];
 
-  // Extract unique categories, levels, and skills
-  const allCategories = [...new Set(courses.map((course) => course.category))];
-  const allLevels = [...new Set(courses.map((course) => course.level))];
-  const allSkills = [...new Set(courses.flatMap((course) => course.tags))]; // Assuming 'tags' are skills
-
-  // Initialize filtered courses on component mount
-  useEffect(() => {
-    console.log('Initial courses:', courses);
-    setFilteredCourses(courses);
-  }, []);
-
-  useEffect(() => {
-    filterCourses();
-  }, [searchQuery, selectedCategories, selectedLevels, selectedSkills, priceRange, minRating]);
-
+  // Define filterCourses before use
   const filterCourses = () => {
-    let filtered = [...courses];
+    let filtered = [...safeCourses];
     console.log('Starting filter with courses:', filtered.length);
 
     // Apply search filter
@@ -168,10 +166,11 @@ export default function Marketplace() {
     setCurrentPage(1);
   };
 
-  const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+  const coursesPerPage = 12;
+  const totalPages = Math.ceil(safeFilteredCourses.length / coursesPerPage);
   const startIndex = (currentPage - 1) * coursesPerPage;
   const endIndex = startIndex + coursesPerPage;
-  const currentCourses = filteredCourses.slice(startIndex, endIndex);
+  const currentCourses = safeFilteredCourses.slice(startIndex, endIndex);
 
   console.log('Current Courses:', currentCourses.length);
   console.log('Total Pages:', totalPages);
@@ -180,6 +179,18 @@ export default function Marketplace() {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Handler to add course to cart
+  const handleBuyCourse = (course) => {
+    addToCart(course);
+    toast({
+      title: 'Course added to cart!',
+      description: `${course.title || course.name} has been added to your cart`,
+      status: 'success',
+      duration: 2000,
+      isClosable: true,
+    });
   };
 
   return (
@@ -227,22 +238,27 @@ export default function Marketplace() {
         </Card>
 
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} gap="20px">
-          {currentCourses && currentCourses.length > 0 ? (
+          {loading ? (
+            <Text textAlign="center" fontSize="lg" color={textColor}>
+              Loading courses...
+            </Text>
+          ) : error ? (
+            <Text textAlign="center" fontSize="lg" color="red.400">
+              Error: {error}
+            </Text>
+          ) : currentCourses && currentCourses.length > 0 ? (
             currentCourses.map((course) => (
               <NFT
                 key={course.id}
-                id={course.id}
                 image={course.image}
-                title={course.title}
+                name={course.title}
                 author={course.author}
-                currentPrice={course.price}
-                originalPrice={course.originalPrice}
-                discount={course.discountPercentage}
-                rating={course.rating}
-                level={course.level}
-                category={course.category}
-                tags={course.tags}
-                isFree={course.isFree}
+                bidders={course.bidders}
+                download={course.download}
+                buttonText="Buy Course"
+                courseObj={course}
+                onBuy={handleBuyCourse}
+                isInCart={isInCart(course.id)}
               />
             ))
           ) : (
@@ -408,6 +424,8 @@ export default function Marketplace() {
           </DrawerBody>
         </DrawerContent>
       </Drawer>
+
+
     </Box>
   );
 }

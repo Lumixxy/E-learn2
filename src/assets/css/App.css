@@ -1,8 +1,236 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
 body {
   font-family: "DM Sans", sans-serif;
 }
 
 option {
   color: black;
+}
+
+/* Gaming-themed animations and effects */
+@keyframes neon-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 5px #a259ff,
+      0 0 10px #a259ff,
+      0 0 15px #a259ff,
+      0 0 20px #a259ff;
+  }
+  50% {
+    text-shadow: 
+      0 0 10px #a259ff,
+      0 0 20px #a259ff,
+      0 0 30px #a259ff,
+      0 0 40px #a259ff;
+  }
+}
+
+@keyframes cyber-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(127, 124, 255, 0.5),
+      0 0 40px rgba(127, 124, 255, 0.3),
+      0 0 60px rgba(127, 124, 255, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(127, 124, 255, 0.8),
+      0 0 60px rgba(127, 124, 255, 0.5),
+      0 0 90px rgba(127, 124, 255, 0.3);
+  }
+}
+
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes hologram-flicker {
+  0%, 100% {
+    opacity: 1;
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    filter: hue-rotate(90deg);
+  }
+  50% {
+    opacity: 0.9;
+    filter: hue-rotate(180deg);
+  }
+  75% {
+    opacity: 0.7;
+    filter: hue-rotate(270deg);
+  }
+}
+
+@keyframes energy-field {
+  0%, 100% {
+    background: radial-gradient(circle, rgba(63, 224, 208, 0.1) 0%, transparent 70%);
+  }
+  50% {
+    background: radial-gradient(circle, rgba(63, 224, 208, 0.2) 0%, transparent 70%);
+  }
+}
+
+/* Gaming-style scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #a259ff, #3FE0D0);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #3FE0D0, #a259ff);
+}
+
+/* Gaming font for headings */
+.gaming-font {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+/* Glowing text effect */
+.glow-text {
+  animation: neon-glow 2s ease-in-out infinite;
+}
+
+/* Cyber button effect */
+.cyber-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.cyber-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.cyber-button:hover::before {
+  left: 100%;
+}
+
+/* Particle effect container */
+.particle-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #a259ff;
+  border-radius: 50%;
+  animation: matrix-rain 3s linear infinite;
+}
+
+/* Hologram effect */
+.hologram {
+  animation: hologram-flicker 3s ease-in-out infinite;
+}
+
+/* Energy field effect */
+.energy-field {
+  animation: energy-field 4s ease-in-out infinite;
+}
+
+/* Gaming card hover effects */
+.gaming-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.gaming-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(45deg, #a259ff, #3FE0D0, #ff4ecd, #19e37d);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gaming-card:hover::after {
+  opacity: 1;
+}
+
+.gaming-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(63, 224, 208, 0.3);
+}
+
+/* Loading animation for gaming elements */
+@keyframes loading-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.loading-gaming {
+  animation: loading-pulse 1.5s ease-in-out infinite;
+}
+
+/* Responsive gaming effects */
+@media (max-width: 768px) {
+  .gaming-font {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+  
+  .cyber-button {
+    font-size: 0.9rem;
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0a0a0f;
+    color: #ffffff;
+  }
+  
+  .gaming-card {
+    background: rgba(24, 28, 47, 0.8);
+    backdrop-filter: blur(10px);
+  }
 }

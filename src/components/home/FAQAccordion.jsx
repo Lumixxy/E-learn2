@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Accordion,
@@ -10,31 +10,14 @@ import {
   Container,
   Heading,
   useColorModeValue,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 
 export const FAQAccordion = () => {
-  const faqItems = [
-    {
-      question: "What is E-Learn?",
-      answer: "E-Learn is a comprehensive online learning platform that offers a wide range of courses across various subjects. Our platform is designed to provide high-quality education accessible to everyone, anywhere, and anytime."
-    },
-    {
-      question: "How do I get started with a course?",
-      answer: "Getting started is easy! Simply browse our course catalog, select a course that interests you, and click 'Enroll Now'. You'll have immediate access to the course content and can start learning right away."
-    },
-    {
-      question: "Can I get a certificate after completing a course?",
-      answer: "Yes! Upon successful completion of a course, you'll receive a certificate of completion. This certificate can be downloaded and shared on your professional profiles like LinkedIn."
-    },
-    {
-      question: "What payment methods do you accept?",
-      answer: "We accept various payment methods including credit/debit cards, PayPal, and other major payment gateways. All transactions are secure and encrypted for your safety."
-    },
-    {
-      question: "Can I access courses on mobile devices?",
-      answer: "Absolutely! Our platform is fully responsive and works seamlessly on all devices including smartphones, tablets, and computers. You can learn on the go with our mobile-friendly interface."
-    }
-  ];
+  const [faqItems, setFaqItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Dark mode colors
   const bgColor = useColorModeValue("white", "navy.800");
@@ -43,6 +26,52 @@ export const FAQAccordion = () => {
   const textColor = useColorModeValue("gray.600", "gray.300");
   const headingColor = useColorModeValue("gray.800", "white");
   const iconColor = useColorModeValue("blue.500", "blue.300");
+
+  // Fetch FAQ data from JSON file (simulating API call)
+  useEffect(() => {
+    const fetchFAQData = async () => {
+      try {
+        setLoading(true);
+        // Simulate API call with a small delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const response = await fetch('/data/faq.json');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch FAQ data: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        setFaqItems(data);
+      } catch (err) {
+        console.error('Error fetching FAQ data:', err);
+        setError(`Error loading FAQ data: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFAQData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Container maxW="container.xl" py={16}>
+        <Center>
+          <Spinner size="xl" color={iconColor} />
+        </Center>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxW="container.xl" py={16}>
+        <Center>
+          <Text color="red.500">Error loading FAQ data: {error}</Text>
+        </Center>
+      </Container>
+    );
+  }
 
   return (
     <Container maxW="container.xl" py={16}>

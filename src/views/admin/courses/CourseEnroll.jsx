@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -25,7 +25,6 @@ import {
   FormErrorMessage,
 } from '@chakra-ui/react';
 import { FaCheck, FaClock, FaBook, FaCertificate, FaStar, FaLock } from 'react-icons/fa';
-import courseData from '../../../data/course_enroll_data.json';
 
 const CourseEnroll = () => {
   const { courseId } = useParams();
@@ -34,6 +33,34 @@ const CourseEnroll = () => {
   const [usn, setUsn] = useState('');
   const [usnError, setUsnError] = useState('');
   const toast = useToast();
+
+  const [courseData, setCourseData] = useState({
+    title: '',
+    description: '',
+    provider: '',
+    modules: [],
+    outcomes: [],
+    certificates: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/data/course_enroll_data.json');
+        if (!response.ok) throw new Error('Failed to fetch course enroll data');
+        const data = await response.json();
+        setCourseData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourseData();
+  }, []);
 
   // Color mode values
   const bgColor = useColorModeValue("gray.50", "gray.900");
@@ -61,6 +88,24 @@ const CourseEnroll = () => {
   const handleStartCourse = () => {
     navigate(`/admin/courses/${courseId}/roadmap`);
   };
+
+  if (loading) {
+    return <Box minH="100vh" bg={bgColor} py={8} display="flex" justifyContent="center" alignItems="center">
+      <Text fontSize="2xl">Loading course data...</Text>
+    </Box>;
+  }
+
+  if (error) {
+    return <Box minH="100vh" bg={bgColor} py={8} display="flex" justifyContent="center" alignItems="center">
+      <Text fontSize="2xl" color="red.300">{error}</Text>
+    </Box>;
+  }
+
+  if (!courseData || Object.keys(courseData).length === 0) {
+    return <Box minH="100vh" bg={bgColor} py={8} display="flex" justifyContent="center" alignItems="center">
+      <Text fontSize="2xl">No course data found.</Text>
+    </Box>;
+  }
 
   return (
     <Box minH="100vh" bg={bgColor} py={8}>
@@ -127,7 +172,7 @@ const CourseEnroll = () => {
                     What you'll learn
                   </Text>
                   <List spacing={3}>
-                    {courseData.outcomes.map((outcome, index) => (
+                    {courseData.outcomes && courseData.outcomes.map((outcome, index) => (
                       <ListItem key={index}>
                         <ListIcon as={FaCheck} color="green.500" />
                         {outcome}
@@ -143,7 +188,7 @@ const CourseEnroll = () => {
                     Course Content
                   </Text>
                   <VStack spacing={4} align="stretch">
-                    {courseData.modules.map((module, index) => (
+                    {courseData.modules && courseData.modules.map((module, index) => (
                       <Card key={index} variant="outline">
                         <CardBody>
                           <VStack align="stretch" spacing={2}>
@@ -177,7 +222,7 @@ const CourseEnroll = () => {
                     Certificates
                   </Text>
                   <VStack spacing={4} align="stretch">
-                    {courseData.certificates.map((certificate, index) => (
+                    {courseData.certificates && courseData.certificates.map((certificate, index) => (
                       <Card key={index} variant="outline">
                         <CardBody>
                           <HStack spacing={4}>

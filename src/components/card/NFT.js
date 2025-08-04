@@ -28,7 +28,10 @@ export default function NFT(props) {
     currentPrice, 
     originalPrice, 
     discount, 
-    buttonText = "Buy the Course" 
+    buttonText = "Buy the Course",
+    onBuy,
+    courseObj, // pass the full course object for cart
+    isInCart = false
   } = props;
   
   const [like, setLike] = useState(false);
@@ -156,28 +159,23 @@ export default function NFT(props) {
               </Text>
               <Flex align='center' gap='10px'>
                 <Text fontWeight='700' fontSize='lg' color={textColor}>
-                  {currentPrice}
+                  ₹0
                 </Text>
-                {originalPrice && (
-                  <Text
-                    fontWeight='400'
-                    fontSize='sm'
-                    color='secondaryGray.600'
-                    textDecoration='line-through'>
-                    {originalPrice}
-                  </Text>
-                )}
+                {/* No original price for free */}
               </Flex>
             </Flex>
             <Button
-              variant='darkBrand'
-              color='white'
+              variant={isInCart ? 'outline' : 'darkBrand'}
+              color={isInCart ? 'green.500' : 'white'}
               fontSize='sm'
               fontWeight='500'
               borderRadius='70px'
               px='24px'
-              py='5px'>
-              Buy the Course
+              py='5px'
+              onClick={() => onBuy && onBuy(courseObj)}
+              isDisabled={isInCart}
+            >
+              {isInCart ? 'In Cart' : buttonText}
             </Button>
           </Flex>
         </Flex>

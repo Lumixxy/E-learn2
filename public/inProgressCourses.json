@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "title": "Complete Web Development Bootcamp",
+    "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
+    "progress": 45,
+    "lessons": 12426,
+    "lastViewed": "1 week ago"
+  },
+  {
+    "id": "2",
+    "title": "UI/UX Design Masterclass",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    "progress": 22,
+    "lessons": 542,
+    "lastViewed": "2 days ago"
+  },
+  {
+    "id": "3",
+    "title": "Data Science and Machine Learning",
+    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
+    "progress": 65,
+    "lessons": 3245,
+    "lastViewed": "Today"
+  }
+] 

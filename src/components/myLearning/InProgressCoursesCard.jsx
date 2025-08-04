@@ -1,41 +1,66 @@
-import React from "react";
-import { Box, Text, Image, Progress, Button, useColorModeValue, SimpleGrid } from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Box, Text, Image, Progress, Button, useColorModeValue, SimpleGrid, Spinner, Center } from "@chakra-ui/react";
 import Card from "../card/Card";
 import { Link } from "react-router-dom";
 
-const courses = [
-  {
-    id: "1",
-    title: "Complete Web Development Bootcamp",
-    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
-    progress: 45,
-    lessons: 12426,
-    lastViewed: "1 week ago"
-  },
-  {
-    id: "2",
-    title: "UI/UX Design Masterclass",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-    progress: 22,
-    lessons: 542,
-    lastViewed: "2 days ago"
-  },
-  {
-    id: "3",
-    title: "Data Science and Machine Learning",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-    progress: 65,
-    lessons: 3245,
-    lastViewed: "Today"
-  }
-];
-
 const InProgressCoursesCard = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const textColor = useColorModeValue("gray.700", "white");
   const textColorSecondary = useColorModeValue("gray.500", "whiteAlpha.700");
   const textColorTertiary = useColorModeValue("gray.400", "whiteAlpha.600");
   const cardBg = useColorModeValue("white", "gray.800");
   const cardBorder = useColorModeValue("gray.200", "gray.700");
+
+  // Fetch in-progress courses data from JSON file (simulating API call)
+  useEffect(() => {
+    const fetchCoursesData = async () => {
+      try {
+        setLoading(true);
+        // Simulate API call with a small delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const response = await fetch('/inProgressCourses.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch courses data');
+        }
+        
+        const data = await response.json();
+        setCourses(data);
+      } catch (err) {
+        console.error('Error fetching courses data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoursesData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box>
+        <Text fontWeight="bold" fontSize="lg" mb={6} color={textColor}>In Progress</Text>
+        <Center py={8}>
+          <Spinner size="lg" color="blue.500" />
+        </Center>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box>
+        <Text fontWeight="bold" fontSize="lg" mb={6} color={textColor}>In Progress</Text>
+        <Center py={8}>
+          <Text color="red.500">Error loading courses: {error}</Text>
+        </Center>
+      </Box>
+    );
+  }
 
   return (
     <Box>

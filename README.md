@@ -116,3 +116,36 @@ new people that already use Horizon UI!
 =======
 # E-Learn
 >>>>>>> 55586dd41315492da18b8f30ddf0e00ab815e6e9
+# <Box
+          position="absolute"
+          left={8}
+          bottom={72}
+          w={{ base: "90vw", md: "420px" }}
+          bg="blackAlpha.700"
+          borderRadius="2xl"
+          p={6}
+          boxShadow="2xl"
+          display="flex"
+          alignItems="center"
+          zIndex={9}
+          justifyContent="space-between"
+          
+        >
+          <Box flex={1}>
+            <Text fontWeight="bold" fontSize="lg" color="white">Ready to Continue?</Text>
+            <Text color="gray.300" fontSize="md">Pick up where you left off</Text>
+          </Box>
+          <Button
+            size="lg"
+            fontWeight="bold"
+            px={6}
+            py={4}
+            fontSize="lg"
+            bgGradient="linear(to-r, #7F7CFF, #3FE0D0)"
+            color="white"
+            _hover={{ bgGradient: "linear(to-r, #3FE0D0, #7F7CFF)", opacity: 0.9 }}
+            shadow="xl"
+          >
+            Resume Learning
+          </Button>
+        </Box>

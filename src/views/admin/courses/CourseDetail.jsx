@@ -43,7 +43,6 @@ import {
   FiCode,
   FiMessageSquare,
 } from 'react-icons/fi';
-import courseData from '../../../data/course_detail_data.json';
 
 export default function CourseDetail() {
   const { courseId } = useParams();
@@ -57,6 +56,31 @@ export default function CourseDetail() {
   const [output, setOutput] = useState('');
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [courseData, setCourseData] = useState({
+    title: '',
+    description: '',
+    provider: '',
+    modules: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/data/course_detail_data.json');
+        if (!response.ok) throw new Error('Failed to fetch course detail data');
+        const data = await response.json();
+        setCourseData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourseData();
+  }, []);
 
   // Color mode values
   const bgColor = useColorModeValue("gray.50", "gray.900");
@@ -109,7 +133,25 @@ export default function CourseDetail() {
     }
   };
 
-  const currentModule = courseData.modules[selectedModule];
+  // Show loading state
+  if (loading) {
+    return (
+      <Box minH="100vh" bg={bgColor} p={8} display="flex" alignItems="center" justifyContent="center">
+        <Text fontSize="lg" color={textColor}>Loading course details...</Text>
+      </Box>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Box minH="100vh" bg={bgColor} p={8} display="flex" alignItems="center" justifyContent="center">
+        <Text fontSize="lg" color="red.500">Error: {error}</Text>
+      </Box>
+    );
+  }
+
+  const currentModule = courseData.modules && courseData.modules.length > 0 ? courseData.modules[selectedModule] : null;
 
   if (!isEnrolled) {
     return (
@@ -158,7 +200,7 @@ export default function CourseDetail() {
               </Text>
               
               <VStack spacing={0} align="stretch">
-                {courseData.modules.map((module, index) => (
+                {courseData.modules && courseData.modules.map((module, index) => (
                   <Box key={module.id} mb={2}>
                     <Button
                       w="full"

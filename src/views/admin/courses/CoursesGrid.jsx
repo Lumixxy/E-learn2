@@ -110,10 +110,10 @@ const CoursesGrid = () => {
 
   useEffect(() => {
     console.log('CoursesGrid mounted');
-    const fetchCourses = () => {
+    const fetchCourses = async () => {
       try {
         console.log('Fetching courses...');
-        const courseData = loadCourseData();
+        const courseData = await loadCourseData();
         console.log('Course data loaded:', courseData);
         setCourses(courseData);
         setError(null);
@@ -131,7 +131,6 @@ const CoursesGrid = () => {
         setLoading(false);
       }
     };
-
     fetchCourses();
   }, [toast]);
 

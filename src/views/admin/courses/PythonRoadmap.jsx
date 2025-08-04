@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -7,7 +7,6 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
 } from 'react-flow-renderer';
-import roadmapData from '../../../data/python/python_roadmap.json';
 
 const foggyBg = {
   background: 'linear-gradient(120deg, #e0f2ff 0%, #b3c6e0 100%)',
@@ -19,9 +18,29 @@ const foggyBg = {
 };
 
 export default function PythonRoadmap() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(roadmapData.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(roadmapData.edges);
-  const [selectedNodeId, setSelectedNodeId] = useState(nodes[0].id);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [roadmapData, setRoadmapData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchRoadmapData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/data/python/python_roadmap.json');
+        if (!response.ok) throw new Error('Failed to fetch python roadmap data');
+        const data = await response.json();
+        setRoadmapData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRoadmapData();
+  }, []);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)), [setEdges]);
 
@@ -31,6 +50,18 @@ export default function PythonRoadmap() {
   }, []);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
+
+  if (loading) {
+    return <div>Loading roadmap...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!roadmapData) {
+    return <div>No roadmap data available.</div>;
+  }
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex' }}>

@@ -1,10 +1,9 @@
 import React from "react";
 import {
   Box,
-  Button,
   Flex,
   Text,
-  Image,
+  Button,
   useColorModeValue,
 } from "@chakra-ui/react";
 
@@ -66,13 +65,7 @@ export default function Banner() {
           top="50%"
           transform="translateY(-50%)"
         >
-          <Image
-            src="/images/graduation-cap.png"
-            alt="Graduation Cap"
-            w="200px"
-            h="200px"
-            objectFit="contain"
-          />
+       
         </Box>
       </Flex>
     </Box>

@@ -8,7 +8,7 @@ import {
   MdDescription,
   MdSchool,
   MdLeaderboard,
-  MdMap,
+
   MdLibraryBooks,
 } from "react-icons/md";
 
@@ -19,16 +19,13 @@ import ResumeGenerator from "views/admin/resumeGenerator";
 import MyLearning from "views/admin/myLearning";
 import Leaderboard from "views/admin/leaderboard";
 import Home from "views/admin/home";
-import Roadmap from "views/admin/roadmap";
+
 import CourseDetail from "views/admin/courses/CourseDetail";
 import Courses from "views/admin/courses/Courses";
 import CourseEnroll from "views/admin/courses/CourseEnroll";
 import CourseLearn from "views/admin/courses/CourseLearn";
 import CourseRoadmap from "views/admin/courses/CourseRoadmap";
 import PythonRoadmap from "views/admin/courses/PythonRoadmap";
-import Syllabus from "views/admin/mit-course/Syllabus";
-import Readings from "views/admin/mit-course/Readings";
-import Assignments from "views/admin/mit-course/Assignments";
 import CourseImport from "views/admin/courses/CourseImport";
 
 
@@ -91,13 +88,7 @@ const routes = [
     component: <PythonRoadmap />,
     hidden: false,
   },
-  {
-    name: "Roadmap",
-    layout: "/admin",
-    path: "/roadmap",
-    icon: <Icon as={MdMap} width="20px" height="20px" color="inherit" />,
-    component: <Roadmap />,
-  },
+
   {
     name: "Marketplace",
     layout: "/admin",

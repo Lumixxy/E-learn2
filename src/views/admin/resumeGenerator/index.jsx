@@ -1,609 +1,939 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from 'react';
 import {
   Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
+  Container,
   Grid,
-  Input,
-  Select,
-  Stack,
-  Text,
-  Textarea,
-  useColorModeValue,
+  GridItem,
   VStack,
   HStack,
-  IconButton,
-  Divider,
+  Text,
+  Button,
+  useColorModeValue,
   useToast,
+  Divider,
+  IconButton,
+  Badge,
+  Card,
+  CardBody,
+  Heading,
+  Flex,
+  Spacer,
+  Icon,
+  useDisclosure,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
+  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  useDisclosure,
-} from "@chakra-ui/react";
-import { AddIcon, DeleteIcon, DownloadIcon, ViewIcon } from "@chakra-ui/icons";
-import Card from "components/card/Card";
+} from '@chakra-ui/react';
+import {
+  FiUser,
+  FiBook,
+  FiBriefcase,
+  FiAward,
+  FiFileText,
+  FiDownload,
+  FiEye,
+  FiEdit3,
+  FiPlus,
+  FiTrash2,
+  FiMail,
+  FiPhone,
+  FiMapPin,
+  FiGlobe,
+  FiLinkedin,
+  FiGithub,
+} from 'react-icons/fi';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
-function ResumeGenerator() {
-  const toast = useToast();
+// Resume Data Structure
+const initialResumeData = {
+  personalInfo: {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    website: '',
+    linkedin: '',
+    github: '',
+    summary: '',
+  },
+  education: [],
+  experience: [],
+  skills: [],
+  projects: [],
+  certifications: [],
+};
+
+const ResumeGenerator = () => {
+  const [resumeData, setResumeData] = useState(initialResumeData);
+  const [activeSection, setActiveSection] = useState('personal');
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const textColor = useColorModeValue("gray.700", "white");
-  const bgColor = useColorModeValue("white", "navy.700");
+  const previewRef = useRef();
+  const toast = useToast();
 
-  // Personal Information
-  const [personalInfo, setPersonalInfo] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
-    linkedin: "",
-    website: "",
-    summary: "",
-  });
+  // Color mode values
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const primaryColor = useColorModeValue('blue.500', 'blue.300');
 
-  // Education
-  const [education, setEducation] = useState([
-    { id: 1, institution: "", degree: "", field: "", startDate: "", endDate: "", gpa: "" }
-  ]);
-
-  // Work Experience
-  const [experience, setExperience] = useState([
-    { id: 1, company: "", position: "", startDate: "", endDate: "", description: "" }
-  ]);
-
-  // Skills
-  const [skills, setSkills] = useState([
-    { id: 1, name: "" }
-  ]);
-
-  // Handle personal info changes
-  const handlePersonalInfoChange = (e) => {
-    const { name, value } = e.target;
-    setPersonalInfo({ ...personalInfo, [name]: value });
+  // Update resume data
+  const updateResumeData = (section, data) => {
+    setResumeData(prev => ({
+      ...prev,
+      [section]: data
+    }));
   };
 
-  // Handle education changes
-  const handleEducationChange = (id, field, value) => {
-    setEducation(education.map(edu => 
-      edu.id === id ? { ...edu, [field]: value } : edu
-    ));
+  // Add new item to array sections
+  const addItem = (section) => {
+    const newItem = getEmptyItem(section);
+    setResumeData(prev => ({
+      ...prev,
+      [section]: [...prev[section], newItem]
+    }));
   };
 
-  // Add new education entry
-  const addEducation = () => {
-    const newId = education.length > 0 ? Math.max(...education.map(e => e.id)) + 1 : 1;
-    setEducation([...education, { 
-      id: newId, 
-      institution: "", 
-      degree: "", 
-      field: "", 
-      startDate: "", 
-      endDate: "", 
-      gpa: "" 
-    }]);
+  // Remove item from array sections
+  const removeItem = (section, index) => {
+    setResumeData(prev => ({
+      ...prev,
+      [section]: prev[section].filter((_, i) => i !== index)
+    }));
   };
 
-  // Remove education entry
-  const removeEducation = (id) => {
-    if (education.length > 1) {
-      setEducation(education.filter(edu => edu.id !== id));
-    } else {
+  // Update item in array sections
+  const updateItem = (section, index, data) => {
+    setResumeData(prev => ({
+      ...prev,
+      [section]: prev[section].map((item, i) => 
+        i === index ? { ...item, ...data } : item
+      )
+    }));
+  };
+
+  // Get empty item template
+  const getEmptyItem = (section) => {
+    const templates = {
+      education: {
+        institution: '',
+        degree: '',
+        field: '',
+        startDate: '',
+        endDate: '',
+        gpa: '',
+        description: '',
+      },
+      experience: {
+        company: '',
+        position: '',
+        startDate: '',
+        endDate: '',
+        current: false,
+        description: '',
+        achievements: [],
+      },
+      skills: {
+        category: '',
+        skills: '',
+      },
+      projects: {
+        name: '',
+        description: '',
+        technologies: '',
+        link: '',
+        startDate: '',
+        endDate: '',
+      },
+      certifications: {
+        name: '',
+        issuer: '',
+        date: '',
+        link: '',
+      },
+    };
+    return templates[section] || {};
+  };
+
+  // Generate PDF
+  const generatePDF = async () => {
+    try {
+      const element = previewRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`${resumeData.personalInfo.firstName}_${resumeData.personalInfo.lastName}_Resume.pdf`);
+      
       toast({
-        title: "Cannot remove",
-        description: "You need at least one education entry",
-        status: "warning",
+        title: 'Resume Downloaded!',
+        description: 'Your resume has been successfully generated and downloaded.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to generate PDF. Please try again.',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
     }
   };
 
-  // Handle experience changes
-  const handleExperienceChange = (id, field, value) => {
-    setExperience(experience.map(exp => 
-      exp.id === id ? { ...exp, [field]: value } : exp
-    ));
-  };
+  // Form Sections
+  const sections = [
+    { id: 'personal', name: 'Personal Info', icon: FiUser },
+    { id: 'education', name: 'Education', icon: FiBook },
+    { id: 'experience', name: 'Experience', icon: FiBriefcase },
+    { id: 'skills', name: 'Skills', icon: FiAward },
+    { id: 'projects', name: 'Projects', icon: FiFileText },
+  ];
 
-  // Add new experience entry
-  const addExperience = () => {
-    const newId = experience.length > 0 ? Math.max(...experience.map(e => e.id)) + 1 : 1;
-    setExperience([...experience, { 
-      id: newId, 
-      company: "", 
-      position: "", 
-      startDate: "", 
-      endDate: "", 
-      description: "" 
-    }]);
-  };
+  return (
+    <Box minH="100vh" bg={bgColor} py={8}>
+      <Container maxW="7xl">
+        <VStack spacing={8}>
+          {/* Header */}
+          <Box textAlign="center" w="full">
+            <Heading size="xl" color={textColor} mb={2}>
+                  Resume Generator
+            </Heading>
+            <Text color="gray.500" fontSize="lg">
+              Create a professional resume with our easy-to-use builder
+                </Text>
+              </Box>
 
-  // Remove experience entry
-  const removeExperience = (id) => {
-    if (experience.length > 1) {
-      setExperience(experience.filter(exp => exp.id !== id));
-    } else {
-      toast({
-        title: "Cannot remove",
-        description: "You need at least one experience entry",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
+          {/* Main Content */}
+          <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={8} w="full">
+            {/* Form Section */}
+            <GridItem>
+              <Card bg={cardBg} shadow="lg" borderRadius="xl">
+                <CardBody p={6}>
+                  <VStack spacing={6} align="stretch">
+                    {/* Section Navigation */}
+                    <HStack spacing={2} overflowX="auto" pb={2}>
+                      {sections.map((section) => (
+                        <Button
+                          key={section.id}
+                          size="sm"
+                          variant={activeSection === section.id ? 'solid' : 'outline'}
+                          colorScheme="blue"
+                          leftIcon={<Icon as={section.icon} />}
+                          onClick={() => setActiveSection(section.id)}
+                          whiteSpace="nowrap"
+                        >
+                          {section.name}
+                        </Button>
+                      ))}
+                    </HStack>
 
-  // Handle skills changes
-  const handleSkillChange = (id, value) => {
-    setSkills(skills.map(skill => 
-      skill.id === id ? { ...skill, name: value } : skill
-    ));
-  };
+                    <Divider />
 
-  // Add new skill
-  const addSkill = () => {
-    const newId = skills.length > 0 ? Math.max(...skills.map(s => s.id)) + 1 : 1;
-    setSkills([...skills, { id: newId, name: "" }]);
-  };
+                    {/* Form Content */}
+                    <Box>
+                      {activeSection === 'personal' && (
+                        <PersonalInfoForm
+                          data={resumeData.personalInfo}
+                          updateData={(data) => updateResumeData('personalInfo', data)}
+                        />
+                      )}
+                      {activeSection === 'education' && (
+                        <EducationForm
+                          data={resumeData.education}
+                          addItem={() => addItem('education')}
+                          removeItem={(index) => removeItem('education', index)}
+                          updateItem={(index, data) => updateItem('education', index, data)}
+                        />
+                      )}
+                      {activeSection === 'experience' && (
+                        <ExperienceForm
+                          data={resumeData.experience}
+                          addItem={() => addItem('experience')}
+                          removeItem={(index) => removeItem('experience', index)}
+                          updateItem={(index, data) => updateItem('experience', index, data)}
+                        />
+                      )}
+                      {activeSection === 'skills' && (
+                        <SkillsForm
+                          data={resumeData.skills}
+                          addItem={() => addItem('skills')}
+                          removeItem={(index) => removeItem('skills', index)}
+                          updateItem={(index, data) => updateItem('skills', index, data)}
+                        />
+                      )}
+                      {activeSection === 'projects' && (
+                        <ProjectsForm
+                          data={resumeData.projects}
+                          addItem={() => addItem('projects')}
+                          removeItem={(index) => removeItem('projects', index)}
+                          updateItem={(index, data) => updateItem('projects', index, data)}
+                        />
+                      )}
+                    </Box>
+                  </VStack>
+                </CardBody>
+              </Card>
+            </GridItem>
 
-  // Remove skill
-  const removeSkill = (id) => {
-    if (skills.length > 1) {
-      setSkills(skills.filter(skill => skill.id !== id));
-    } else {
-      toast({
-        title: "Cannot remove",
-        description: "You need at least one skill",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
+            {/* Preview Section */}
+            <GridItem>
+              <Card bg={cardBg} shadow="lg" borderRadius="xl">
+                <CardBody p={6}>
+                  <VStack spacing={4} align="stretch">
+                    <HStack justify="space-between">
+                      <Heading size="md" color={textColor}>
+                        Resume Preview
+                      </Heading>
+                      <HStack spacing={2}>
+                <Button
+                          size="sm"
+                  variant="outline"
+                          leftIcon={<Icon as={FiEye} />}
+                          onClick={() => setIsPreviewMode(!isPreviewMode)}
+                >
+                          {isPreviewMode ? 'Edit Mode' : 'Preview Mode'}
+                </Button>
+                <Button
+                          size="sm"
+                          colorScheme="blue"
+                          leftIcon={<Icon as={FiDownload} />}
+                          onClick={generatePDF}
+                        >
+                          Download PDF
+                </Button>
+              </HStack>
+                    </HStack>
 
-  // Generate Resume
-  const generateResume = () => {
-    // In a real application, this would generate a PDF or document
-    // For now, we'll just show a success message
-    toast({
-      title: "Resume Generated",
-      description: "Your resume has been generated successfully!",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
-  };
+                    <Divider />
 
-  // Preview Resume
-  const previewResume = () => {
-    onOpen();
+                    {/* Resume Preview */}
+                    <Box
+                      ref={previewRef}
+                      bg="white"
+                      p={6}
+                      borderRadius="md"
+                      border="1px solid"
+                      borderColor={borderColor}
+                      minH="600px"
+                      className="resume-preview"
+                    >
+                      <ResumePreview data={resumeData} />
+                    </Box>
+                  </VStack>
+                </CardBody>
+              </Card>
+            </GridItem>
+          </Grid>
+        </VStack>
+      </Container>
+    </Box>
+  );
+};
+
+// Personal Info Form Component
+const PersonalInfoForm = ({ data, updateData }) => {
+  const handleChange = (field, value) => {
+    updateData({ ...data, [field]: value });
   };
 
   return (
-    <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
-      <Grid templateColumns={{ base: "1fr", lg: "1fr" }} gap="20px">
-        <Card mb="20px">
-          <Flex direction="column">
-            <Flex justify="space-between" align="center" mb="30px">
-              <Box>
-                <Text
-                  color={textColor}
-                  fontSize="2xl"
-                  fontWeight="700"
-                  mb="10px"
-                >
-                  Resume Generator
-                </Text>
-                <Text color="gray.500" fontSize="md">
-                  Fill in the details below to generate your professional resume
-                </Text>
-              </Box>
-              <HStack spacing="4">
-                <Button
-                  leftIcon={<ViewIcon />}
-                  colorScheme="brand"
-                  variant="outline"
-                  onClick={previewResume}
-                >
-                  Preview
-                </Button>
-                <Button
-                  leftIcon={<DownloadIcon />}
-                  colorScheme="brand"
-                  onClick={generateResume}
-                >
-                  Generate
-                </Button>
-              </HStack>
-            </Flex>
-
-            {/* Personal Information */}
-            <Box mb="20px">
-              <Text color={textColor} fontSize="xl" fontWeight="700" mb="10px">
-                Personal Information
-              </Text>
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap="20px">
-                <FormControl>
-                  <FormLabel>Full Name</FormLabel>
-                  <Input 
-                    name="fullName"
-                    value={personalInfo.fullName}
-                    onChange={handlePersonalInfoChange}
-                    placeholder="John Doe"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Email</FormLabel>
-                  <Input 
-                    name="email"
-                    value={personalInfo.email}
-                    onChange={handlePersonalInfoChange}
-                    placeholder="john.doe@example.com"
-                    type="email"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Phone</FormLabel>
-                  <Input 
-                    name="phone"
-                    value={personalInfo.phone}
-                    onChange={handlePersonalInfoChange}
-                    placeholder="(123) 456-7890"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Address</FormLabel>
-                  <Input 
-                    name="address"
-                    value={personalInfo.address}
-                    onChange={handlePersonalInfoChange}
-                    placeholder="City, State"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>LinkedIn</FormLabel>
-                  <Input 
-                    name="linkedin"
-                    value={personalInfo.linkedin}
-                    onChange={handlePersonalInfoChange}
-                    placeholder="linkedin.com/in/johndoe"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Website/Portfolio</FormLabel>
-                  <Input 
-                    name="website"
-                    value={personalInfo.website}
-                    onChange={handlePersonalInfoChange}
-                    placeholder="johndoe.com"
-                  />
-                </FormControl>
-              </Grid>
-              <FormControl mt="20px">
-                <FormLabel>Professional Summary</FormLabel>
-                <Textarea 
-                  name="summary"
-                  value={personalInfo.summary}
-                  onChange={handlePersonalInfoChange}
-                  placeholder="Brief summary of your professional background and goals"
-                  rows={4}
-                />
-              </FormControl>
-            </Box>
-
-            <Divider my="30px" />
-
-            {/* Education */}
-            <Box mb="20px">
-              <Flex justify="space-between" align="center" mb="10px">
-                <Text color={textColor} fontSize="xl" fontWeight="700">
-                  Education
-                </Text>
-                <Button leftIcon={<AddIcon />} colorScheme="blue" size="sm" onClick={addEducation}>
-                  Add Education
-                </Button>
-              </Flex>
-              
-              {education.map((edu) => (
-                <Box 
-                  key={edu.id} 
-                  p="15px" 
-                  mb="15px" 
-                  borderWidth="1px" 
-                  borderRadius="md"
-                  bg={bgColor}
-                >
-                  <Flex justify="space-between" mb="10px">
-                    <Text fontWeight="600">Education #{edu.id}</Text>
-                    <IconButton
-                      icon={<DeleteIcon />}
-                      colorScheme="red"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeEducation(edu.id)}
-                      aria-label="Remove education"
-                    />
-                  </Flex>
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap="15px">
-                    <FormControl>
-                      <FormLabel>Institution</FormLabel>
-                      <Input 
-                        value={edu.institution}
-                        onChange={(e) => handleEducationChange(edu.id, "institution", e.target.value)}
-                        placeholder="University Name"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Degree</FormLabel>
-                      <Input 
-                        value={edu.degree}
-                        onChange={(e) => handleEducationChange(edu.id, "degree", e.target.value)}
-                        placeholder="Bachelor of Science"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Field of Study</FormLabel>
-                      <Input 
-                        value={edu.field}
-                        onChange={(e) => handleEducationChange(edu.id, "field", e.target.value)}
-                        placeholder="Computer Science"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>GPA</FormLabel>
-                      <Input 
-                        value={edu.gpa}
-                        onChange={(e) => handleEducationChange(edu.id, "gpa", e.target.value)}
-                        placeholder="3.8/4.0"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Start Date</FormLabel>
-                      <Input 
-                        type="month"
-                        value={edu.startDate}
-                        onChange={(e) => handleEducationChange(edu.id, "startDate", e.target.value)}
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>End Date</FormLabel>
-                      <Input 
-                        type="month"
-                        value={edu.endDate}
-                        onChange={(e) => handleEducationChange(edu.id, "endDate", e.target.value)}
-                      />
-                    </FormControl>
-                  </Grid>
-                </Box>
-              ))}
-            </Box>
-
-            <Divider my="30px" />
-
-            {/* Work Experience */}
-            <Box mb="20px">
-              <Flex justify="space-between" align="center" mb="10px">
-                <Text color={textColor} fontSize="xl" fontWeight="700">
-                  Work Experience
-                </Text>
-                <Button leftIcon={<AddIcon />} colorScheme="blue" size="sm" onClick={addExperience}>
-                  Add Experience
-                </Button>
-              </Flex>
-              
-              {experience.map((exp) => (
-                <Box 
-                  key={exp.id} 
-                  p="15px" 
-                  mb="15px" 
-                  borderWidth="1px" 
-                  borderRadius="md"
-                  bg={bgColor}
-                >
-                  <Flex justify="space-between" mb="10px">
-                    <Text fontWeight="600">Experience #{exp.id}</Text>
-                    <IconButton
-                      icon={<DeleteIcon />}
-                      colorScheme="red"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeExperience(exp.id)}
-                      aria-label="Remove experience"
-                    />
-                  </Flex>
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap="15px">
-                    <FormControl>
-                      <FormLabel>Company</FormLabel>
-                      <Input 
-                        value={exp.company}
-                        onChange={(e) => handleExperienceChange(exp.id, "company", e.target.value)}
-                        placeholder="Company Name"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Position</FormLabel>
-                      <Input 
-                        value={exp.position}
-                        onChange={(e) => handleExperienceChange(exp.id, "position", e.target.value)}
-                        placeholder="Software Engineer"
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Start Date</FormLabel>
-                      <Input 
-                        type="month"
-                        value={exp.startDate}
-                        onChange={(e) => handleExperienceChange(exp.id, "startDate", e.target.value)}
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>End Date</FormLabel>
-                      <Input 
-                        type="month"
-                        value={exp.endDate}
-                        onChange={(e) => handleExperienceChange(exp.id, "endDate", e.target.value)}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <FormControl mt="15px">
-                    <FormLabel>Description</FormLabel>
-                    <Textarea 
-                      value={exp.description}
-                      onChange={(e) => handleExperienceChange(exp.id, "description", e.target.value)}
-                      placeholder="Describe your responsibilities and achievements"
-                      rows={3}
-                    />
-                  </FormControl>
-                </Box>
-              ))}
-            </Box>
-
-            <Divider my="30px" />
-
-            {/* Skills */}
-            <Box mb="30px">
-              <Flex justify="space-between" align="center" mb="10px">
-                <Text color={textColor} fontSize="xl" fontWeight="700">
-                  Skills
-                </Text>
-                <Button leftIcon={<AddIcon />} colorScheme="blue" size="sm" onClick={addSkill}>
-                  Add Skill
-                </Button>
-              </Flex>
-              
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap="15px">
-                {skills.map((skill) => (
-                  <Box key={skill.id} p="10px" borderWidth="1px" borderRadius="md" bg={bgColor}>
-                    <Flex justify="space-between" align="center">
-                      <FormControl>
-                        <Input 
-                          value={skill.name}
-                          onChange={(e) => handleSkillChange(skill.id, e.target.value)}
-                          placeholder="Skill Name"
-                        />
-                      </FormControl>
-                      <IconButton
-                        icon={<DeleteIcon />}
-                        colorScheme="red"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeSkill(skill.id)}
-                        aria-label="Remove skill"
-                      />
-                    </Flex>
-                  </Box>
-                ))}
-              </Grid>
-            </Box>
-
-            <Divider my="30px" />
-          </Flex>
-        </Card>
+    <VStack spacing={4} align="stretch">
+      <Heading size="md" color="gray.700">Personal Information</Heading>
+      
+      <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+        <FormField
+          label="First Name"
+          value={data.firstName}
+          onChange={(value) => handleChange('firstName', value)}
+          icon={FiUser}
+        />
+        <FormField
+          label="Last Name"
+          value={data.lastName}
+          onChange={(value) => handleChange('lastName', value)}
+          icon={FiUser}
+        />
       </Grid>
 
-      {/* Preview Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size="full">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Resume Preview</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Box p="20px" bg="white" borderRadius="md" boxShadow="md">
+      <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+        <FormField
+          label="Email"
+          value={data.email}
+          onChange={(value) => handleChange('email', value)}
+          icon={FiMail}
+                    type="email"
+                  />
+        <FormField
+          label="Phone"
+          value={data.phone}
+          onChange={(value) => handleChange('phone', value)}
+          icon={FiPhone}
+          type="tel"
+        />
+      </Grid>
+
+      <FormField
+        label="Address"
+        value={data.address}
+        onChange={(value) => handleChange('address', value)}
+        icon={FiMapPin}
+      />
+
+      <Grid templateColumns={{ base: '1fr', md: '1fr 1fr 1fr' }} gap={4}>
+        <FormField
+          label="City"
+          value={data.city}
+          onChange={(value) => handleChange('city', value)}
+          icon={FiMapPin}
+        />
+        <FormField
+          label="State"
+          value={data.state}
+          onChange={(value) => handleChange('state', value)}
+          icon={FiMapPin}
+        />
+        <FormField
+          label="ZIP Code"
+          value={data.zipCode}
+          onChange={(value) => handleChange('zipCode', value)}
+          icon={FiMapPin}
+        />
+      </Grid>
+
+      <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+        <FormField
+          label="Website"
+          value={data.website}
+          onChange={(value) => handleChange('website', value)}
+          icon={FiGlobe}
+          type="url"
+        />
+        <FormField
+          label="LinkedIn"
+          value={data.linkedin}
+          onChange={(value) => handleChange('linkedin', value)}
+          icon={FiLinkedin}
+          type="url"
+        />
+              </Grid>
+
+      <FormField
+        label="GitHub"
+        value={data.github}
+        onChange={(value) => handleChange('github', value)}
+        icon={FiGithub}
+        type="url"
+      />
+
+      <FormField
+        label="Professional Summary"
+        value={data.summary}
+        onChange={(value) => handleChange('summary', value)}
+        isTextarea
+        placeholder="Write a brief professional summary..."
+      />
+    </VStack>
+  );
+};
+
+// Education Form Component
+const EducationForm = ({ data, addItem, removeItem, updateItem }) => {
+  return (
+    <VStack spacing={4} align="stretch">
+      <HStack justify="space-between">
+        <Heading size="md" color="gray.700">Education</Heading>
+        <Button size="sm" leftIcon={<Icon as={FiPlus} />} onClick={addItem}>
+                  Add Education
+                </Button>
+      </HStack>
+
+      {data.map((education, index) => (
+        <Card key={index} variant="outline" p={4}>
+          <VStack spacing={4} align="stretch">
+            <HStack justify="space-between">
+              <Text fontWeight="bold">Education #{index + 1}</Text>
+                    <IconButton
+                size="sm"
+                icon={<Icon as={FiTrash2} />}
+                onClick={() => removeItem(index)}
+                      colorScheme="red"
+                      variant="ghost"
+              />
+            </HStack>
+
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+              <FormField
+                label="Institution"
+                value={education.institution}
+                onChange={(value) => updateItem(index, { institution: value })}
+              />
+              <FormField
+                label="Degree"
+                value={education.degree}
+                onChange={(value) => updateItem(index, { degree: value })}
+              />
+            </Grid>
+
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+              <FormField
+                label="Field of Study"
+                value={education.field}
+                onChange={(value) => updateItem(index, { field: value })}
+              />
+              <FormField
+                label="GPA"
+                value={education.gpa}
+                onChange={(value) => updateItem(index, { gpa: value })}
+              />
+            </Grid>
+
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+              <FormField
+                label="Start Date"
+                value={education.startDate}
+                onChange={(value) => updateItem(index, { startDate: value })}
+                        type="month"
+              />
+              <FormField
+                label="End Date"
+                value={education.endDate}
+                onChange={(value) => updateItem(index, { endDate: value })}
+                        type="month"
+                      />
+                  </Grid>
+
+            <FormField
+              label="Description"
+              value={education.description}
+              onChange={(value) => updateItem(index, { description: value })}
+              isTextarea
+              placeholder="Describe your education experience..."
+            />
+          </VStack>
+        </Card>
+      ))}
+    </VStack>
+  );
+};
+
+// Experience Form Component
+const ExperienceForm = ({ data, addItem, removeItem, updateItem }) => {
+  return (
+    <VStack spacing={4} align="stretch">
+      <HStack justify="space-between">
+        <Heading size="md" color="gray.700">Work Experience</Heading>
+        <Button size="sm" leftIcon={<Icon as={FiPlus} />} onClick={addItem}>
+                  Add Experience
+                </Button>
+      </HStack>
+
+      {data.map((experience, index) => (
+        <Card key={index} variant="outline" p={4}>
+          <VStack spacing={4} align="stretch">
+            <HStack justify="space-between">
+              <Text fontWeight="bold">Experience #{index + 1}</Text>
+                    <IconButton
+                size="sm"
+                icon={<Icon as={FiTrash2} />}
+                onClick={() => removeItem(index)}
+                      colorScheme="red"
+                      variant="ghost"
+              />
+            </HStack>
+
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+              <FormField
+                label="Company"
+                value={experience.company}
+                onChange={(value) => updateItem(index, { company: value })}
+              />
+              <FormField
+                label="Position"
+                value={experience.position}
+                onChange={(value) => updateItem(index, { position: value })}
+              />
+            </Grid>
+
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+              <FormField
+                label="Start Date"
+                value={experience.startDate}
+                onChange={(value) => updateItem(index, { startDate: value })}
+                        type="month"
+              />
+              <FormField
+                label="End Date"
+                value={experience.endDate}
+                onChange={(value) => updateItem(index, { endDate: value })}
+                        type="month"
+                      />
+                  </Grid>
+
+            <FormField
+              label="Description"
+              value={experience.description}
+              onChange={(value) => updateItem(index, { description: value })}
+              isTextarea
+              placeholder="Describe your role and responsibilities..."
+            />
+          </VStack>
+        </Card>
+      ))}
+    </VStack>
+  );
+};
+
+// Skills Form Component
+const SkillsForm = ({ data, addItem, removeItem, updateItem }) => {
+  return (
+    <VStack spacing={4} align="stretch">
+      <HStack justify="space-between">
+        <Heading size="md" color="gray.700">Skills</Heading>
+        <Button size="sm" leftIcon={<Icon as={FiPlus} />} onClick={addItem}>
+          Add Skill Category
+                </Button>
+      </HStack>
+
+      {data.map((skill, index) => (
+        <Card key={index} variant="outline" p={4}>
+          <VStack spacing={4} align="stretch">
+            <HStack justify="space-between">
+              <Text fontWeight="bold">Skill Category #{index + 1}</Text>
+                      <IconButton
+                size="sm"
+                icon={<Icon as={FiTrash2} />}
+                onClick={() => removeItem(index)}
+                        colorScheme="red"
+                        variant="ghost"
+              />
+            </HStack>
+
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+              <FormField
+                label="Category"
+                value={skill.category}
+                onChange={(value) => updateItem(index, { category: value })}
+                placeholder="e.g., Programming Languages, Tools, etc."
+              />
+              <FormField
+                label="Skills"
+                value={skill.skills}
+                onChange={(value) => updateItem(index, { skills: value })}
+                placeholder="e.g., JavaScript, React, Node.js"
+              />
+              </Grid>
+          </VStack>
+        </Card>
+      ))}
+    </VStack>
+  );
+};
+
+// Projects Form Component
+const ProjectsForm = ({ data, addItem, removeItem, updateItem }) => {
+  return (
+    <VStack spacing={4} align="stretch">
+      <HStack justify="space-between">
+        <Heading size="md" color="gray.700">Projects</Heading>
+        <Button size="sm" leftIcon={<Icon as={FiPlus} />} onClick={addItem}>
+          Add Project
+        </Button>
+      </HStack>
+
+      {data.map((project, index) => (
+        <Card key={index} variant="outline" p={4}>
+          <VStack spacing={4} align="stretch">
+            <HStack justify="space-between">
+              <Text fontWeight="bold">Project #{index + 1}</Text>
+              <IconButton
+                size="sm"
+                icon={<Icon as={FiTrash2} />}
+                onClick={() => removeItem(index)}
+                colorScheme="red"
+                variant="ghost"
+              />
+            </HStack>
+
+            <FormField
+              label="Project Name"
+              value={project.name}
+              onChange={(value) => updateItem(index, { name: value })}
+            />
+
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+              <FormField
+                label="Start Date"
+                value={project.startDate}
+                onChange={(value) => updateItem(index, { startDate: value })}
+                type="month"
+              />
+              <FormField
+                label="End Date"
+                value={project.endDate}
+                onChange={(value) => updateItem(index, { endDate: value })}
+                type="month"
+              />
+      </Grid>
+
+            <FormField
+              label="Technologies"
+              value={project.technologies}
+              onChange={(value) => updateItem(index, { technologies: value })}
+              placeholder="e.g., React, Node.js, MongoDB"
+            />
+
+            <FormField
+              label="Project Link"
+              value={project.link}
+              onChange={(value) => updateItem(index, { link: value })}
+              type="url"
+              placeholder="https://github.com/username/project"
+            />
+
+            <FormField
+              label="Description"
+              value={project.description}
+              onChange={(value) => updateItem(index, { description: value })}
+              isTextarea
+              placeholder="Describe your project..."
+            />
+          </VStack>
+        </Card>
+      ))}
+    </VStack>
+  );
+};
+
+// Reusable Form Field Component
+const FormField = ({ 
+  label, 
+  value, 
+  onChange, 
+  icon: IconComponent, 
+  type = "text", 
+  isTextarea = false,
+  placeholder = "" 
+}) => {
+  const { Input, Textarea } = require('@chakra-ui/react');
+  
+  return (
+    <Box>
+      <Text fontSize="sm" fontWeight="medium" color="gray.700" mb={2}>
+        {label}
+      </Text>
+      <HStack>
+        {IconComponent && <Icon as={IconComponent} color="gray.400" />}
+        {isTextarea ? (
+          <Textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            size="sm"
+            resize="vertical"
+            minH="100px"
+          />
+        ) : (
+          <Input
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            size="sm"
+          />
+        )}
+      </HStack>
+    </Box>
+  );
+};
+
+// Resume Preview Component
+const ResumePreview = ({ data }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short' 
+    });
+  };
+
+  return (
+    <Box fontFamily="serif" fontSize="12px" lineHeight="1.4">
               {/* Header */}
-              <Box mb="20px">
-                <Text fontSize="2xl" fontWeight="bold" color={textColor}>
-                  {personalInfo.fullName}
+      <Box textAlign="center" mb={6}>
+        <Text fontSize="24px" fontWeight="bold" color="#2D3748">
+          {data.personalInfo.firstName} {data.personalInfo.lastName}
+        </Text>
+        <Text fontSize="14px" color="#4A5568" mt={1}>
+          {data.personalInfo.email} • {data.personalInfo.phone}
+        </Text>
+        <Text fontSize="12px" color="#718096" mt={1}>
+          {data.personalInfo.address}, {data.personalInfo.city}, {data.personalInfo.state} {data.personalInfo.zipCode}
+        </Text>
+        {(data.personalInfo.website || data.personalInfo.linkedin || data.personalInfo.github) && (
+          <Text fontSize="12px" color="#718096" mt={1}>
+            {data.personalInfo.website && `${data.personalInfo.website} • `}
+            {data.personalInfo.linkedin && `${data.personalInfo.linkedin} • `}
+            {data.personalInfo.github}
                 </Text>
-                <Text color="gray.600">{personalInfo.email} • {personalInfo.phone}</Text>
-                <Text color="gray.600">{personalInfo.address}</Text>
-                {personalInfo.linkedin && (
-                  <Text color="blue.500">LinkedIn: {personalInfo.linkedin}</Text>
-                )}
-                {personalInfo.website && (
-                  <Text color="blue.500">Website: {personalInfo.website}</Text>
                 )}
               </Box>
 
               {/* Summary */}
-              {personalInfo.summary && (
-                <Box mb="20px">
-                  <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
-                    Professional Summary
+      {data.personalInfo.summary && (
+        <Box mb={4}>
+          <Text fontSize="14px" fontWeight="bold" color="#2D3748" mb={2}>
+            PROFESSIONAL SUMMARY
+          </Text>
+          <Text fontSize="12px" color="#4A5568">
+            {data.personalInfo.summary}
                   </Text>
-                  <Text color="gray.600">{personalInfo.summary}</Text>
                 </Box>
               )}
 
-              {/* Education */}
-              <Box mb="20px">
-                <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
-                  Education
+      {/* Experience */}
+      {data.experience.length > 0 && (
+        <Box mb={4}>
+          <Text fontSize="14px" fontWeight="bold" color="#2D3748" mb={2}>
+            PROFESSIONAL EXPERIENCE
+          </Text>
+          {data.experience.map((exp, index) => (
+            <Box key={index} mb={3}>
+              <HStack justify="space-between" mb={1}>
+                <Text fontSize="12px" fontWeight="bold" color="#2D3748">
+                  {exp.position}
                 </Text>
-                {education.map((edu) => (
-                  <Box key={edu.id} mb="10px">
-                    <Text fontWeight="bold" color={textColor}>
-                      {edu.institution}
+                <Text fontSize="11px" color="#718096">
+                  {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
                     </Text>
-                    <Text color="gray.600">
-                      {edu.degree} in {edu.field}
+              </HStack>
+              <Text fontSize="11px" color="#4A5568" mb={1}>
+                {exp.company}
                     </Text>
-                    <Text color="gray.500" fontSize="sm">
-                      {edu.startDate} - {edu.endDate}
-                      {edu.gpa && ` • GPA: ${edu.gpa}`}
+              <Text fontSize="11px" color="#4A5568">
+                {exp.description}
                     </Text>
                   </Box>
                 ))}
               </Box>
+      )}
 
-              {/* Experience */}
-              <Box mb="20px">
-                <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
-                  Work Experience
+      {/* Education */}
+      {data.education.length > 0 && (
+        <Box mb={4}>
+          <Text fontSize="14px" fontWeight="bold" color="#2D3748" mb={2}>
+            EDUCATION
+          </Text>
+          {data.education.map((edu, index) => (
+            <Box key={index} mb={3}>
+              <HStack justify="space-between" mb={1}>
+                <Text fontSize="12px" fontWeight="bold" color="#2D3748">
+                  {edu.degree} in {edu.field}
                 </Text>
-                {experience.map((exp) => (
-                  <Box key={exp.id} mb="10px">
-                    <Text fontWeight="bold" color={textColor}>
-                      {exp.position} at {exp.company}
+                <Text fontSize="11px" color="#718096">
+                  {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                </Text>
+              </HStack>
+              <Text fontSize="11px" color="#4A5568">
+                {edu.institution} {edu.gpa && `• GPA: ${edu.gpa}`}
+              </Text>
+              {edu.description && (
+                <Text fontSize="11px" color="#4A5568" mt={1}>
+                  {edu.description}
+                </Text>
+              )}
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {/* Skills */}
+      {data.skills.length > 0 && (
+        <Box mb={4}>
+          <Text fontSize="14px" fontWeight="bold" color="#2D3748" mb={2}>
+            SKILLS
                     </Text>
-                    <Text color="gray.500" fontSize="sm">
-                      {exp.startDate} - {exp.endDate}
+          {data.skills.map((skill, index) => (
+            <Box key={index} mb={2}>
+              <Text fontSize="11px" fontWeight="bold" color="#4A5568" mb={1}>
+                {skill.category}:
                     </Text>
-                    <Text color="gray.600" mt="5px">
-                      {exp.description}
+              <Text fontSize="11px" color="#4A5568">
+                {skill.skills}
                     </Text>
                   </Box>
                 ))}
               </Box>
+      )}
 
-              {/* Skills */}
-              <Box>
-                <Text fontSize="lg" fontWeight="bold" mb="10px" color={textColor}>
-                  Skills
+      {/* Projects */}
+      {data.projects.length > 0 && (
+        <Box mb={4}>
+          <Text fontSize="14px" fontWeight="bold" color="#2D3748" mb={2}>
+            PROJECTS
+          </Text>
+          {data.projects.map((project, index) => (
+            <Box key={index} mb={3}>
+              <HStack justify="space-between" mb={1}>
+                <Text fontSize="12px" fontWeight="bold" color="#2D3748">
+                  {project.name}
                 </Text>
-                <Flex wrap="wrap" gap="10px">
-                  {skills.map((skill) => (
-                    <Box
-                      key={skill.id}
-                      bg="gray.100"
-                      px="10px"
-                      py="5px"
-                      borderRadius="md"
-                    >
-                      <Text color="gray.700">{skill.name}</Text>
+                <Text fontSize="11px" color="#718096">
+                  {formatDate(project.startDate)} - {formatDate(project.endDate)}
+                </Text>
+              </HStack>
+              <Text fontSize="11px" color="#4A5568" mb={1}>
+                Technologies: {project.technologies}
+              </Text>
+              <Text fontSize="11px" color="#4A5568">
+                {project.description}
+              </Text>
+              {project.link && (
+                <Text fontSize="11px" color="#3182CE" mt={1}>
+                  {project.link}
+                </Text>
+              )}
                     </Box>
                   ))}
-                </Flex>
               </Box>
-            </Box>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      )}
     </Box>
   );
-}
+};
 
 export default ResumeGenerator;
