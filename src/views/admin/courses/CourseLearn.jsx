@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import {
   Box,
   Flex,
@@ -39,9 +39,11 @@ import {
   FiFileText,
 } from 'react-icons/fi';
 import axios from 'axios';
+import { loadCourseById } from 'utils/courseDataLoader';
 
 const CourseLearn = () => {
   const { courseId } = useParams();
+  const location = useLocation();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,6 +53,14 @@ const CourseLearn = () => {
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [moduleCompleted, setModuleCompleted] = useState(false);
+  const [completedLessons, setCompletedLessons] = useState(() => {
+    try {
+      const raw = localStorage.getItem('completedLessons');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
   const { isOpen: isCertificateOpen, onOpen: onCertificateOpen, onClose: onCertificateClose } = useDisclosure();
   const toast = useToast();
 
@@ -66,65 +76,35 @@ const CourseLearn = () => {
     const fetchCourseDetails = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:8000/api/courses/${courseId}/`);
-        // Assuming your backend returns a single course object with 'Course', 'Module', 'Topic', 'WebsiteLink'
-        // We need to transform this into the structure expected by CourseLearn.
-        // For simplicity, let's assume each row from the backend corresponds to a 'lesson' within a 'module'.
-        // This part needs to be adjusted based on your actual backend data structure for courses.
-
-        const fetchedCourse = response.data;
-
-        // Create a simplified module/lesson structure based on the fetched data
-        // This is a placeholder and might need to be more sophisticated
+        const course = await loadCourseById(courseId);
+        if (!course) throw new Error('Course not found');
         const transformedCourse = {
-          id: fetchedCourse.id,
-          title: fetchedCourse.Course || "Unknown Course",
-          provider: "PygenicArc", // Or fetch from backend if available
-          description: fetchedCourse.Topic || "No description available.",
-          totalModules: 1,
+          id: course.id,
+          title: course.title,
+          provider: course.instructor,
+          description: course.description,
+          totalModules: course.modules?.length || 0,
           completedModules: 0,
-          modules: [
-            {
-              id: 1,
-              title: fetchedCourse.Module || "General Module",
-              completed: false,
-              lessons: [
-                {
-                  id: 1,
-                  title: fetchedCourse.Topic || "No Topic",
-                  type: "reading",
-                  duration: "30 min", // Placeholder
-                  completed: false,
-                  content: `This content is for: **${fetchedCourse.Topic}**\n\nAccess course materials: [${fetchedCourse.WebsiteLink}](${fetchedCourse.WebsiteLink})\n\nMore details about the course **${fetchedCourse.Course}** in module **${fetchedCourse.Module}**.`,
-                },
-                // You can add a mock quiz here if needed for demonstration
-                {
-                  id: 2,
-                  title: "Module Quiz",
-                  type: "quiz",
-                  questions: [
-                    {
-                      id: 1,
-                      question: `What is the main topic of "${fetchedCourse.Topic}"?`,
-                      options: [
-                        "Option A",
-                        "Option B",
-                        "Option C",
-                        "Option D"
-                      ],
-                      correctAnswer: 0 // Placeholder
-                    }
-                  ]
-                }
-              ],
-            },
-          ],
+          modules: (course.modules || []).map((m, moduleIdx) => ({
+            id: moduleIdx + 1,
+            title: m.title,
+            completed: false,
+            lessons: (m.lessons || []).map((l, lessonIdx) => ({
+              id: lessonIdx + 1,
+              title: l.title,
+              type: l.type || 'reading',
+              duration: l.duration || '30 min',
+              completed:
+                !!completedLessons[`${course.id}-${moduleIdx}-${lessonIdx}`],
+              content: l.content || '',
+            })),
+          })),
         };
         setCourseData(transformedCourse);
         setError(null);
       } catch (err) {
-        console.error("Error fetching course details:", err);
-        setError("Failed to load course details. Please try again later.");
+        console.error('Error fetching course details:', err);
+        setError('Failed to load course details. Please try again later.');
         setCourseData(null);
       } finally {
         setLoading(false);
@@ -136,11 +116,30 @@ const CourseLearn = () => {
     }
   }, [courseId]);
 
+  // If roadmap passed a specific module index via query string, honor it
+  useEffect(() => {
+    const search = new URLSearchParams(location.search);
+    const moduleIndexParam = search.get('moduleIndex');
+    if (moduleIndexParam !== null) {
+      const idx = parseInt(moduleIndexParam, 10);
+      if (!isNaN(idx)) {
+        setCurrentModuleIndex(idx);
+        setCurrentLessonIndex(0);
+      }
+    }
+  }, [location.search]);
+
   const currentModule = courseData?.modules[currentModuleIndex];
   const currentLesson = currentModule?.lessons[currentLessonIndex];
 
   const handleLessonComplete = () => {
-    // Logic to mark lesson as complete (not implemented fully here)
+    const key = `${courseData.id}-${currentModuleIndex}-${currentLessonIndex}`;
+    setCompletedLessons((prev) => {
+      const next = { ...prev, [key]: true };
+      localStorage.setItem('completedLessons', JSON.stringify(next));
+      return next;
+    });
+
     toast({
       title: "Lesson Completed!",
       description: "You have completed this lesson.",
@@ -452,6 +451,17 @@ const CourseLearn = () => {
               <Card bg={cardBg} p={6} borderWidth="1px" borderColor={borderColor}>
                 <CardBody>
                   {renderLessonContent()}
+                  {currentLesson?.websiteLink && (
+                    <Box mt={4}>
+                      <Text color={mutedColor} mb={2}>Resource link:</Text>
+                      <a href={currentLesson.websiteLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--chakra-colors-blue-500)', textDecoration: 'underline' }}>
+                        {currentLesson.title}
+                      </a>
+                      {currentLesson.summary && (
+                        <Text mt={2} color={mutedColor}>{currentLesson.summary}</Text>
+                      )}
+                    </Box>
+                  )}
                 </CardBody>
               </Card>
             )}

@@ -18,7 +18,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { StarIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loadCourseData } from 'utils/courseDataLoader';
 import CourseDialog from 'components/course/CourseDialog';
 
@@ -107,6 +107,7 @@ const CoursesGrid = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const toast = useToast();
   const bgColor = useColorModeValue("gray.50", "navy.900");
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log('CoursesGrid mounted');
@@ -115,7 +116,11 @@ const CoursesGrid = () => {
         console.log('Fetching courses...');
         const courseData = await loadCourseData();
         console.log('Course data loaded:', courseData);
-        setCourses(courseData);
+        // Filter to Python-related courses if title contains 'Python'
+        const pythonCourses = courseData.filter((c) =>
+          String(c.title || c.course || '').toLowerCase().includes('python')
+        );
+        setCourses(pythonCourses.length ? pythonCourses : courseData);
         setError(null);
       } catch (err) {
         console.error('Error in fetchCourses:', err);
@@ -135,8 +140,7 @@ const CoursesGrid = () => {
   }, [toast]);
 
   const handleCourseClick = (course) => {
-    setSelectedCourse(course);
-    setIsDialogOpen(true);
+    navigate(`/admin/courses/${course.id}/enroll`);
   };
 
   const handleDialogClose = () => {
@@ -191,13 +195,7 @@ const CoursesGrid = () => {
         ))}
       </SimpleGrid>
 
-      {selectedCourse && (
-        <CourseDialog
-          isOpen={isDialogOpen}
-          onClose={handleDialogClose}
-          courseId={selectedCourse.id}
-        />
-      )}
+      {/* Admin edit dialog disabled in favor of navigation to enroll */}
     </Box>
   );
 };

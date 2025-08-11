@@ -1,30 +1,7 @@
-import React from 'react';
-import { Box, VStack, HStack, Text, Button, useColorModeValue, Flex } from '@chakra-ui/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, VStack, HStack, Text, useColorModeValue, Flex } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
-
-// Mock data structure for demonstration
-const mockRoadmap = [
-  {
-    id: 'intro',
-    label: 'Introduction',
-    next: ['module1'],
-  },
-  {
-    id: 'module1',
-    label: 'Module 1: Basics',
-    next: ['module2'],
-  },
-  {
-    id: 'module2',
-    label: 'Module 2: Intermediate',
-    next: ['module3'],
-  },
-  {
-    id: 'module3',
-    label: 'Module 3: Advanced',
-    next: [],
-  },
-];
+import { loadCourseById } from 'utils/courseDataLoader';
 
 const nodeStyle = (bg) => ({
   background: bg,
@@ -53,13 +30,34 @@ const CourseRoadmap = () => {
   const textColor = useColorModeValue('blue.900', 'white');
   const navigate = useNavigate();
   const { courseId } = useParams();
+  const [course, setCourse] = useState(null);
 
-  // For now, use mockRoadmap. Replace with real course/module data as needed.
-  const roadmap = mockRoadmap;
+  useEffect(() => {
+    const load = async () => {
+      const c = await loadCourseById(courseId);
+      setCourse(c || null);
+    };
+    load();
+  }, [courseId]);
 
-  const handleNodeClick = (nodeId) => {
-    // Navigate to the learn page for the course (optionally with module/topic info)
-    navigate(`/admin/courses/${courseId}/learn`);
+  const roadmap = useMemo(() => {
+    if (!course?.modules) return [];
+    // Only include modules that contain Python in title or lessons if filtering Python
+    const modules = course.modules.filter((m) =>
+      String(m.title).toLowerCase().includes('python') ||
+      (m.lessons || []).some((l) => String(l.title).toLowerCase().includes('python'))
+    );
+    const list = (modules.length ? modules : course.modules).map((m, index) => ({
+      id: m.id,
+      label: m.title,
+      index,
+    }));
+    return list;
+  }, [course]);
+
+  const handleNodeClick = (nodeId, index) => {
+    // Navigate to learn page with selected module index encoded in query string
+    navigate(`/admin/courses/${courseId}/learn?moduleIndex=${index}`);
   };
 
   return (
@@ -78,7 +76,7 @@ const CourseRoadmap = () => {
             <Box
               sx={nodeStyle(nodeBg)}
               color={textColor}
-              onClick={() => handleNodeClick(node.id)}
+              onClick={() => handleNodeClick(node.id, node.index)}
               _hover={{ background: '#b3d8fd' }}
             >
               {node.label}
