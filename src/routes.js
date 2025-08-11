@@ -22,6 +22,7 @@ import Home from "views/admin/home";
 
 import CourseDetail from "views/admin/courses/CourseDetail";
 import Courses from "views/admin/courses/Courses";
+import WebWarrior from "views/admin/courses/WebWarrior";
 import CourseEnroll from "views/admin/courses/CourseEnroll";
 import CourseLearn from "views/admin/courses/CourseLearn";
 import CourseRoadmap from "views/admin/courses/CourseRoadmap";
@@ -45,6 +46,13 @@ const routes = [
     path: "/courses",
     icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
     component: <Courses />,
+  },
+  {
+    name: "Web Warrior",
+    layout: "/admin",
+    path: "/web-warrior",
+    icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
+    component: <WebWarrior />,
   },
   {
     name: "My Learning",

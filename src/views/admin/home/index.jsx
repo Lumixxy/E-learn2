@@ -649,21 +649,24 @@ export default function Index() {
               description: "Master HTML, CSS, JavaScript, and modern frameworks to build responsive and dynamic websites.",
               courses: 8,
               duration: "6 months",
-              icon: FiCode
+              icon: FiCode,
+              path: "/admin/courses"
             },
             {
               title: "Data Sage",
               description: "Learn data analysis, visualization, machine learning, and AI to extract insights from complex datasets.",
               courses: 10,
               duration: "8 months",
-              icon: FiTrendingUp
+              icon: FiTrendingUp,
+              path: null
             },
             {
               title: "Full Stack Champion",
               description: "Become proficient in both frontend and backend technologies to build complete web applications.",
               courses: 12,
               duration: "10 months",
-              icon: FiLayers
+              icon: FiLayers,
+              path: null
             }
           ].map((path, index) => (
             <Card key={index} p="25px" variant="outline" bg="rgba(35, 41, 70, 0.6)" borderColor="rgba(63, 224, 208, 0.3)" backdropFilter="blur(10px)" animation={`${float} ${3 + index * 0.5}s ease-in-out infinite`}>
@@ -688,6 +691,9 @@ export default function Index() {
                   colorScheme="brand" 
                   rightIcon={<MdArrowForward />}
                   alignSelf="flex-start"
+                  onClick={() => path.path && navigate(path.path)}
+                  cursor={path.path ? "pointer" : "not-allowed"}
+                  opacity={path.path ? 1 : 0.6}
                 >
                   Begin Adventure
                 </Button>
