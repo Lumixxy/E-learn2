@@ -25,6 +25,7 @@ import {
   FormErrorMessage,
 } from '@chakra-ui/react';
 import { FaCheck, FaClock, FaBook, FaCertificate, FaStar, FaLock } from 'react-icons/fa';
+import { loadCourseById } from 'utils/courseDataLoader';
 
 const CourseEnroll = () => {
   const { courseId } = useParams();
@@ -49,10 +50,24 @@ const CourseEnroll = () => {
     const fetchCourseData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/data/course_enroll_data.json');
-        if (!response.ok) throw new Error('Failed to fetch course enroll data');
-        const data = await response.json();
-        setCourseData(data);
+        const course = await loadCourseById(courseId);
+        if (!course) throw new Error('Course not found');
+        // Normalize to existing shape used by the enroll page
+        setCourseData({
+          title: course.title,
+          description: course.description,
+          provider: course.instructor,
+          price: course.price || 'Free',
+          modules: course.modules?.map((m) => ({
+            title: m.title,
+            duration: m.duration || '—',
+            content: m.description || '',
+            topics: (m.lessons || []).map((l) => l.title),
+          })) || [],
+          outcomes: [],
+          certificates: [],
+        });
+        setError(null);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -60,7 +75,7 @@ const CourseEnroll = () => {
       }
     };
     fetchCourseData();
-  }, []);
+  }, [courseId]);
 
   // Color mode values
   const bgColor = useColorModeValue("gray.50", "gray.900");

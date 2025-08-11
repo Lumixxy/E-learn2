@@ -495,6 +495,7 @@ export default function Index() {
             _hover={{ bg: "#232946", borderColor: "#7F7CFF", color: "#7F7CFF" }}
             shadow="xl"
             _active={{ transform: "scale(0.95)" }}
+            onClick={() => navigate('/admin/courses')}
           >
             Explore Courses
           </Button>

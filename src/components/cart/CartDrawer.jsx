@@ -37,6 +37,7 @@ const CartDrawer = () => {
   const bgColor = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('gray.800', 'white');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const itemBgColor = useColorModeValue('gray.50', 'gray.700');
 
   const handleCheckout = () => {
     // Implement checkout logic here
@@ -72,7 +73,7 @@ const CartDrawer = () => {
                   borderWidth="1px"
                   borderRadius="lg"
                   borderColor={borderColor}
-                  bg={useColorModeValue('gray.50', 'gray.700')}
+                  bg={itemBgColor}
                 >
                   <HStack spacing={3} align="start">
                     <Image
