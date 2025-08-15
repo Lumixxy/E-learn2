@@ -22,7 +22,11 @@ import Home from "views/admin/home";
 
 import CourseDetail from "views/admin/courses/CourseDetail";
 import Courses from "views/admin/courses/Courses";
-import WebWarrior from "views/admin/courses/WebWarrior";
+import AdventurePathPage from "views/admin/courses/AdventurePathPage";
+import WebWarriorGrid from "views/admin/courses/WebWarriorGrid";
+import WebWarriorCourseDetail from "views/admin/courses/WebWarriorCourseDetail";
+import CourseAssessment from "views/admin/courses/CourseAssessment";
+import FinalAssessment from "views/admin/courses/FinalAssessment";
 import CourseEnroll from "views/admin/courses/CourseEnroll";
 import CourseLearn from "views/admin/courses/CourseLearn";
 import CourseRoadmap from "views/admin/courses/CourseRoadmap";
@@ -48,11 +52,32 @@ const routes = [
     component: <Courses />,
   },
   {
-    name: "Web Warrior",
+    name: "Adventure Path",
     layout: "/admin",
-    path: "/web-warrior",
+    path: "/adventure-path",
     icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
-    component: <WebWarrior />,
+    component: <AdventurePathPage />,
+  },
+  {
+    name: "Adventure Course Detail",
+    layout: "/admin",
+    path: "/adventure-path/courses/:courseId",
+    component: <WebWarriorCourseDetail />,
+    hidden: true,
+  },
+  {
+    name: "Adventure Course Assessment",
+    layout: "/admin",
+    path: "/adventure-path/courses/:courseId/assessment",
+    component: <CourseAssessment />,
+    hidden: true,
+  },
+  {
+    name: "Final Assessment",
+    layout: "/admin",
+    path: "/final-assessment",
+    component: <FinalAssessment />,
+    hidden: true,
   },
   {
     name: "My Learning",

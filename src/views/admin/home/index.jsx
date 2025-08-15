@@ -650,7 +650,7 @@ export default function Index() {
               courses: 8,
               duration: "6 months",
               icon: FiCode,
-              path: "/admin/courses"
+              path: "/admin/adventure-path"
             },
             {
               title: "Data Sage",
