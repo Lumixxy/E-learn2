@@ -36,6 +36,7 @@ import {
 import { MdArrowForward } from "react-icons/md";
 import { FiCode, FiTrendingUp, FiLayers } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import ApiTest from "components/ApiTest";
 
 // Gaming-themed animations
 const float = keyframes`
@@ -767,6 +768,10 @@ export default function Index() {
         </SimpleGrid>
       </Box>
 
+      {/* API Test Section - Temporary for debugging */}
+      <Box px={8} py={6}>
+        <ApiTest />
+      </Box>
 
       
     </Box>

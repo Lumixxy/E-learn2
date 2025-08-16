@@ -5,6 +5,7 @@ import AuthLayout from './layouts/auth';
 import AdminLayout from './layouts/admin';
 import RTLLayout from './layouts/rtl';
 import { XPProvider } from './contexts/XPContext';
+import { CompletedNodesProvider } from './context/CompletedNodesContext';
 import {
   ChakraProvider,
   // extendTheme
@@ -21,24 +22,26 @@ export default function Main() {
   return (
     <ChakraProvider theme={currentTheme}>
       <XPProvider>
-        <CartProvider>
-          <Routes>
-            <Route path="auth/*" element={<AuthLayout />} />
-            <Route
-              path="admin/*"
-              element={
-                <AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />
-              }
-            />
-            <Route
-              path="rtl/*"
-              element={
-                <RTLLayout theme={currentTheme} setTheme={setCurrentTheme} />
-              }
-            />
-            <Route path="/" element={<Navigate to="/admin/home" replace />} />
-          </Routes>
-        </CartProvider>
+        <CompletedNodesProvider>
+          <CartProvider>
+            <Routes>
+              <Route path="auth/*" element={<AuthLayout />} />
+              <Route
+                path="admin/*"
+                element={
+                  <AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />
+                }
+              />
+              <Route
+                path="rtl/*"
+                element={
+                  <RTLLayout theme={currentTheme} setTheme={setCurrentTheme} />
+                }
+              />
+              <Route path="/" element={<Navigate to="/admin/home" replace />} />
+            </Routes>
+          </CartProvider>
+        </CompletedNodesProvider>
       </XPProvider>
     </ChakraProvider>
   );

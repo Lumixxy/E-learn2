@@ -111,13 +111,6 @@ const routes = [
     name: "Course Roadmap",
     layout: "/admin",
     path: "/courses/:courseId/roadmap",
-    component: <CourseRoadmap />,
-    hidden: true,
-  },
-  {
-    name: "Python Roadmap",
-    layout: "/admin",
-    path: "/courses/:courseId/roadmap",
     component: <PythonRoadmap />,
     hidden: false,
   },

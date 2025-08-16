@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Box, VStack, HStack, Text, useColorModeValue, Flex } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { loadCourseById } from 'utils/courseDataLoader';
+import WebWarriorAPI from 'api/webwarrior';
 
 const nodeStyle = (bg) => ({
   background: bg,
@@ -40,23 +41,64 @@ const CourseRoadmap = () => {
     load();
   }, [courseId]);
 
-  const roadmap = useMemo(() => {
-    if (!course?.modules) return [];
-    // Only include modules that contain Python in title or lessons if filtering Python
-    const modules = course.modules.filter((m) =>
-      String(m.title).toLowerCase().includes('python') ||
-      (m.lessons || []).some((l) => String(l.title).toLowerCase().includes('python'))
-    );
-    const list = (modules.length ? modules : course.modules).map((m, index) => ({
-      id: m.id,
-      label: m.title,
-      index,
-    }));
-    return list;
-  }, [course]);
+  const [apiRoadmap, setApiRoadmap] = useState(null);
+  const [nodesFromApi, setNodesFromApi] = useState([]);
 
-  const handleNodeClick = (nodeId, index) => {
-    // Navigate to learn page with selected module index encoded in query string
+  // Load roadmap from backend API by title (course title)
+  useEffect(() => {
+    const load = async () => {
+      try {
+        if (!course?.title) return;
+        console.log('Attempting to load roadmap for course:', course.title);
+        const rm = await WebWarriorAPI.getRoadmapByTitle(course.title);
+        console.log('Roadmap loaded from API:', rm);
+        setApiRoadmap(rm);
+        const nodes = (rm?.nodes || []).map((n, idx) => ({
+          id: n.node_id,
+          label: n.label,
+          description: n.description,
+          index: idx,
+        }));
+        setNodesFromApi(nodes);
+      } catch (error) {
+        console.warn('Failed to load roadmap from API, falling back to local data:', error);
+        setApiRoadmap(null);
+        setNodesFromApi([]);
+      }
+    };
+    load();
+  }, [course?.title]);
+
+  const roadmap = useMemo(() => {
+    if (nodesFromApi.length > 0) return nodesFromApi;
+    if (!course?.modules) return [];
+    const list = course.modules.map((m, index) => ({ id: m.id, label: m.title, index }));
+    return list;
+  }, [nodesFromApi, course]);
+
+  const handleNodeClick = async (nodeId, index) => {
+    // Prefer API resources if available for this node
+    try {
+      if (apiRoadmap) {
+        const resources = await WebWarriorAPI.getNodeResources(nodeId);
+        const firstUrl = resources?.find((r) => r.url)?.url;
+        if (firstUrl) {
+          window.open(firstUrl, '_blank', 'noopener,noreferrer');
+          return;
+        }
+      }
+    } catch (_) {
+      // ignore and fallback to local logic
+    }
+
+    // Fallback to local course data links
+    const selectedModule = course?.modules?.[index];
+    const firstLessonWithLink = selectedModule?.lessons?.find((l) => l.websiteLink);
+    const targetUrl = firstLessonWithLink?.websiteLink;
+    if (targetUrl) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
     navigate(`/admin/courses/${courseId}/learn?moduleIndex=${index}`);
   };
 

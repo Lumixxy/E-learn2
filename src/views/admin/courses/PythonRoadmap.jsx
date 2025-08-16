@@ -7,6 +7,14 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
 } from 'react-flow-renderer';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@chakra-ui/react';
+import { loadCourseById } from 'utils/courseDataLoader';
+import WebWarriorAPI from 'api/webwarrior';
+import NodeQuiz from '../../../components/roadmap/NodeQuiz';
+import ResourcesList from '../../../components/roadmap/ResourcesList';
+import { useCompletedNodes } from '../../../context/CompletedNodesContext';
+import nodeQuizzes from '../../../data/nodeQuizzes';
 
 const foggyBg = {
   background: 'linear-gradient(120deg, #e0f2ff 0%, #b3c6e0 100%)',
@@ -24,11 +32,69 @@ export default function PythonRoadmap() {
   const [roadmapData, setRoadmapData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { courseId } = useParams();
+  const navigate = useNavigate();
+  const [course, setCourse] = useState(null);
+  const [apiRoadmap, setApiRoadmap] = useState(null);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const { isNodeCompleted, markNodeAsCompleted } = useCompletedNodes();
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
       try {
         setLoading(true);
+        // Load course to determine roadmap title
+        const c = await loadCourseById(courseId);
+        setCourse(c || null);
+
+        // Try API first
+        if (c?.title) {
+          try {
+            console.log('Attempting to load roadmap for course:', c.title);
+            const rm = await WebWarriorAPI.getRoadmapByTitle(c.title);
+            console.log('Roadmap loaded from API:', rm);
+            setApiRoadmap(rm);
+            // Build nodes/edges from API nodes and their dependencies
+            const apiNodes = (rm?.nodes || []).map((n) => ({
+              id: String(n.node_id),
+              type: 'default',
+              data: { label: n.label, description: n.description },
+              position: { x: n.position_x || 0, y: n.position_y || 0 },
+              style: {
+                 width: 180,
+                 height: 60,
+                 borderRadius: 8,
+                 padding: '10px',
+                 fontSize: '14px',
+                 fontWeight: 'bold',
+                 color: '#fff',
+                 textAlign: 'center',
+                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                 backgroundColor: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '#4ade80' : '#60a5fa',
+                 border: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '2px solid #16a34a' : undefined
+               }
+            }));
+            const nodeIdSet = new Set(apiNodes.map((n) => n.id));
+            const apiEdges = [];
+            (rm?.nodes || []).forEach((n) => {
+              (n.dependencies || []).forEach((dep) => {
+                if (nodeIdSet.has(String(dep))) {
+                  apiEdges.push({ id: `${dep}->${n.node_id}`, source: String(dep), target: n.node_id, animated: true });
+                }
+              });
+            });
+            setNodes(apiNodes);
+            setEdges(apiEdges);
+            if (apiNodes.length > 0) setSelectedNodeId(apiNodes[0].id);
+            setRoadmapData(null); // not using static
+            return;
+          } catch (error) {
+            console.warn('Failed to load roadmap from API, falling back to static data:', error);
+            // fall through to static
+          }
+        }
+
+        // Fallback to static JSON
         const response = await fetch('/data/python/python_roadmap.json');
         if (!response.ok) throw new Error('Failed to fetch python roadmap data');
         const data = await response.json();
@@ -40,14 +106,87 @@ export default function PythonRoadmap() {
       }
     };
     fetchRoadmapData();
-  }, []);
+  }, [courseId, setNodes, setEdges]);
+
+  // Initialize nodes/edges after static roadmap data loads
+  useEffect(() => {
+    if (!roadmapData) return;
+    
+    // Transform static nodes to have consistent styling
+    if (Array.isArray(roadmapData.nodes)) {
+      const styledNodes = roadmapData.nodes.map(node => ({
+        ...node,
+        type: node.type || 'default',
+        style: {
+          width: 180,
+          height: 60,
+          borderRadius: 8,
+          padding: '10px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          color: '#fff',
+          textAlign: 'center',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          backgroundColor: isNodeCompleted('python-roadmap', node.id.startsWith('node-') ? node.id : `node-${node.id}`) ? '#4ade80' : '#60a5fa',
+          border: isNodeCompleted('python-roadmap', node.id.startsWith('node-') ? node.id : `node-${node.id}`) ? '2px solid #16a34a' : undefined,
+          ...node.style
+        }
+      }));
+      setNodes(styledNodes);
+    }
+    
+    if (Array.isArray(roadmapData.edges)) setEdges(roadmapData.edges);
+    if (roadmapData.nodes && roadmapData.nodes.length > 0) {
+      setSelectedNodeId(roadmapData.nodes[0].id);
+    }
+  }, [roadmapData, setNodes, setEdges]);
+
+  // Load the course to resolve website links for modules/lessons
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const c = await loadCourseById(courseId);
+        setCourse(c || null);
+      } catch (_) {
+        setCourse(null);
+      }
+    };
+    load();
+  }, [courseId]);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)), [setEdges]);
 
-  // Handle node click to update selected node
-  const onNodeClick = useCallback((event, node) => {
+  // Handle node click: Show node info in right panel, with option to take quiz
+  const onNodeClick = useCallback(async (event, node) => {
     setSelectedNodeId(node.id);
-  }, []);
+    
+    // We don't automatically open the quiz anymore, just select the node
+    // This allows users to see the resources in the right panel first
+    
+    // We no longer automatically open external links
+    // Resources are displayed in the ResourcesList component in the right panel
+
+    const label = String(node?.data?.label || '').toLowerCase();
+    if (course?.modules) {
+      const matchModuleIndex = course.modules.findIndex((m) => {
+        const inModuleTitle = String(m.title).toLowerCase().includes(label);
+        const inLessons = (m.lessons || []).some((l) => String(l.title).toLowerCase().includes(label));
+        return inModuleTitle || inLessons;
+      });
+      if (matchModuleIndex >= 0) {
+        const module = course.modules[matchModuleIndex];
+        const matchingLesson = (module.lessons || []).find((l) => String(l.title).toLowerCase().includes(label));
+        const firstLessonWithLink = matchingLesson?.websiteLink ? matchingLesson : (module.lessons || []).find((l) => l.websiteLink);
+        const targetUrl = firstLessonWithLink?.websiteLink;
+        if (targetUrl) {
+          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+          return;
+        }
+        navigate(`/admin/courses/${courseId}/learn?moduleIndex=${matchModuleIndex}`);
+        return;
+      }
+    }
+  }, [course, courseId, navigate]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
 
@@ -63,13 +202,58 @@ export default function PythonRoadmap() {
     return <div>No roadmap data available.</div>;
   }
 
+  // Determine if the selected node is completed
+  const isSelectedNodeCompleted = selectedNodeId ? 
+    isNodeCompleted(
+      apiRoadmap?.id || 'python-roadmap', 
+      selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`
+    ) : false;
+    
+  // Handle quiz completion
+  const handleQuizComplete = (score, xp, passed) => {
+    if (passed && selectedNodeId) {
+      // Mark the node as completed in the CompletedNodesContext
+      const roadmapId = apiRoadmap?.id || 'python-roadmap';
+      const nodeId = selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`;
+      markNodeAsCompleted(roadmapId, nodeId);
+      
+      // Update the nodes to reflect completion status
+      setNodes(nodes => nodes.map(node => {
+        if (node.id === selectedNodeId) {
+          return {
+            ...node,
+            style: {
+              ...node.style,
+              background: '#4ade80',
+              border: '2px solid #16a34a'
+            }
+          };
+        }
+        return node;
+      }));
+    }
+    setQuizOpen(false);
+  };
+
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex' }}>
       <div style={foggyBg} />
       {/* Roadmap left */}
       <div style={{ position: 'relative', zIndex: 1, width: '60vw', height: '100vh', borderRight: '2px solid #b3c6e0', background: 'transparent' }}>
         <ReactFlow
-          nodes={nodes}
+          nodes={nodes.map(node => ({
+            ...node,
+            style: {
+              ...node.style,
+              // Add visual indicator for completed nodes
+              backgroundColor: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
+                node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
+                ? '#4ade80' : '#60a5fa',
+              border: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
+                node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
+                ? '2px solid #16a34a' : undefined
+            }
+          }))}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
@@ -85,9 +269,48 @@ export default function PythonRoadmap() {
       </div>
       {/* Content right */}
       <div style={{ width: '40vw', height: '100vh', overflowY: 'auto', background: 'rgba(255,255,255,0.85)', padding: '48px 32px', zIndex: 2 }}>
-        <h2 style={{ color: '#2563eb', fontSize: '2rem', fontWeight: 700, marginBottom: 16 }}>{selectedNode.data.label}</h2>
-        <p style={{ color: '#334155', fontSize: '1.1rem', lineHeight: 1.7 }}>{selectedNode.data.description}</p>
+        <h2 style={{ color: '#2563eb', fontSize: '2rem', fontWeight: 700, marginBottom: 16 }}>
+          {selectedNode?.data?.label}
+          {isSelectedNodeCompleted && (
+            <span style={{ marginLeft: '10px', color: '#16a34a', fontSize: '1rem' }}>✓ Completed</span>
+          )}
+        </h2>
+        <p style={{ color: '#334155', fontSize: '1.1rem', lineHeight: 1.7 }}>{selectedNode?.data?.description}</p>
+        
+        {/* Quiz button - show only if a quiz exists for this node */}
+        {selectedNodeId && nodeQuizzes[selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`] && (
+          <Button
+            onClick={() => setQuizOpen(true)}
+            colorScheme="blue"
+            size="md"
+            mt={4}
+            leftIcon={<span role="img" aria-label="quiz">📝</span>}
+          >
+            Take Quiz
+          </Button>
+        )}
+        
+        {/* Resources section - always show when a node is selected */}
+        {selectedNodeId && (
+          <div style={{ marginTop: '30px' }}>
+            <h3 style={{ color: '#2c3e50', fontSize: '1.5rem', fontWeight: '600', marginBottom: '15px' }}>
+              Resources:
+            </h3>
+            <ResourcesList nodeId={selectedNodeId} />
+          </div>
+        )}
       </div>
+      
+      {/* Node Quiz Modal */}
+      {selectedNodeId && (
+        <NodeQuiz 
+          nodeId={selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`}
+          roadmapId={apiRoadmap?.id || 'python-roadmap'}
+          isOpen={quizOpen}
+          onClose={() => setQuizOpen(false)}
+          onQuizComplete={handleQuizComplete}
+        />
+      )}
     </div>
   );
-} 
+}

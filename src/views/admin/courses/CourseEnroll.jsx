@@ -31,8 +31,6 @@ const CourseEnroll = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [isEnrolled, setIsEnrolled] = useState(false);
-  const [usn, setUsn] = useState('');
-  const [usnError, setUsnError] = useState('');
   const toast = useToast();
 
   const [courseData, setCourseData] = useState({
@@ -84,17 +82,12 @@ const CourseEnroll = () => {
   const mutedColor = useColorModeValue("gray.600", "gray.400");
 
   const handleEnroll = () => {
-    if (!usn || !/^\w{10,}$/.test(usn)) {
-      setUsnError('Please enter a valid USN (e.g., 1KG22CS030)');
-      return;
-    }
     setIsEnrolled(true);
-    setUsnError('');
     toast({
       title: "Enrollment Successful!",
-      description: `You have successfully enrolled with USN: ${usn}. You can now start learning!`,
+      description: "You can now start learning!",
       status: "success",
-      duration: 5000,
+      duration: 3000,
       isClosable: true,
       position: "top",
     });
@@ -126,7 +119,7 @@ const CourseEnroll = () => {
     <Box minH="100vh" bg={bgColor} py={8}>
       <Container maxW="container.xl">
         <VStack spacing={8} align="stretch">
-          {/* Enrollment Form */}
+          {/* Enrollment */}
           {!isEnrolled ? (
             <Card bg={cardBg} borderRadius="xl" overflow="hidden">
               <CardBody p={8}>
@@ -143,17 +136,6 @@ const CourseEnroll = () => {
                       {courseData.description}
                     </Text>
                   </Box>
-                  <FormControl isInvalid={!!usnError}>
-                    <FormLabel htmlFor="usn">Enter your USN</FormLabel>
-                    <Input
-                      id="usn"
-                      placeholder="e.g., 1KG22CS030"
-                      value={usn}
-                      onChange={e => setUsn(e.target.value)}
-                      maxW="300px"
-                    />
-                    {usnError && <FormErrorMessage>{usnError}</FormErrorMessage>}
-                  </FormControl>
                   <Button colorScheme="purple" size="lg" onClick={handleEnroll}>
                     Enroll Now - {courseData.price}
                   </Button>
@@ -166,9 +148,6 @@ const CourseEnroll = () => {
                 <VStack spacing={6} align="stretch">
                   <Text fontSize="2xl" fontWeight="bold" color={textColor}>
                     Enrollment Successful!
-                  </Text>
-                  <Text color={mutedColor}>
-                    USN: <b>{usn}</b>
                   </Text>
                   <Button colorScheme="green" size="lg" onClick={handleStartCourse}>
                     Start Course

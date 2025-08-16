@@ -8,6 +8,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'courses',
+    'roadmap',
 ]
 
 MIDDLEWARE = [
@@ -21,9 +22,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS settings
+## CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React development server
 ]
 
-CORS_ALLOW_CREDENTIALS = True 
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow roadmap_api to be accessed from the main application
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Additional CORS settings for better compatibility
+CORS_ALLOWED_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
