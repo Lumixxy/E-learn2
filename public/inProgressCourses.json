@@ -1,26 +1,42 @@
 [
   {
+    "id": "python-roadmap",
+    "title": "Python Programming",
+    "image": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=400&q=80",
+    "progress": 30,
+    "lessons": 24,
+    "lastViewed": "Today",
+    "roadmapId": "python",
+    "totalNodes": 20
+  },
+  {
     "id": "1",
     "title": "Complete Web Development Bootcamp",
     "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
     "progress": 45,
-    "lessons": 12426,
-    "lastViewed": "1 week ago"
+    "lessons": 42,
+    "lastViewed": "1 week ago",
+    "roadmapId": "web-dev",
+    "totalNodes": 30
   },
   {
     "id": "2",
     "title": "UI/UX Design Masterclass",
     "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
     "progress": 22,
-    "lessons": 542,
-    "lastViewed": "2 days ago"
+    "lessons": 36,
+    "lastViewed": "2 days ago",
+    "roadmapId": "ui-ux",
+    "totalNodes": 25
   },
   {
     "id": "3",
     "title": "Data Science and Machine Learning",
     "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
     "progress": 65,
-    "lessons": 3245,
-    "lastViewed": "Today"
+    "lessons": 48,
+    "lastViewed": "Yesterday",
+    "roadmapId": "data-science",
+    "totalNodes": 40
   }
-] 
+]

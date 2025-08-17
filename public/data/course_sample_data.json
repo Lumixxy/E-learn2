@@ -18,11 +18,11 @@
   },
   {
     "id": 2,
-    "course": "Data Structures and Algorithms",
+    "course": "Python",
     "module": "CS201",
     "topic": "Advanced Programming",
     "websiteLink": "https://example.com/cs201",
-    "description": "Master data structures and algorithms for efficient programming",
+    "description": "Master Python programming with practical examples and projects",
     "instructor": "MIT OpenCourseWare",
     "rating": 4.8,
     "totalRatings": 150,
@@ -30,7 +30,7 @@
     "lectures": 15,
     "level": "Intermediate",
     "price": "Free",
-    "imageUrl": "https://via.placeholder.com/300x200?text=CS201",
-    "tags": ["Data Structures", "Algorithms"]
+    "imageUrl": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    "tags": ["Python", "Programming"]
   }
-] 
+]

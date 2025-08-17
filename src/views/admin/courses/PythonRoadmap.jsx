@@ -47,13 +47,27 @@ export default function PythonRoadmap() {
         const c = await loadCourseById(courseId);
         setCourse(c || null);
 
-        // Try API first
-        if (c?.title) {
-          try {
-            console.log('Attempting to load roadmap for course:', c.title);
-            const rm = await WebWarriorAPI.getRoadmapByTitle(c.title);
-            console.log('Roadmap loaded from API:', rm);
+        // Always try to use the roadmap_api backend first
+        try {
+          console.log('Attempting to load roadmap from backend API');
+          // Use the roadmap_api backend URL directly
+          const response = await fetch('http://localhost:8000/api/roadmap/');
+          if (!response.ok) throw new Error('Failed to fetch roadmaps from backend API');
+          
+          const roadmaps = await response.json();
+          console.log('Roadmaps loaded from backend API:', roadmaps);
+          
+          // Use the first roadmap or find one matching the course title if available
+          let rm = roadmaps[0]; // Default to first roadmap
+          if (c?.title) {
+            const matchingRoadmap = roadmaps.find(r => r.title.toLowerCase() === c.title.toLowerCase());
+            if (matchingRoadmap) rm = matchingRoadmap;
+          }
+          
+          if (rm) {
+            console.log('Using roadmap:', rm);
             setApiRoadmap(rm);
+            
             // Build nodes/edges from API nodes and their dependencies
             const apiNodes = (rm?.nodes || []).map((n) => ({
               id: String(n.node_id),
@@ -61,19 +75,20 @@ export default function PythonRoadmap() {
               data: { label: n.label, description: n.description },
               position: { x: n.position_x || 0, y: n.position_y || 0 },
               style: {
-                 width: 180,
-                 height: 60,
-                 borderRadius: 8,
-                 padding: '10px',
-                 fontSize: '14px',
-                 fontWeight: 'bold',
-                 color: '#fff',
-                 textAlign: 'center',
-                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                 backgroundColor: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '#4ade80' : '#60a5fa',
-                 border: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '2px solid #16a34a' : undefined
-               }
+                width: 180,
+                height: 60,
+                borderRadius: 8,
+                padding: '10px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                color: '#fff',
+                textAlign: 'center',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                backgroundColor: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '#4ade80' : '#60a5fa',
+                border: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '2px solid #16a34a' : undefined
+              }
             }));
+            
             const nodeIdSet = new Set(apiNodes.map((n) => n.id));
             const apiEdges = [];
             (rm?.nodes || []).forEach((n) => {
@@ -83,14 +98,61 @@ export default function PythonRoadmap() {
                 }
               });
             });
+            
             setNodes(apiNodes);
             setEdges(apiEdges);
             if (apiNodes.length > 0) setSelectedNodeId(apiNodes[0].id);
             setRoadmapData(null); // not using static
             return;
-          } catch (error) {
-            console.warn('Failed to load roadmap from API, falling back to static data:', error);
-            // fall through to static
+          }
+        } catch (error) {
+          console.warn('Failed to load roadmap from backend API, trying WebWarriorAPI:', error);
+          
+          // Try WebWarriorAPI as fallback
+          if (c?.title) {
+            try {
+              console.log('Attempting to load roadmap for course:', c.title);
+              const rm = await WebWarriorAPI.getRoadmapByTitle(c.title);
+              console.log('Roadmap loaded from WebWarriorAPI:', rm);
+              setApiRoadmap(rm);
+              // Build nodes/edges from API nodes and their dependencies
+              const apiNodes = (rm?.nodes || []).map((n) => ({
+                id: String(n.node_id),
+                type: 'default',
+                data: { label: n.label, description: n.description },
+                position: { x: n.position_x || 0, y: n.position_y || 0 },
+                style: {
+                  width: 180,
+                  height: 60,
+                  borderRadius: 8,
+                  padding: '10px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  color: '#fff',
+                  textAlign: 'center',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  backgroundColor: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '#4ade80' : '#60a5fa',
+                  border: isNodeCompleted(rm?.id || 'python-roadmap', `node-${n.node_id}`) ? '2px solid #16a34a' : undefined
+                }
+              }));
+              const nodeIdSet = new Set(apiNodes.map((n) => n.id));
+              const apiEdges = [];
+              (rm?.nodes || []).forEach((n) => {
+                (n.dependencies || []).forEach((dep) => {
+                  if (nodeIdSet.has(String(dep))) {
+                    apiEdges.push({ id: `${dep}->${n.node_id}`, source: String(dep), target: n.node_id, animated: true });
+                  }
+                });
+              });
+              setNodes(apiNodes);
+              setEdges(apiEdges);
+              if (apiNodes.length > 0) setSelectedNodeId(apiNodes[0].id);
+              setRoadmapData(null); // not using static
+              return;
+            } catch (error) {
+              console.warn('Failed to load roadmap from WebWarriorAPI, falling back to static data:', error);
+              // fall through to static
+            }
           }
         }
 
@@ -198,7 +260,7 @@ export default function PythonRoadmap() {
     return <div>Error: {error}</div>;
   }
 
-  if (!roadmapData) {
+  if (!roadmapData && !apiRoadmap) {
     return <div>No roadmap data available.</div>;
   }
 
@@ -208,6 +270,11 @@ export default function PythonRoadmap() {
       apiRoadmap?.id || 'python-roadmap', 
       selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`
     ) : false;
+    
+  // Debug information
+  console.log('Nodes:', nodes);
+  console.log('Edges:', edges);
+  console.log('API Roadmap:', apiRoadmap);
     
   // Handle quiz completion
   const handleQuizComplete = (score, xp, passed) => {
@@ -235,72 +302,129 @@ export default function PythonRoadmap() {
     setQuizOpen(false);
   };
 
+  // If we have nodes but no roadmapData, we're using API data
+  const hasNodes = nodes && nodes.length > 0;
+
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex' }}>
-      <div style={foggyBg} />
-      {/* Roadmap left */}
-      <div style={{ position: 'relative', zIndex: 1, width: '60vw', height: '100vh', borderRight: '2px solid #b3c6e0', background: 'transparent' }}>
-        <ReactFlow
-          nodes={nodes.map(node => ({
-            ...node,
-            style: {
-              ...node.style,
-              // Add visual indicator for completed nodes
-              backgroundColor: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
-                node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
-                ? '#4ade80' : '#60a5fa',
-              border: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
-                node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
-                ? '2px solid #16a34a' : undefined
-            }
-          }))}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          fitView
-          style={{ background: 'transparent', width: '100%', height: '100%' }}
-          onNodeClick={onNodeClick}
-        >
-          <MiniMap nodeColor={() => '#60a5fa'} maskColor="#e0f2ff88" />
-          <Controls />
-          <Background color="#b3d8fd" gap={32} />
-        </ReactFlow>
-      </div>
-      {/* Content right */}
-      <div style={{ width: '40vw', height: '100vh', overflowY: 'auto', background: 'rgba(255,255,255,0.85)', padding: '48px 32px', zIndex: 2 }}>
-        <h2 style={{ color: '#2563eb', fontSize: '2rem', fontWeight: 700, marginBottom: 16 }}>
-          {selectedNode?.data?.label}
-          {isSelectedNodeCompleted && (
-            <span style={{ marginLeft: '10px', color: '#16a34a', fontSize: '1rem' }}>✓ Completed</span>
+    <>
+      <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex' }}>
+        <div style={foggyBg} />
+        {/* Roadmap left */}
+        <div style={{ position: 'relative', zIndex: 1, width: '60vw', height: '100vh', borderRight: '2px solid #b3c6e0', background: 'transparent' }}>
+          {hasNodes ? (
+            <ReactFlow
+              nodes={nodes.map(node => ({
+                ...node,
+                style: {
+                  ...node.style,
+                  // Add visual indicator for completed nodes
+                  backgroundColor: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
+                    node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
+                    ? '#4ade80' : '#60a5fa',
+                  border: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
+                    node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
+                    ? '2px solid #16a34a' : undefined
+                }
+              }))}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              fitView
+              style={{ background: 'transparent', width: '100%', height: '100%' }}
+              onNodeClick={onNodeClick}
+            >
+              <MiniMap nodeColor={() => '#60a5fa'} maskColor="#e0f2ff88" />
+              <Controls />
+              <Background color="#b3d8fd" gap={32} />
+            </ReactFlow>
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <div>No roadmap data available.</div>
+            </div>
           )}
-        </h2>
-        <p style={{ color: '#334155', fontSize: '1.1rem', lineHeight: 1.7 }}>{selectedNode?.data?.description}</p>
-        
-        {/* Quiz button - show only if a quiz exists for this node */}
-        {selectedNodeId && nodeQuizzes[selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`] && (
-          <Button
-            onClick={() => setQuizOpen(true)}
-            colorScheme="blue"
-            size="md"
-            mt={4}
-            leftIcon={<span role="img" aria-label="quiz">📝</span>}
-          >
-            Take Quiz
-          </Button>
-        )}
-        
-        {/* Resources section - always show when a node is selected */}
-        {selectedNodeId && (
-          <div style={{ marginTop: '30px' }}>
-            <h3 style={{ color: '#2c3e50', fontSize: '1.5rem', fontWeight: '600', marginBottom: '15px' }}>
-              Resources:
-            </h3>
-            <ResourcesList nodeId={selectedNodeId} />
-          </div>
-        )}
+        </div>
+        {/* Content right */}
+        <div style={{ width: '40vw', height: '100vh', overflowY: 'auto', background: 'rgba(255,255,255,0.85)', padding: '48px 32px', zIndex: 2 }}>
+          <h2 style={{ color: '#2563eb', fontSize: '2rem', fontWeight: 700, marginBottom: 16 }}>
+            {selectedNode?.data?.label}
+            {isSelectedNodeCompleted && (
+              <span style={{ marginLeft: '10px', color: '#16a34a', fontSize: '1rem' }}>✓ Completed</span>
+            )}
+          </h2>
+          <p style={{ color: '#334155', fontSize: '1.1rem', lineHeight: 1.7 }}>{selectedNode?.data?.description}</p>
+          
+          {/* Mark as Read/Take Quiz button - always show when a node is selected */}
+          {selectedNode && (
+            <div style={{ display: 'flex', marginTop: '20px' }}>
+              {!isSelectedNodeCompleted && (
+                <Button
+                  onClick={() => {
+                    const roadmapId = apiRoadmap?.id || 'python-roadmap';
+                    const nodeId = selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`;
+                    
+                    // Check if there's a quiz for this node
+                    const hasQuiz = nodeQuizzes[nodeId];
+                    
+                    if (hasQuiz) {
+                      // If there's a quiz, open it instead of marking as read directly
+                      setQuizOpen(true);
+                    } else {
+                      // If no quiz, mark as read directly
+                      markNodeAsCompleted(roadmapId, nodeId);
+                      
+                      // Update the nodes to reflect completion status
+                      setNodes(nodes => nodes.map(node => {
+                        if (node.id === selectedNodeId) {
+                          return {
+                            ...node,
+                            style: {
+                              ...node.style,
+                              backgroundColor: '#4ade80',
+                              border: '2px solid #16a34a'
+                            }
+                          };
+                        }
+                        return node;
+                      }));
+                    }
+                  }}
+                  colorScheme="green"
+                  size="md"
+                  mr={2}
+                  leftIcon={<span role="img" aria-label="mark-read">✓</span>}
+                >
+                  {nodeQuizzes[selectedNodeId?.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`] ? 'Take Quiz' : 'Mark as Read'}
+                </Button>
+              )}
+              
+              {/* Quiz button - show only if a quiz exists for this node and the node is already completed */}
+              {isSelectedNodeCompleted && nodeQuizzes[selectedNodeId?.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`] && (
+                <Button
+                  onClick={() => setQuizOpen(true)}
+                  colorScheme="blue"
+                  size="md"
+                  mt={4}
+                  leftIcon={<span role="img" aria-label="quiz">📝</span>}
+                >
+                  Retake Quiz
+                </Button>
+              )}
+            </div>
+          )}
+          
+          {/* Resources section - always show when a node is selected */}
+          {selectedNodeId && (
+            <div style={{ marginTop: '30px' }}>
+              <h3 style={{ color: '#2c3e50', fontSize: '1.5rem', fontWeight: '600', marginBottom: '15px' }}>
+                Resources:
+              </h3>
+              <ResourcesList nodeId={selectedNodeId} />
+            </div>
+          )}
+        </div>
       </div>
-      
+
       {/* Node Quiz Modal */}
       {selectedNodeId && (
         <NodeQuiz 
@@ -311,6 +435,6 @@ export default function PythonRoadmap() {
           onQuizComplete={handleQuizComplete}
         />
       )}
-    </div>
+    </>
   );
 }

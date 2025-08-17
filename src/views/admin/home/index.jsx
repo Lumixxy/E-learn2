@@ -541,6 +541,7 @@ export default function Index() {
             shadow="xl"
             leftIcon={<Icon as={Gamepad2} />}
             _active={{ transform: "scale(0.95)" }}
+            onClick={() => navigate('/admin/courses/python-roadmap')}
           >
             Resume Learning
           </Button>

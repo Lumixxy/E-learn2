@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Box, Text, Image, Progress, Button, useColorModeValue, SimpleGrid, Spinner, Center } from "@chakra-ui/react";
 import Card from "../card/Card";
 import { Link } from "react-router-dom";
+import { useCompletedNodes } from "../../context/CompletedNodesContext";
 
 const InProgressCoursesCard = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { completedNodes, getRoadmapCompletionPercentage } = useCompletedNodes();
 
   const textColor = useColorModeValue("gray.700", "white");
   const textColorSecondary = useColorModeValue("gray.500", "whiteAlpha.700");
@@ -28,7 +30,22 @@ const InProgressCoursesCard = () => {
         }
         
         const data = await response.json();
-        setCourses(data);
+        
+        // Update courses with dynamic progress from CompletedNodesContext
+        const updatedCourses = data.map(course => {
+          // If the course has a roadmapId, use the completion percentage from context
+          if (course.roadmapId) {
+            const totalNodes = course.totalNodes || 20; // Fallback to 20 if not specified
+            const progress = getRoadmapCompletionPercentage(course.roadmapId, totalNodes);
+            return {
+              ...course,
+              progress: progress
+            };
+          }
+          return course;
+        });
+        
+        setCourses(updatedCourses);
       } catch (err) {
         console.error('Error fetching courses data:', err);
         setError(err.message);
@@ -38,7 +55,7 @@ const InProgressCoursesCard = () => {
     };
 
     fetchCoursesData();
-  }, []);
+  }, [completedNodes, getRoadmapCompletionPercentage]);
 
   if (loading) {
     return (
@@ -108,7 +125,7 @@ const InProgressCoursesCard = () => {
                 borderRadius="full"
               />
               <Text fontSize="sm" color={textColorTertiary} mb={4}>
-                {course.lessons} lessons
+                {course.progress}% completed • {course.lessons} lessons
               </Text>
               <Link to={`/admin/courses/${course.id}`}>
                 <Button
@@ -131,4 +148,4 @@ const InProgressCoursesCard = () => {
   );
 };
 
-export default InProgressCoursesCard; 
+export default InProgressCoursesCard;

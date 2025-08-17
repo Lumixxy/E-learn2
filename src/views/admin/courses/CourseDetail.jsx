@@ -316,7 +316,7 @@ export default function CourseDetail() {
 
               {/* Lessons List */}
               <VStack spacing={3} align="stretch">
-                {currentModule.lessons.map((lesson) => (
+                {currentModule.lessons && currentModule.lessons.map((lesson) => (
                   <Card 
                     key={lesson.id}
                     bg={cardBg}
@@ -424,4 +424,4 @@ export default function CourseDetail() {
       </Box>
     </Box>
   );
-} 
+}

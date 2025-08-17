@@ -30,6 +30,7 @@ import { GiAchievement } from 'react-icons/gi';
 import { FiZap } from "react-icons/fi";
 import routes from 'routes';
 import CartIcon from '../cart/CartIcon';
+import { useXP } from 'contexts/XPContext';
 
 
 
@@ -48,11 +49,11 @@ export default function HeaderLinks(props) {
     '14px 17px 40px 4px rgba(112, 144, 176, 0.06)',
   );
 
-  // Hardcoded values for demonstration
-  const currentXP = 200;
+  // Get XP from XPContext
+  const { totalXP } = useXP();
   const maxXP = 1500;
-  const xpPercentage = (currentXP / maxXP) * 100;
-  const xpNeededToLevelUp = maxXP - currentXP;
+  const xpPercentage = (totalXP / maxXP) * 100;
+  const xpNeededToLevelUp = maxXP - totalXP;
   const dayStreak = 7; // Hardcoded Day Streak value
 
   const progressGradient = `linear-gradient(to right, ${useColorModeValue("brand.500", "brand.400")}, ${useColorModeValue("blue.500", "blue.300")})`;
@@ -109,7 +110,7 @@ export default function HeaderLinks(props) {
           >
             <Icon as={GiAchievement} color={ethColor} w='18px' h='18px' me='4px' />
             <Text fontSize="sm" color={textColor} whiteSpace="nowrap">
-              {currentXP}/{maxXP}
+              {totalXP}/{maxXP}
             </Text>
             <Box w='100px' ml="8px">
               <Progress
