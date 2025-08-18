@@ -39,7 +39,9 @@ const AdventurePathPage = () => {
             </Button>
           )}
         </Box>
+        {/* Temporarily hidden Adventure Path cards
         <WebWarriorGrid />
+        */}
       </VStack>
     </Box>
   );

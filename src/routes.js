@@ -51,13 +51,14 @@ const routes = [
     icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
     component: <Courses />,
   },
-  {
-    name: "Adventure Path",
-    layout: "/admin",
-    path: "/adventure-path",
-    icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
-    component: <AdventurePathPage />,
-  },
+  // Temporarily hidden Adventure Path
+  // {
+  //   name: "Adventure Path",
+  //   layout: "/admin",
+  //   path: "/adventure-path",
+  //   icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
+  //   component: <AdventurePathPage />,
+  // },
   {
     name: "Adventure Course Detail",
     layout: "/admin",

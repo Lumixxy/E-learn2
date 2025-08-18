@@ -455,11 +455,11 @@ export default function Index() {
             <Icon as={Users} color={accentColor} boxSize={6} />
             <Text fontSize="md" color={featureTextColor}>5K+ Learners</Text>
           </HStack>
-          <HStack spacing={2} animation={`${float} 2s ease-in-out infinite`} animationDelay="0.5s">
+          <HStack spacing={2} animation={`${float} 2s ease-in-out infinite`} style={{ animationDelay: "0.5s" }}>
             <Icon as={Trophy} color={trophyColor} boxSize={6} />
             <Text fontSize="md" color={featureTextColor}>500+ Courses</Text>
           </HStack>
-          <HStack spacing={2} animation={`${float} 2s ease-in-out infinite`} animationDelay="1s">
+          <HStack spacing={2} animation={`${float} 2s ease-in-out infinite`} style={{ animationDelay: "1s" }}>
             <Icon as={Zap} color={zapColor} boxSize={6} />
             <Text fontSize="md" color={featureTextColor}>Gamified Learning</Text>
           </HStack>
@@ -634,7 +634,8 @@ export default function Index() {
         </Grid>
       </Box>
 
-      {/* Learning Paths Section with gaming theme */}
+      {/* Temporarily hidden Adventure Paths Section with gaming theme */}
+      {/* 
       <Card mb="20px" p="30px" bg="rgba(24, 28, 47, 0.8)" border="2px solid" borderColor="rgba(63, 224, 208, 0.2)" backdropFilter="blur(10px)">
         <Flex justify="space-between" align="center" mb="30px">
           <Heading as="h2" size="lg" color={textColor}>
@@ -704,6 +705,7 @@ export default function Index() {
           ))}
         </SimpleGrid>
       </Card>
+      */}
 
       {/* Latest Achievements Section with gaming theme */}
       <Box px={8} py={12}>

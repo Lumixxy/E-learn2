@@ -547,7 +547,8 @@ const Leaderboard = () => {
                 _hover={{
                   boxShadow: "lg",
                   transform: "translateY(-2px)",
-                  transition: "all 0.2s ease-in-out",
+                  transitionProperty: "all",
+                  transitionDuration: "0.2s"
                 }}
               >
                 <HStack spacing={4}>
