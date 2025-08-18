@@ -16,6 +16,10 @@ import { CartProvider } from './contexts/CartContext';
 
 // Chakra imports
 
+
+
+
+//imports done
 export default function Main() {
   // eslint-disable-next-line
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
