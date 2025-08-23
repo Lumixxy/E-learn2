@@ -23,15 +23,18 @@ import {
   FormControl,
   FormLabel,
   FormErrorMessage,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { FaCheck, FaClock, FaBook, FaCertificate, FaStar, FaLock } from 'react-icons/fa';
+import { FaCheck, FaClock, FaBook, FaCertificate, FaStar, FaLock, FaGraduationCap } from 'react-icons/fa';
 import { loadCourseById } from 'utils/courseDataLoader';
+import FinalAssignment from '../../../components/roadmap/FinalAssignment';
 
 const CourseEnroll = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [isEnrolled, setIsEnrolled] = useState(false);
   const toast = useToast();
+  const [showFinalAssignment, setShowFinalAssignment] = useState(false);
 
   const [courseData, setCourseData] = useState({
     title: '',
@@ -118,6 +121,15 @@ const CourseEnroll = () => {
   return (
     <Box minH="100vh" bg={bgColor} py={8}>
       <Container maxW="container.xl">
+        {/* Final Assignment Modal */}
+        {showFinalAssignment && (
+          <FinalAssignment 
+            isOpen={showFinalAssignment} 
+            onClose={() => setShowFinalAssignment(false)} 
+            roadmapId="python" 
+            courseId={courseId} 
+          />
+        )}
         <VStack spacing={8} align="stretch">
           {/* Enrollment */}
           {!isEnrolled ? (
@@ -210,6 +222,40 @@ const CourseEnroll = () => {
                 </Box>
 
                 <Divider />
+                
+                <Box>
+                  <Text fontSize="2xl" fontWeight="bold" color={textColor} mb={4}>
+                    Final Project
+                  </Text>
+                  <Card variant="outline" borderColor="purple.200" bg="purple.50" mb={6}>
+                    <CardBody>
+                      <HStack spacing={4}>
+                        <Icon as={FaGraduationCap} w={8} h={8} color="purple.500" />
+                        <Box>
+                          <Text fontWeight="bold" color="purple.700">
+                            Comprehensive Final Project
+                          </Text>
+                          <Text color={mutedColor}>
+                            Complete this final project to demonstrate your mastery of all course concepts. 
+                            Your project will be evaluated by your peers, and you'll need to pass at least 
+                            two peer evaluations to earn your certificate.
+                          </Text>
+                          <Button 
+                            colorScheme="purple" 
+                            size="sm" 
+                            mt={3} 
+                            onClick={() => setShowFinalAssignment(true)}
+                            isDisabled={!isEnrolled}
+                          >
+                            Start Final Project
+                          </Button>
+                        </Box>
+                      </HStack>
+                    </CardBody>
+                  </Card>
+                </Box>
+
+                <Divider />
 
                 <Box>
                   <Text fontSize="2xl" fontWeight="bold" color={textColor} mb={4}>
@@ -233,6 +279,21 @@ const CourseEnroll = () => {
                         </CardBody>
                       </Card>
                     ))}
+                    <Card variant="outline" borderColor="purple.200" bg="purple.50">
+                      <CardBody>
+                        <HStack spacing={4}>
+                          <Icon as={FaCertificate} w={8} h={8} color="purple.500" />
+                          <Box>
+                            <Text fontWeight="bold" color="purple.700">
+                              PyGenicArc Certificate
+                            </Text>
+                            <Text color={mutedColor}>
+                              Earn an industry-recognized certificate upon completion of all assignments with a minimum of 85% score.
+                            </Text>
+                          </Box>
+                        </HStack>
+                      </CardBody>
+                    </Card>
                   </VStack>
                 </Box>
               </VStack>
@@ -244,4 +305,4 @@ const CourseEnroll = () => {
   );
 };
 
-export default CourseEnroll; 
+export default CourseEnroll;

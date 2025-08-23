@@ -15,8 +15,8 @@ const ResourcesList = ({ nodeId }) => {
         
         // MIT OCW based resources mapped to node IDs
         const mitResourcesMap = {
-          // Introduction to Computer Science
-          'intro': [
+          // Node IDs from roadmap.json
+          '1': [
             {
               title: 'MIT Lecture 1: What is Computation?',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-1-what-is-computation/',
@@ -36,23 +36,24 @@ const ResourcesList = ({ nodeId }) => {
               source: 'MIT OCW'
             }
           ],
-          // Python Basics
-          'Python Basics': [
+          // Python Basics (node-1) - already defined above
+          // Data Structures (node-2)
+          '2': [
             {
-              title: 'MIT Lecture 1: What is Computation?',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-1-what-is-computation/',
+              title: 'MIT Lecture 5: Tuples, Lists, Aliasing, Mutability, and Cloning',
+              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-5-tuples-lists-aliasing-mutability-and-cloning/',
               type: 'video',
               source: 'MIT OCW'
             },
             {
-              title: 'Python Official Documentation',
-              url: 'https://docs.python.org/3/',
+              title: 'Python Data Structures Documentation',
+              url: 'https://docs.python.org/3/tutorial/datastructures.html',
               type: 'docs',
               source: 'Python.org'
             },
             {
-              title: 'MIT Problem Set 0',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps0/',
+              title: 'MIT Problem Set 4',
+              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps4/',
               type: 'assignment',
               source: 'MIT OCW'
             }
@@ -267,8 +268,8 @@ const ResourcesList = ({ nodeId }) => {
               source: 'MIT OCW'
             }
           ],
-          // Algorithms
-          'Algorithms': [
+          // Algorithms (node-3)
+          '3': [
             {
               title: 'MIT Lecture 12: Searching and Sorting Algorithms',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-12-searching-and-sorting-algorithms/',
@@ -288,8 +289,8 @@ const ResourcesList = ({ nodeId }) => {
               source: 'MIT OCW'
             }
           ],
-          // OOP & Advanced Topics
-          'OOP & Advanced Topics': [
+          // OOP & Advanced Topics (node-4)
+          '4': [
             {
               title: 'MIT Lecture 9: Python Classes and Inheritance',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-9-python-classes-and-inheritance/',
@@ -309,8 +310,8 @@ const ResourcesList = ({ nodeId }) => {
               source: 'MIT OCW'
             }
           ],
-          // Package Management
-          'Package Management': [
+          // Package Managers (node-7)
+          '7': [
             {
               title: 'Python Packaging User Guide',
               url: 'https://packaging.python.org/en/latest/',
@@ -330,8 +331,52 @@ const ResourcesList = ({ nodeId }) => {
               source: 'PyPI'
             }
           ],
-          // Frameworks
-          'Frameworks': [
+          // Version Control (node-5)
+          '5': [
+            {
+              title: 'MIT Missing Semester: Version Control (Git)',
+              url: 'https://missing.csail.mit.edu/2020/version-control/',
+              type: 'lecture',
+              source: 'MIT'
+            },
+            {
+              title: 'Git and GitHub for Python Developers',
+              url: 'https://ocw.mit.edu/courses/res-str-001-geographic-information-system-gis-tutorial-january-iap-2016/pages/part-1-introduction/git-and-github/',
+              type: 'tutorial',
+              source: 'MIT OCW'
+            },
+            {
+              title: 'Git Basics Exercise',
+              url: 'https://missing.csail.mit.edu/2020/version-control/#exercises',
+              type: 'assignment',
+              source: 'MIT'
+            }
+          ],
+          
+          // Repo Hosting (node-6)
+          '6': [
+            {
+              title: 'GitHub for MIT Projects',
+              url: 'https://libguides.mit.edu/c.php?g=176372&p=1159529',
+              type: 'guide',
+              source: 'MIT'
+            },
+            {
+              title: 'MIT Open Source Projects on GitHub',
+              url: 'https://github.com/mit',
+              type: 'resource',
+              source: 'GitHub'
+            },
+            {
+              title: 'Collaborative Development with GitHub',
+              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/pages/syllabus/',
+              type: 'guide',
+              source: 'MIT OCW'
+            }
+          ],
+          
+          // Frameworks (node-8)
+          '8': [
             {
               title: 'MIT Web Development with Python',
               url: 'https://ocw.mit.edu/courses/6-148-web-programming-competition-january-iap-2011/',
@@ -351,8 +396,8 @@ const ResourcesList = ({ nodeId }) => {
               source: 'Pallets Projects'
             }
           ],
-          // Testing
-          'Testing': [
+          // Testing (node-9)
+          '9': [
             {
               title: 'MIT Lecture 7: Testing, Debugging, Exceptions, and Assertions',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-7-testing-debugging-exceptions-and-assertions/',
@@ -377,22 +422,22 @@ const ResourcesList = ({ nodeId }) => {
         // Default resources if no specific MIT resources are found for the node
         const defaultResources = [
           {
+            title: 'MIT Introduction to Computer Science and Programming in Python',
+            url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/',
+            type: 'Course',
+            source: 'MIT OCW'
+          },
+          {
             title: 'Python Official Documentation',
             url: 'https://docs.python.org/3/',
             type: 'Documentation',
             source: 'Python.org'
           },
           {
-            title: 'W3Schools Python Tutorial',
-            url: 'https://www.w3schools.com/python/',
-            type: 'Tutorial',
-            source: 'W3Schools'
-          },
-          {
-            title: 'Real Python Tutorials',
-            url: 'https://realpython.com/',
-            type: 'Tutorial',
-            source: 'Real Python'
+            title: 'MIT Python Lectures',
+            url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/video_galleries/lecture-videos/',
+            type: 'Video',
+            source: 'MIT OCW'
           }
         ];
         

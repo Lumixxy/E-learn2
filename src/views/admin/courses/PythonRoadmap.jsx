@@ -8,7 +8,7 @@ import ReactFlow, {
   addEdge,
 } from 'react-flow-renderer';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, useToast } from '@chakra-ui/react';
+import { Button, useToast, Box, Text, Badge, Flex, Icon } from '@chakra-ui/react';
 import { loadCourseById } from 'utils/courseDataLoader';
 import WebWarriorAPI from 'api/webwarrior';
 import NodeQuiz from '../../../components/roadmap/NodeQuiz';
@@ -16,6 +16,7 @@ import NodeAssignment from '../../../components/roadmap/NodeAssignment';
 import ResourcesList from '../../../components/roadmap/ResourcesList';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
 import nodeQuizzes from '../../../data/nodeQuizzes';
+import { FaCertificate, FaLock, FaUnlock, FaCheck } from 'react-icons/fa';
 
 const foggyBg = {
   background: 'linear-gradient(120deg, #e0f2ff 0%, #b3c6e0 100%)',
@@ -41,6 +42,7 @@ export default function PythonRoadmap() {
   const [assignmentOpen, setAssignmentOpen] = useState(false);
   const [completedAssignments, setCompletedAssignments] = useState({});
   const [assignmentScores, setAssignmentScores] = useState({});
+  const [certificateEligible, setCertificateEligible] = useState(false);
   const toast = useToast();
   const { isNodeCompleted, markNodeAsCompleted } = useCompletedNodes();
 
@@ -293,7 +295,7 @@ export default function PythonRoadmap() {
   };
 
   // Handle assignment completion
-  const handleAssignmentComplete = (score) => {
+  const handleAssignmentComplete = (score, passed) => {
     if (selectedNodeId) {
       // Store the assignment score
       setAssignmentScores(prev => ({
@@ -301,38 +303,66 @@ export default function PythonRoadmap() {
         [selectedNodeId]: score
       }));
       
-      setCompletedAssignments(prev => ({
-        ...prev,
-        [selectedNodeId]: true
-      }));
+      // Only mark as completed if passed
+      if (passed) {
+        setCompletedAssignments(prev => ({
+          ...prev,
+          [selectedNodeId]: true
+        }));
 
-      // Mark the node as completed in the CompletedNodesContext
-      const roadmapId = apiRoadmap?.id || 'python-roadmap';
-      const nodeId = selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`;
-      markNodeAsCompleted(roadmapId, nodeId);
-      
-      // Update the nodes to reflect completion status
-      setNodes(nodes => nodes.map(node => {
-        if (node.id === selectedNodeId) {
-          return {
-            ...node,
-            style: {
-              ...node.style,
-              background: '#4ade80',
-              border: '2px solid #16a34a'
-            }
-          };
+        // Mark the node as completed in the CompletedNodesContext
+        const roadmapId = apiRoadmap?.id || 'python-roadmap';
+        const nodeId = selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`;
+        markNodeAsCompleted(roadmapId, nodeId);
+        
+        // Update the nodes to reflect completion status
+        setNodes(nodes => nodes.map(node => {
+          if (node.id === selectedNodeId) {
+            return {
+              ...node,
+              style: {
+                ...node.style,
+                background: '#4ade80',
+                border: '2px solid #16a34a'
+              }
+            };
+          }
+          return node;
+        }));
+        
+        toast({
+          title: "Assignment completed",
+          description: `You scored ${score}% on this assignment.`,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Check if all nodes are completed to enable certificate
+        const allNodesCompleted = nodes.every(node => {
+          const nodeId = node.id.startsWith('node-') ? node.id : `node-${node.id}`;
+          return isNodeCompleted(apiRoadmap?.id || 'python-roadmap', nodeId);
+        });
+        
+        if (allNodesCompleted) {
+          setCertificateEligible(true);
+          toast({
+            title: "Congratulations!",
+            description: "You've completed all assignments! You are now eligible for a certificate.",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
         }
-        return node;
-      }));
-      
-      toast({
-        title: "Assignment completed",
-        description: `You scored ${score}% on this assignment.`,
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+      } else {
+        toast({
+          title: "Assignment not passed",
+          description: `You scored ${score}%. You need at least 85% to pass this assignment.`,
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     }
     setAssignmentOpen(false);
   };
@@ -389,6 +419,47 @@ export default function PythonRoadmap() {
           </h2>
           <p style={{ color: '#334155', fontSize: '1.1rem', lineHeight: 1.7 }}>{selectedNode?.data?.description}</p>
           
+          {/* Certificate Status */}
+          <Box 
+            mt={6} 
+            p={4} 
+            borderRadius="md" 
+            bg={certificateEligible ? "green.50" : "gray.50"}
+            border="1px solid"
+            borderColor={certificateEligible ? "green.200" : "gray.200"}
+          >
+            <Flex align="center" justify="space-between">
+              <Flex align="center">
+                <Icon 
+                  as={certificateEligible ? FaUnlock : FaLock} 
+                  color={certificateEligible ? "green.500" : "gray.500"} 
+                  mr={3} 
+                  boxSize={5}
+                />
+                <Box>
+                  <Text fontWeight="bold" color={certificateEligible ? "green.700" : "gray.700"}>
+                    Certificate Status
+                  </Text>
+                  <Text fontSize="sm" color={certificateEligible ? "green.600" : "gray.600"}>
+                    {certificateEligible 
+                      ? "You are eligible to receive a certificate!" 
+                      : "Complete all assignments with at least 85% to earn your certificate"}
+                  </Text>
+                </Box>
+              </Flex>
+              {certificateEligible && (
+                <Button 
+                  colorScheme="green" 
+                  size="sm"
+                  leftIcon={<Icon as={FaCertificate} />}
+                  onClick={() => navigate(`/admin/courses/${courseId}/certificate`)}
+                >
+                  View Certificate
+                </Button>
+              )}
+            </Flex>
+          </Box>
+          
           {/* Mark as Read/Take Quiz button - always show when a node is selected */}
           {selectedNode && (
             <div style={{ display: 'flex', marginTop: '20px' }}>
@@ -439,12 +510,22 @@ export default function PythonRoadmap() {
                   onClick={() => setQuizOpen(true)}
                   colorScheme="blue"
                   size="md"
-                  mt={4}
+                  mr={2}
                   leftIcon={<span role="img" aria-label="quiz">📝</span>}
                 >
                   Retake Quiz
                 </Button>
               )}
+              
+              {/* Assignment button - always show when a node is selected */}
+              <Button
+                onClick={() => setAssignmentOpen(true)}
+                colorScheme="purple"
+                size="md"
+                leftIcon={<span role="img" aria-label="assignment">📋</span>}
+              >
+                {completedAssignments[selectedNodeId] ? 'Review Assignment' : 'Start Assignment'}
+              </Button>
             </div>
           )}
           
@@ -468,6 +549,17 @@ export default function PythonRoadmap() {
           isOpen={quizOpen}
           onClose={() => setQuizOpen(false)}
           onQuizComplete={handleQuizComplete}
+        />
+      )}
+      
+      {/* Node Assignment Modal */}
+      {selectedNodeId && (
+        <NodeAssignment
+          nodeId={selectedNodeId}
+          nodeName={selectedNode?.data?.label}
+          isOpen={assignmentOpen}
+          onClose={() => setAssignmentOpen(false)}
+          onAssignmentComplete={handleAssignmentComplete}
         />
       )}
     </>

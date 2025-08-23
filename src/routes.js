@@ -31,6 +31,7 @@ import CourseEnroll from "views/admin/courses/CourseEnroll";
 import CourseLearn from "views/admin/courses/CourseLearn";
 import CourseRoadmap from "views/admin/courses/CourseRoadmap";
 import PythonRoadmap from "views/admin/courses/PythonRoadmap";
+import Certificate from "views/admin/courses/Certificate";
 import CourseImport from "views/admin/courses/CourseImport";
 
 
@@ -114,6 +115,13 @@ const routes = [
     path: "/courses/:courseId/roadmap",
     component: <PythonRoadmap />,
     hidden: false,
+  },
+  {
+    name: "Course Certificate",
+    layout: "/admin",
+    path: "/courses/:courseId/certificate",
+    component: <Certificate />,
+    hidden: true,
   },
 
   {

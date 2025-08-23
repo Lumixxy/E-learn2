@@ -1,0 +1,222 @@
+import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  Image,
+  Button,
+  useToast,
+  VStack,
+  HStack,
+  Divider,
+  Badge,
+  Icon,
+} from '@chakra-ui/react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FaDownload, FaShare, FaLinkedin, FaTwitter, FaCertificate } from 'react-icons/fa';
+import { loadCourseById } from 'utils/courseDataLoader';
+import { useCompletedNodes } from '../../../context/CompletedNodesContext';
+
+const Certificate = () => {
+  const { courseId } = useParams();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('John Doe'); // In a real app, get from user profile
+  const [issueDate, setIssueDate] = useState(new Date().toLocaleDateString());
+  const { getCompletedNodeIds } = useCompletedNodes();
+  
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        const courseData = await loadCourseById(courseId);
+        setCourse(courseData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading course:', error);
+        toast({
+          title: 'Error loading course',
+          description: 'Could not load the course data.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        setLoading(false);
+      }
+    };
+
+    fetchCourseData();
+  }, [courseId, toast]);
+
+  const handleDownload = () => {
+    toast({
+      title: 'Certificate Downloaded',
+      description: 'Your certificate has been downloaded successfully.',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  const handleShare = (platform) => {
+    toast({
+      title: `Shared on ${platform}`,
+      description: `Your certificate has been shared on ${platform}.`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" h="100vh">
+        <Text>Loading certificate...</Text>
+      </Flex>
+    );
+  }
+
+  if (!course) {
+    return (
+      <Flex justify="center" align="center" h="100vh">
+        <Text>Course not found</Text>
+      </Flex>
+    );
+  }
+
+  // Check if all nodes are completed
+  const roadmapId = 'python-roadmap'; // This should be dynamic in a real app
+  const completedNodeIds = getCompletedNodeIds(roadmapId) || [];
+  
+  return (
+    <Box p={8} maxW="1200px" mx="auto">
+      <Button 
+        mb={6} 
+        leftIcon={<Icon as={FaShare} />} 
+        onClick={() => navigate(`/admin/courses/${courseId}/roadmap`)}
+        colorScheme="blue"
+        variant="outline"
+      >
+        Back to Roadmap
+      </Button>
+
+      {/* Certificate Container */}
+      <Box 
+        border="2px solid" 
+        borderColor="gold" 
+        borderRadius="md" 
+        p={8} 
+        bg="white" 
+        boxShadow="xl"
+        position="relative"
+        overflow="hidden"
+        mb={8}
+      >
+        {/* Certificate Background Pattern */}
+        <Box 
+          position="absolute" 
+          top={0} 
+          left={0} 
+          right={0} 
+          bottom={0} 
+          opacity={0.05} 
+          zIndex={0}
+          bgImage="url('https://i.imgur.com/7rVzuvu.png')"
+          bgSize="cover"
+        />
+
+        {/* Certificate Content */}
+        <VStack spacing={6} position="relative" zIndex={1}>
+          <Flex justify="center" align="center" w="full">
+            <Icon as={FaCertificate} color="gold" boxSize={16} mr={4} />
+            <Heading as="h1" size="xl" color="purple.700" fontFamily="serif">
+              Certificate of Completion
+            </Heading>
+          </Flex>
+
+          <Text fontSize="lg" fontStyle="italic" color="gray.600">
+            This is to certify that
+          </Text>
+
+          <Heading as="h2" size="lg" color="purple.800" fontFamily="serif" borderBottom="2px solid" borderColor="purple.200" pb={2}>
+            {userName}
+          </Heading>
+
+          <Text fontSize="lg" textAlign="center" maxW="600px">
+            has successfully completed the course
+          </Text>
+
+          <Heading as="h3" size="lg" color="purple.700" fontFamily="serif">
+            {course.title}
+          </Heading>
+
+          <Text fontSize="md" textAlign="center" maxW="700px">
+            demonstrating proficiency in all required skills and knowledge areas
+            with a minimum passing grade of 85% on all assignments.
+          </Text>
+
+          <Divider borderColor="purple.200" />
+
+          <Flex justify="space-between" w="full" pt={4}>
+            <VStack align="flex-start">
+              <Text fontWeight="bold">Issue Date:</Text>
+              <Text>{issueDate}</Text>
+            </VStack>
+
+            <VStack align="flex-end">
+              <Text fontWeight="bold">Provider:</Text>
+              <Flex align="center">
+                <Text mr={2}>PyGenicArc</Text>
+                <Badge colorScheme="purple" p={1}>Verified</Badge>
+              </Flex>
+            </VStack>
+          </Flex>
+
+          <Text fontSize="sm" color="gray.500" mt={4}>
+            Certificate ID: PGA-{courseId}-{Date.now().toString().slice(-8)}
+          </Text>
+        </VStack>
+      </Box>
+
+      {/* Action Buttons */}
+      <HStack spacing={4} justify="center" mb={8}>
+        <Button leftIcon={<FaDownload />} colorScheme="green" onClick={handleDownload}>
+          Download Certificate
+        </Button>
+        <Button leftIcon={<FaLinkedin />} colorScheme="blue" onClick={() => handleShare('LinkedIn')}>
+          Share on LinkedIn
+        </Button>
+        <Button leftIcon={<FaTwitter />} colorScheme="twitter" onClick={() => handleShare('Twitter')}>
+          Share on Twitter
+        </Button>
+      </HStack>
+
+      {/* Course Details */}
+      <Box bg="gray.50" p={6} borderRadius="md" boxShadow="md">
+        <Heading as="h3" size="md" mb={4}>Course Details</Heading>
+        <VStack align="stretch" spacing={3}>
+          <Flex>
+            <Text fontWeight="bold" w="200px">Course:</Text>
+            <Text>{course.title}</Text>
+          </Flex>
+          <Flex>
+            <Text fontWeight="bold" w="200px">Provider:</Text>
+            <Text>PyGenicArc</Text>
+          </Flex>
+          <Flex>
+            <Text fontWeight="bold" w="200px">Completion Date:</Text>
+            <Text>{issueDate}</Text>
+          </Flex>
+          <Flex>
+            <Text fontWeight="bold" w="200px">Skills Acquired:</Text>
+            <Text>{course.outcomes?.join(', ') || 'Python Programming, Data Structures, Algorithms'}</Text>
+          </Flex>
+        </VStack>
+      </Box>
+    </Box>
+  );
+};
+
+export default Certificate;

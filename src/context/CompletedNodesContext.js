@@ -63,6 +63,11 @@ export const CompletedNodesProvider = ({ children }) => {
     return Math.round((completed / totalNodes) * 100);
   };
 
+  // Get all completed node IDs for a roadmap
+  const getCompletedNodeIds = (roadmapId) => {
+    return completedNodes[roadmapId] || [];
+  };
+
   return (
     <CompletedNodesContext.Provider
       value={{
@@ -70,7 +75,8 @@ export const CompletedNodesProvider = ({ children }) => {
         markNodeAsCompleted,
         isNodeCompleted,
         getCompletedNodesForRoadmap,
-        getRoadmapCompletionPercentage
+        getRoadmapCompletionPercentage,
+        getCompletedNodeIds
       }}
     >
       {children}
