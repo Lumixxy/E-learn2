@@ -8,10 +8,11 @@ import ReactFlow, {
   addEdge,
 } from 'react-flow-renderer';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@chakra-ui/react';
+import { Button, useToast } from '@chakra-ui/react';
 import { loadCourseById } from 'utils/courseDataLoader';
 import WebWarriorAPI from 'api/webwarrior';
 import NodeQuiz from '../../../components/roadmap/NodeQuiz';
+import NodeAssignment from '../../../components/roadmap/NodeAssignment';
 import ResourcesList from '../../../components/roadmap/ResourcesList';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
 import nodeQuizzes from '../../../data/nodeQuizzes';
@@ -37,6 +38,10 @@ export default function PythonRoadmap() {
   const [course, setCourse] = useState(null);
   const [apiRoadmap, setApiRoadmap] = useState(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [assignmentOpen, setAssignmentOpen] = useState(false);
+  const [completedAssignments, setCompletedAssignments] = useState({});
+  const [assignmentScores, setAssignmentScores] = useState({});
+  const toast = useToast();
   const { isNodeCompleted, markNodeAsCompleted } = useCompletedNodes();
 
   useEffect(() => {
@@ -279,6 +284,28 @@ export default function PythonRoadmap() {
   // Handle quiz completion
   const handleQuizComplete = (score, xp, passed) => {
     if (passed && selectedNodeId) {
+      // After passing the quiz, show the assignment
+      setQuizOpen(false);
+      setAssignmentOpen(true);
+      return;
+    }
+    setQuizOpen(false);
+  };
+
+  // Handle assignment completion
+  const handleAssignmentComplete = (score) => {
+    if (selectedNodeId) {
+      // Store the assignment score
+      setAssignmentScores(prev => ({
+        ...prev,
+        [selectedNodeId]: score
+      }));
+      
+      setCompletedAssignments(prev => ({
+        ...prev,
+        [selectedNodeId]: true
+      }));
+
       // Mark the node as completed in the CompletedNodesContext
       const roadmapId = apiRoadmap?.id || 'python-roadmap';
       const nodeId = selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`;
@@ -298,8 +325,16 @@ export default function PythonRoadmap() {
         }
         return node;
       }));
+      
+      toast({
+        title: "Assignment completed",
+        description: `You scored ${score}% on this assignment.`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     }
-    setQuizOpen(false);
+    setAssignmentOpen(false);
   };
 
   // If we have nodes but no roadmapData, we're using API data
