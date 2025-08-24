@@ -351,6 +351,12 @@ const SkillTreeRoadmap = () => {
   
   // Function to handle node click
   const handleNodeClick = useCallback((nodeId, node) => {
+    // If Python node is clicked, redirect
+    if (node.name === 'Python') {
+      window.location.href = 'http://localhost:3000/admin/courses';
+      return;
+    }
+
     // If node has children, toggle expansion
     if (node.children && node.children.length > 0) {
       toggleNode(nodeId);
@@ -585,7 +591,7 @@ const SkillTreeRoadmap = () => {
     <Box
       ref={containerRef}
       position="relative"
-      height="calc(100vh - 200px)"
+      height="100vh"
       width="100%"
       overflow="auto"
       borderRadius="xl"
@@ -608,8 +614,7 @@ const SkillTreeRoadmap = () => {
       <Box
         position="relative"
         zIndex={1}
-        bg={bgColor}
-        backdropFilter="blur(5px)"
+        bg="transparent"
         borderRadius="xl"
         border="1px solid"
         borderColor={borderColor}
