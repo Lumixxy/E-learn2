@@ -37,6 +37,9 @@ import CourseImport from "views/admin/courses/CourseImport";
 
 // Auth Imports
 
+// Skill Tree Roadmap Import
+import SkillTreeRoadmap from "components/skilltree/SkillTreeRoadmap";
+
 const routes = [
   {
     name: "Home",
@@ -147,24 +150,7 @@ const routes = [
     component: <ResumeGenerator />,
   },
 
-  {
-    name: "Leaderboard",
-    layout: "/admin",
-    path: "/leaderboard",
-    icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,
-    component: <Leaderboard />,
-  },
-  {
-    name: "Profile",
-    layout: "/admin",
-    path: "/profile",
-    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: <Profile />,
-  },
-  {
-    path: "courses/import",
-    element: <CourseImport />,
-  },
+  {    name: "Leaderboard",    layout: "/admin",    path: "/leaderboard",    icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,    component: <Leaderboard />,  },  {    name: "Profile",    layout: "/admin",    path: "/profile",    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,    component: <Profile />,  },  {    name: "Skill Tree Roadmap",    layout: "/admin",    path: "/skilltree",    component: <SkillTreeRoadmap />,    hidden: true,  },  {    path: "courses/import",    element: <CourseImport />,  },
 ];
 
 export default routes;

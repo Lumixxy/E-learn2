@@ -480,6 +480,7 @@ export default function Index() {
             shadow="xl"
             animation={`${glow} 2s ease-in-out infinite`}
             _active={{ transform: "scale(0.95)" }}
+            onClick={() => navigate('/admin/skilltree')}
           >
             Start Your Journey
           </Button>
