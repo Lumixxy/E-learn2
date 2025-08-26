@@ -70,7 +70,7 @@ const WebWarriorProgress = ({ courseId }) => {
   }, [courseId]);
   
   // Get completed nodes from context
-  const completedNodes = getCompletedNodesForRoadmap(courseId || 'web-warrior-roadmap');
+  const completedNodes = getCompletedNodesForRoadmap(courseId || 'web-warrior-roadmap') || [];
   
   // Mock quiz scores
   const quizScores = {};
@@ -79,7 +79,6 @@ const WebWarriorProgress = ({ courseId }) => {
   });
   
   // Calculate completion metrics
-  const completedNodes = getCompletedNodesForRoadmap(courseId || 'web-warrior-roadmap') || [];
   const totalNodes = roadmapData?.nodes?.length || 0;
   const completionPercentage = totalNodes > 0 ? Math.round((completedNodes.length / totalNodes) * 100) : 0;
   

@@ -37,6 +37,8 @@ export default function SidebarDocs() {
   const mutedColor = useColorModeValue("gray.500", "gray.400");
   const cardBg = useColorModeValue("white", "navy.700");
   const highlightColor = useColorModeValue("brand.500", "brand.400");
+  const progressBgColor = useColorModeValue("gray.100", "whiteAlpha.100");
+  const leaderboardItemBg = useColorModeValue("gray.50", "whiteAlpha.50");
 
   // Fetch leaderboard data
   useEffect(() => {
@@ -91,7 +93,7 @@ export default function SidebarDocs() {
             size="xs" 
             colorScheme="purple" 
             borderRadius="full" 
-            bgColor={useColorModeValue("gray.100", "whiteAlpha.100")}
+            bgColor={progressBgColor}
           />
         </Box>
       </Box>
@@ -121,7 +123,7 @@ export default function SidebarDocs() {
 
         <VStack spacing={2} align="stretch">
           {leaderboardData.map((user, index) => (
-            <HStack key={user.id} spacing={3} p={2} borderRadius="md" bg={useColorModeValue("gray.50", "whiteAlpha.50")}>
+            <HStack key={user.id} spacing={3} p={2} borderRadius="md" bg={leaderboardItemBg}>
               <Box position="relative" minW="24px" textAlign="center">
                 {index === 0 ? (
                   <Icon as={FaCrown} color="yellow.400" boxSize={5} />
