@@ -274,7 +274,7 @@ const CourseEnroll = () => {
                   <CourseProgressViz
                     courseId={courseId}
                     totalNodes={courseData.modules?.length || 0}
-                    completedNodes={completedNodes?.filter(node => node.startsWith(courseId)) || []}
+                    completedNodes={Array.isArray(completedNodes) ? completedNodes.filter(node => node.startsWith(courseId)) : []}
                     assignmentScores={assignmentScores}
                     quizScores={Object.fromEntries(
                       Object.entries(nodeQuizzes || {})
