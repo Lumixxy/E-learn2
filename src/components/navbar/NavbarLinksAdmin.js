@@ -31,6 +31,8 @@ import { FiZap } from "react-icons/fi";
 import routes from 'routes';
 import CartIcon from '../cart/CartIcon';
 import { useXP } from 'contexts/XPContext';
+import ConnectWallet from '../wallet/ConnectWallet';
+import NetworkSwitcher from '../wallet/NetworkSwitcher';
 
 
 
@@ -133,6 +135,8 @@ export default function HeaderLinks(props) {
 
         <SidebarResponsive routes={routes} />
         <CartIcon />
+        <NetworkSwitcher />
+        <ConnectWallet />
         <Menu>
           <MenuButton p='0px'>
             <Icon
