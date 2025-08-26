@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Modal,
   ModalOverlay,
@@ -47,6 +48,7 @@ import { useCompletedNodes } from '../../context/CompletedNodesContext';
 import { useXP } from '../../contexts/XPContext';
 
 const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
+  const navigate = useNavigate();
   const { markNodeAsCompleted } = useCompletedNodes();
   const { addXP } = useXP();
   const toast = useToast();
@@ -60,6 +62,7 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
   const [myEvaluations, setMyEvaluations] = useState([]);
   const [certificateEligible, setCertificateEligible] = useState(false);
   const [grade, setGrade] = useState(null);
+  const [certificateGenerated, setCertificateGenerated] = useState(false);
   
   const bgColor = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('gray.800', 'white');
@@ -82,7 +85,8 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
       minCharacters: 500,
       maxSubmissionTime: '2 weeks',
       passingScore: 70,
-      xpReward: 500
+      xpReward: 500,
+      courseName: 'Python Programming' // Added course name for certificate generation
     };
     
     setAssignment(mockAssignment);
@@ -132,12 +136,20 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
         
         // Check certificate eligibility (needs at least 2 passing evaluations)
         const passingEvaluations = parsedEvaluations.filter(evaluation => evaluation.score >= 85);
-        setCertificateEligible(passingEvaluations.length >= 2);
+        const isEligible = passingEvaluations.length >= 2;
+        setCertificateEligible(isEligible);
         
         // Calculate average grade
         if (parsedEvaluations.length > 0) {
           const totalScore = parsedEvaluations.reduce((sum, evaluation) => sum + evaluation.score, 0);
           setGrade(Math.round(totalScore / parsedEvaluations.length));
+        }
+        
+        // Check if certificate is already generated
+        const storedCertificates = localStorage.getItem('userCertificates');
+        if (storedCertificates) {
+          const certificates = JSON.parse(storedCertificates);
+          setCertificateGenerated(certificates[courseId] !== undefined);
         }
       }
     }
@@ -148,6 +160,28 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
       setMyEvaluations(JSON.parse(storedMyEvaluations));
     }
   }, [courseId]);
+  
+  // Auto-generate certificate when user becomes eligible
+  useEffect(() => {
+    if (certificateEligible && !certificateGenerated) {
+      // Calculate average grade from evaluations
+      const totalScore = evaluations.reduce((sum, evaluation) => sum + evaluation.score, 0);
+      const averageScore = totalScore / evaluations.length;
+      
+      // Generate certificate
+      const certificate = generateCertificate(averageScore);
+      
+      setCertificateGenerated(true);
+      
+      toast({
+        title: 'Certificate Generated!',
+        description: `Congratulations! Your certificate has been automatically generated with a final grade of ${averageScore.toFixed(1)}%. You can view it in your profile.`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [certificateEligible, certificateGenerated, evaluations, toast, generateCertificate]);
 
   const handleSubmit = () => {
     if (solution.length < assignment.minCharacters) {
@@ -222,18 +256,74 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
     addXP(50);
   };
 
+  // Function to generate certificate and store it in localStorage
+  const generateCertificate = (averageScore) => {
+    // Create certificate data
+    const certificateData = {
+      courseId,
+      courseName: assignment?.courseName || 'Python Programming',
+      userName: 'John Doe', // In a real app, get from user profile
+      issueDate: new Date().toISOString(),
+      grade: averageScore.toFixed(1),
+      certificateId: `PGA-${courseId}-${Date.now().toString().slice(-8)}`,
+      completed: true
+    };
+    
+    // Store certificate in localStorage
+    const storedCertificates = localStorage.getItem('userCertificates') || '{}';
+    const certificates = JSON.parse(storedCertificates);
+    certificates[courseId] = certificateData;
+    localStorage.setItem('userCertificates', JSON.stringify(certificates));
+    
+    return certificateData;
+  };
+  
   const handleClaimCertificate = () => {
-    // In a real app, this would trigger certificate generation
+    // Mark the final project as completed
     markNodeAsCompleted(roadmapId, 'final-project');
     addXP(assignment.xpReward);
     
-    toast({
-      title: 'Certificate eligibility confirmed!',
-      description: 'Congratulations! You have successfully completed the course and are eligible for a certificate.',
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
-    });
+    // Check if all assignments have been completed with at least 85% average score
+    const storedAssignmentScores = localStorage.getItem(`assignmentScores_${courseId}`);
+    let averageScore = 0;
+    let isEligible = false;
+    
+    if (storedAssignmentScores) {
+      const assignmentScores = JSON.parse(storedAssignmentScores);
+      
+      // Calculate average score if there are any assignments completed
+      if (Object.keys(assignmentScores).length > 0) {
+        const totalScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0);
+        averageScore = totalScore / Object.keys(assignmentScores).length;
+        
+        // Check if eligible for certificate (average score >= 85%)
+        isEligible = averageScore >= 85;
+      }
+    }
+    
+    if (isEligible) {
+      // Generate certificate
+      const certificate = generateCertificate(averageScore);
+      
+      toast({
+        title: 'Certificate Generated!',
+        description: `Congratulations! Your certificate has been generated with a final grade of ${averageScore.toFixed(1)}%. You can view it in your profile.`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      
+      // Navigate to certificate view
+      navigate(`/admin/courses/${courseId}/certificate`);
+    } else {
+      toast({
+        title: 'Certificate not yet available',
+        description: `You need to complete all assignments with an average score of at least 85%. Your current average is ${averageScore.toFixed(1)}%.`,
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
     
     onClose();
   };
@@ -466,7 +556,24 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
                     <FaUserGraduate size={60} color="#805AD5" style={{ margin: '0 auto 20px' }} />
                     <Heading size="lg" mb={4}>Course Completion Certificate</Heading>
                     
-                    {certificateEligible ? (
+                    {certificateGenerated ? (
+                      <VStack spacing={4}>
+                        <Alert status="success" borderRadius="md">
+                          <AlertIcon />
+                          Congratulations! Your certificate has been generated automatically.
+                          You can view and download it from your profile.
+                        </Alert>
+                        <Text>Your final grade: <strong>{grade}%</strong></Text>
+                        <Button 
+                          leftIcon={<FaStar />} 
+                          colorScheme="purple" 
+                          size="lg"
+                          onClick={() => navigate(`/admin/courses/${courseId}/certificate`)}
+                        >
+                          View Your Certificate
+                        </Button>
+                      </VStack>
+                    ) : certificateEligible ? (
                       <VStack spacing={4}>
                         <Alert status="success" borderRadius="md">
                           <AlertIcon />

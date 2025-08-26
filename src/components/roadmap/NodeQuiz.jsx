@@ -271,8 +271,8 @@ const NodeQuiz = ({ nodeId, roadmapId, isOpen, onClose, onQuizComplete }) => {
         });
       }
       
-      // Mark node as completed if score is passing (70% or higher)
-      if (finalScore >= 70 && roadmapId && nodeId) {
+      // Mark node as completed if score is passing (85% or higher)
+      if (finalScore >= 85 && roadmapId && nodeId) {
         markNodeAsCompleted(roadmapId, nodeId);
         toast({
           title: 'Node Completed!',
@@ -281,11 +281,19 @@ const NodeQuiz = ({ nodeId, roadmapId, isOpen, onClose, onQuizComplete }) => {
           duration: 3000,
           isClosable: true,
         });
+      } else if (finalScore >= 70 && finalScore < 85) {
+        toast({
+          title: 'Almost There!',
+          description: 'You need a score of 85% or higher to complete this node. Try again!',
+          status: 'warning',
+          duration: 4000,
+          isClosable: true,
+        });
       }
 
       // Notify parent component that quiz is complete
       if (onQuizComplete) {
-        onQuizComplete(finalScore, earnedXP, finalScore >= 70);
+        onQuizComplete(finalScore, earnedXP, finalScore >= 85);
       }
     }
   };
@@ -375,10 +383,10 @@ const NodeQuiz = ({ nodeId, roadmapId, isOpen, onClose, onQuizComplete }) => {
                 display="flex" 
                 alignItems="center" 
                 justifyContent="center"
-                bg={score >= 70 ? 'green.100' : score >= 40 ? 'orange.100' : 'red.100'}
-                color={score >= 70 ? 'green.700' : score >= 40 ? 'orange.700' : 'red.700'}
+                bg={score >= 85 ? 'green.100' : score >= 70 ? 'yellow.100' : score >= 40 ? 'orange.100' : 'red.100'}
+                color={score >= 85 ? 'green.700' : score >= 70 ? 'yellow.700' : score >= 40 ? 'orange.700' : 'red.700'}
                 borderWidth="4px"
-                borderColor={score >= 70 ? 'green.400' : score >= 40 ? 'orange.400' : 'red.400'}
+                borderColor={score >= 85 ? 'green.400' : score >= 70 ? 'yellow.400' : score >= 40 ? 'orange.400' : 'red.400'}
               >
                 <Text fontSize="3xl" fontWeight="bold">{score}%</Text>
               </Box>
@@ -389,13 +397,13 @@ const NodeQuiz = ({ nodeId, roadmapId, isOpen, onClose, onQuizComplete }) => {
                 ).length} out of {currentQuiz.questions.length} questions correctly.</Text>
                 
                 <Badge 
-                  colorScheme={score >= 70 ? 'green' : score >= 40 ? 'orange' : 'red'}
+                  colorScheme={score >= 85 ? 'green' : score >= 70 ? 'yellow' : score >= 40 ? 'orange' : 'red'}
                   fontSize="md"
                   px={3}
                   py={1}
                   borderRadius="full"
                 >
-                  {score >= 70 ? 'Great job!' : score >= 40 ? 'Good effort!' : 'Keep practicing!'}
+                  {score >= 85 ? 'Excellent!' : score >= 70 ? 'Good job, but not quite there!' : score >= 40 ? 'Good effort!' : 'Keep practicing!'}
                 </Badge>
               </VStack>
             </VStack>

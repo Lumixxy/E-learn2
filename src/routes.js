@@ -150,7 +150,7 @@ const routes = [
     component: <ResumeGenerator />,
   },
 
-  {    name: "Leaderboard",    layout: "/admin",    path: "/leaderboard",    icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,    component: <Leaderboard />,  },  {    name: "Wallet",    layout: "/admin",    path: "/wallet",    icon: <Icon as={MdAccountBalanceWallet} width="20px" height="20px" color="inherit" />,    component: <WalletDashboard />,  },  {    name: "Profile",    layout: "/admin",    path: "/profile",    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,    component: <Profile />,  },  {    name: "Skill Tree Roadmap",    layout: "/admin",    path: "/skilltree",    component: <SkillTreeRoadmap />,    hidden: true,  },  {    path: "courses/import",    element: <CourseImport />,  },
+  {    name: "Leaderboard",    layout: "/admin",    path: "/leaderboard",    icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,    component: <Leaderboard />,  },  {    name: "Wallet",    layout: "/admin",    path: "/wallet",    icon: <Icon as={MdAccountBalanceWallet} width="20px" height="20px" color="inherit" />,    component: <WalletDashboard />,    hidden: true,  },  {    name: "Profile",    layout: "/admin",    path: "/profile",    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,    component: <Profile />,  },  {    name: "Skill Tree Roadmap",    layout: "/admin",    path: "/skilltree",    component: <SkillTreeRoadmap />,    hidden: true,  },  {    path: "courses/import",    element: <CourseImport />,  },
 ];
 
 export default routes;

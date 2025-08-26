@@ -119,6 +119,35 @@ export const switchNetwork = async (networkId = 1) => {
  * @returns {string} - The network name
  */
 export const getNetworkName = (chainId) => {
+  // Handle common networks even if not in our supported list
+  if (!chainId && chainId !== 0) {
+    return 'Network Detection Failed';
+  }
+  
+  // Check our supported networks first
   const network = SUPPORTED_NETWORKS[chainId];
-  return network ? network.chainName : 'Unknown Network';
+  if (network) {
+    return network.chainName;
+  }
+  
+  // Handle common networks not in our supported list
+  const commonNetworks = {
+    56: 'Binance Smart Chain',
+    43114: 'Avalanche C-Chain',
+    42161: 'Arbitrum One',
+    10: 'Optimism',
+    250: 'Fantom Opera',
+    100: 'Gnosis Chain',
+    1337: 'Local Development Chain',
+    31337: 'Hardhat Network',
+    1666600000: 'Harmony Mainnet',
+    128: 'Huobi ECO Chain',
+    66: 'OKExChain',
+    1285: 'Moonriver',
+    1284: 'Moonbeam',
+    42220: 'Celo Mainnet',
+    25: 'Cronos Mainnet',
+  };
+  
+  return commonNetworks[chainId] || `Chain ID: ${chainId}`;
 };

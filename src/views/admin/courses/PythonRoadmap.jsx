@@ -16,7 +16,7 @@ import NodeAssignment from '../../../components/roadmap/NodeAssignment';
 import ResourcesList from '../../../components/roadmap/ResourcesList';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
 import nodeQuizzes from '../../../data/nodeQuizzes';
-import { FaCertificate, FaLock, FaUnlock, FaCheck } from 'react-icons/fa';
+import { FaCertificate, FaLock, FaUnlock, FaCheck, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 
 const foggyBg = {
   background: 'linear-gradient(120deg, #e0f2ff 0%, #b3c6e0 100%)',
@@ -45,6 +45,18 @@ export default function PythonRoadmap() {
   const [certificateEligible, setCertificateEligible] = useState(false);
   const toast = useToast();
   const { isNodeCompleted, markNodeAsCompleted } = useCompletedNodes();
+
+  // Function to check if a node is unlockable based on its dependencies
+  const isNodeUnlockable = (roadmapId, nodeId, dependencies) => {
+    // If there are no dependencies, the node is unlockable
+    if (!dependencies || dependencies.length === 0) return true;
+    
+    // Check if all dependencies are completed with at least 85% score
+    return dependencies.every(depId => {
+      const formattedDepId = depId.startsWith('node-') ? depId : `node-${depId}`;
+      return isNodeCompleted(roadmapId, formattedDepId);
+    });
+  };
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
@@ -227,6 +239,37 @@ export default function PythonRoadmap() {
 
   // Handle node click: Show node info in right panel, with option to take quiz
   const onNodeClick = useCallback(async (event, node) => {
+    // Get node dependencies from the edges
+    const nodeId = node.id;
+    const nodeDependencies = edges
+      .filter(edge => edge.target === nodeId)
+      .map(edge => edge.source);
+    
+    // Format dependencies to match the format used in CompletedNodesContext
+    const formattedDependencies = nodeDependencies.map(depId => 
+      depId.startsWith('node-') ? depId : `node-${depId}`
+    );
+    
+    // Check if the node is unlockable (all dependencies completed)
+    const roadmapId = apiRoadmap?.id || 'python-roadmap';
+    const formattedNodeId = nodeId.startsWith('node-') ? nodeId : `node-${nodeId}`;
+    const isUnlockable = isNodeCompleted(roadmapId, formattedNodeId) || 
+                        nodeDependencies.length === 0 || 
+                        isNodeUnlockable(roadmapId, formattedNodeId, formattedDependencies);
+    
+    if (!isUnlockable) {
+      // Show a toast notification that the node is locked
+      toast({
+        title: "Node Locked",
+        description: "You need to complete the prerequisite nodes with at least 85% score first.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    
+    // If the node is unlockable or already completed, proceed with selection
     setSelectedNodeId(node.id);
     
     // We don't automatically open the quiz anymore, just select the node
@@ -237,7 +280,7 @@ export default function PythonRoadmap() {
 
     const label = String(node?.data?.label || '').toLowerCase();
     handleNodeNavigation(label);
-  }, []);
+  }, [edges, toast, apiRoadmap, isNodeCompleted, isNodeUnlockable]);
 
   // Separate function to handle navigation based on node label
   const handleNodeNavigation = useCallback((label) => {
@@ -349,12 +392,46 @@ export default function PythonRoadmap() {
           return isNodeCompleted(apiRoadmap?.id || 'python-roadmap', nodeId);
         });
         
-        if (allNodesCompleted) {
+        // Get assignment scores from localStorage
+        const storedAssignmentScores = localStorage.getItem(`assignmentScores_${courseId}`);
+        let assignmentScores = {};
+        let averageScore = 0;
+        
+        if (storedAssignmentScores) {
+          assignmentScores = JSON.parse(storedAssignmentScores);
+          
+          // Calculate average score if there are any assignments completed
+          if (Object.keys(assignmentScores).length > 0) {
+            const totalScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0);
+            averageScore = totalScore / Object.keys(assignmentScores).length;
+          }
+        }
+        
+        // Update assignment scores with the current assignment
+        if (!assignmentScores[nodeId]) {
+          assignmentScores[nodeId] = score;
+          localStorage.setItem(`assignmentScores_${courseId}`, JSON.stringify(assignmentScores));
+          
+          // Recalculate average after adding new score
+          const totalScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0);
+          averageScore = totalScore / Object.keys(assignmentScores).length;
+        }
+        
+        // Check if all nodes are completed AND average score is at least 85%
+        if (allNodesCompleted && averageScore >= 85) {
           setCertificateEligible(true);
           toast({
             title: "Congratulations!",
-            description: "You've completed all assignments! You are now eligible for a certificate.",
+            description: "You've completed all assignments with an average score of " + averageScore.toFixed(1) + "%. You are now eligible for a certificate!",
             status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
+        } else if (allNodesCompleted && averageScore < 85) {
+          toast({
+            title: "Almost there!",
+            description: "You've completed all assignments, but your average score is " + averageScore.toFixed(1) + "%. You need at least 85% to earn your certificate.",
+            status: "warning",
             duration: 5000,
             isClosable: true,
           });
@@ -383,19 +460,52 @@ export default function PythonRoadmap() {
         <div style={{ position: 'relative', zIndex: 1, width: '60vw', height: '100vh', borderRight: '2px solid #b3c6e0', background: 'transparent' }}>
           {hasNodes ? (
             <ReactFlow
-              nodes={nodes.map(node => ({
-                ...node,
-                style: {
-                  ...node.style,
-                  // Add visual indicator for completed nodes
-                  backgroundColor: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
-                    node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
-                    ? '#4ade80' : '#60a5fa',
-                  border: isNodeCompleted(apiRoadmap?.id || 'python-roadmap', 
-                    node.id.startsWith('node-') ? node.id : `node-${node.id}`) 
-                    ? '2px solid #16a34a' : undefined
+              nodes={nodes.map(node => {
+                // Get node dependencies from the edges
+                const nodeId = node.id;
+                const nodeDependencies = edges
+                  .filter(edge => edge.target === nodeId)
+                  .map(edge => edge.source);
+                
+                // Format dependencies to match the format used in CompletedNodesContext
+                const formattedDependencies = nodeDependencies.map(depId => 
+                  depId.startsWith('node-') ? depId : `node-${depId}`
+                );
+                
+                // Check if the node is unlockable (all dependencies completed)
+                const roadmapId = apiRoadmap?.id || 'python-roadmap';
+                const formattedNodeId = nodeId.startsWith('node-') ? nodeId : `node-${nodeId}`;
+                const isCompleted = isNodeCompleted(roadmapId, formattedNodeId);
+                const isUnlockable = isCompleted || 
+                                    nodeDependencies.length === 0 || 
+                                    isNodeUnlockable(roadmapId, formattedNodeId, formattedDependencies);
+                
+                // Determine node style based on completion and unlockable status
+                let backgroundColor = '#60a5fa'; // Default blue for unlocked nodes
+                let border = undefined;
+                let opacity = 1;
+                let cursor = 'pointer';
+                
+                if (isCompleted) {
+                  backgroundColor = '#4ade80'; // Green for completed nodes
+                  border = '2px solid #16a34a';
+                } else if (!isUnlockable) {
+                  backgroundColor = '#9ca3af'; // Gray for locked nodes
+                  opacity = 0.7;
+                  cursor = 'not-allowed';
                 }
-              }))}
+                
+                return {
+                  ...node,
+                  style: {
+                    ...node.style,
+                    backgroundColor,
+                    border,
+                    opacity,
+                    cursor
+                  }
+                };
+              })}
               edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
@@ -423,6 +533,30 @@ export default function PythonRoadmap() {
             )}
           </h2>
           <p style={{ color: '#334155', fontSize: '1.1rem', lineHeight: 1.7 }}>{selectedNode?.data?.description}</p>
+          
+          {/* Node completion status */}
+          <Box 
+            mt={4} 
+            mb={4} 
+            p={3} 
+            borderRadius="md" 
+            bg={isSelectedNodeCompleted ? "green.50" : "blue.50"}
+            border="1px solid"
+            borderColor={isSelectedNodeCompleted ? "green.200" : "blue.200"}
+          >
+            <Flex align="center">
+              <Icon 
+                as={isSelectedNodeCompleted ? FaCheckCircle : FaInfoCircle} 
+                color={isSelectedNodeCompleted ? "green.500" : "blue.500"} 
+                mr={2} 
+              />
+              <Text>
+                {isSelectedNodeCompleted 
+                  ? "You have completed this node. Continue your journey!" 
+                  : "Complete this node to progress in your learning path."}
+              </Text>
+            </Flex>
+          </Box>
           
           {/* Certificate Status */}
           <Box 

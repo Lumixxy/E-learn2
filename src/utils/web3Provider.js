@@ -25,12 +25,13 @@ class Web3Provider {
       this.provider = await detectEthereumProvider({
         mustBeMetaMask: true,
         silent: false,
+        timeout: 3000, // Add timeout to prevent hanging
       });
 
       // Check if provider exists
       if (!this.provider) {
         console.error('Please install MetaMask!');
-        return false;
+        throw new Error('MetaMask is not installed');
       }
 
       // Initialize Web3 with the provider
@@ -43,14 +44,31 @@ class Web3Provider {
         this.isConnected = true;
       }
 
-      // Get network information
-      this.networkId = await this.web3.eth.net.getId();
-      this.chainId = await this.web3.eth.getChainId();
-      this.networkName = getNetworkName(this.networkId);
+      try {
+        // Get network information with timeout
+        const networkIdPromise = this.web3.eth.net.getId();
+        const chainIdPromise = this.web3.eth.getChainId();
+        
+        // Set timeout for network requests
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Network detection timed out')), 5000);
+        });
+        
+        // Race the network requests against the timeout
+        this.networkId = await Promise.race([networkIdPromise, timeoutPromise]);
+        this.chainId = await Promise.race([chainIdPromise, timeoutPromise]);
+        this.networkName = getNetworkName(this.networkId);
 
-      // Check if the network is supported
-      if (!isNetworkSupported(this.networkId)) {
-        console.warn(`Connected to unsupported network: ${this.networkName}`);
+        // Check if the network is supported
+        if (!isNetworkSupported(this.networkId)) {
+          console.warn(`Connected to unsupported network: ${this.networkName}`);
+        }
+      } catch (networkError) {
+        console.warn('Error detecting network:', networkError);
+        // Set default values if network detection fails
+        this.networkId = 0;
+        this.chainId = 0;
+        this.networkName = 'Network Detection Failed';
       }
       
       // Set up event listeners
@@ -71,27 +89,60 @@ class Web3Provider {
   async connect() {
     try {
       if (!this.provider) {
-        const initialized = await this.init();
-        if (!initialized) {
-          throw new Error('Failed to initialize Web3 provider');
+        try {
+          const initialized = await this.init();
+          if (!initialized) {
+            throw new Error('Failed to initialize Web3 provider');
+          }
+        } catch (initError) {
+          throw new Error(`MetaMask initialization failed: ${initError.message}`);
         }
       }
 
-      // Request accounts from MetaMask
-      this.accounts = await this.provider.request({ method: 'eth_requestAccounts' });
-      this.isConnected = true;
-      
-      // Check if the network is supported after connecting
-      if (this.isConnected && !isNetworkSupported(this.networkId)) {
-        console.warn(`Connected to unsupported network: ${this.networkName}. Attempting to switch...`);
-        // Attempt to switch to a supported network (Ethereum mainnet by default)
-        await switchNetwork(1);
+      // Request accounts from MetaMask with timeout
+      try {
+        const accountsPromise = this.provider.request({ method: 'eth_requestAccounts' });
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Connection request timed out')), 10000);
+        });
+        
+        this.accounts = await Promise.race([accountsPromise, timeoutPromise]);
+        this.isConnected = this.accounts && this.accounts.length > 0;
+        
+        if (!this.isConnected) {
+          throw new Error('No accounts returned from MetaMask');
+        }
+        
+        // Update network information after successful connection
+        try {
+          this.networkId = await this.web3.eth.net.getId();
+          this.chainId = await this.web3.eth.getChainId();
+          this.networkName = getNetworkName(this.networkId);
+          
+          // Check if the network is supported after connecting
+          if (!isNetworkSupported(this.networkId)) {
+            console.warn(`Connected to unsupported network: ${this.networkName}. Attempting to switch...`);
+            // Attempt to switch to a supported network (Ethereum mainnet by default)
+            try {
+              await switchNetwork(1);
+            } catch (switchError) {
+              console.warn(`Failed to switch network: ${switchError.message}`);
+              // Continue with unsupported network rather than failing completely
+            }
+          }
+        } catch (networkError) {
+          console.warn('Error updating network information:', networkError);
+          // Don't fail the connection just because network detection failed
+        }
+        
+        return this.accounts;
+      } catch (connectionError) {
+        console.error('Failed to connect to MetaMask:', connectionError);
+        throw new Error(`Failed to connect to MetaMask: ${connectionError.message}`);
       }
-      
-      return this.accounts;
     } catch (error) {
-      console.error('Failed to connect to MetaMask:', error);
-      throw new Error('Failed to connect to MetaMask: ' + error.message);
+      console.error('Wallet connection error:', error);
+      throw error;
     }
   }
 

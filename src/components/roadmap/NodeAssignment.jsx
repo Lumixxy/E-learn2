@@ -23,7 +23,8 @@ import {
   Divider,
   Code,
   Badge,
-  useColorModeValue
+  useColorModeValue,
+  Icon
 } from '@chakra-ui/react';
 import { FaUserFriends, FaCheck, FaTimes } from 'react-icons/fa';
 import nodeAssignments from '../../data/nodeAssignments';
@@ -39,6 +40,10 @@ const NodeAssignment = ({ isOpen, onClose, nodeId, nodeName, onAssignmentComplet
   const [currentPeerSubmission, setCurrentPeerSubmission] = useState('');
   const [evaluationsCompleted, setEvaluationsCompleted] = useState(0);
   const [evaluationRequired, setEvaluationRequired] = useState(false);
+  const [evaluationProgress, setEvaluationProgress] = useState(0);
+  const [evaluationStage, setEvaluationStage] = useState('');
+  const [realTimeScore, setRealTimeScore] = useState(null);
+  const [realTimeFeedback, setRealTimeFeedback] = useState([]);
 
   // Color mode values for dark/light mode support
   const bgColor = useColorModeValue("white", "gray.800");
@@ -197,70 +202,100 @@ if __name__ == "__main__":
       isClosable: true,
     });
     
-    // If all evaluations are completed, proceed with the assignment
+    // If all evaluations are completed, show a success message
     if (evaluationsCompleted + 1 >= 2) {
-      // In a real app, this would trigger the final grade calculation
-      const finalScore = Math.floor(Math.random() * 16) + 85; // 85-100 range
-      setScore(finalScore);
-    } else {
-      // Show the next submission to evaluate
-      startNextPeerEvaluation();
+      toast({
+        title: 'All peer evaluations completed',
+        description: 'Thank you for contributing to the learning community!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
   
-  const startNextPeerEvaluation = () => {
-    if (peerSubmissions.length > evaluationsCompleted) {
-      setCurrentPeerSubmission(peerSubmissions[evaluationsCompleted]);
-      setShowPeerEvaluation(true);
-    }
+  const startPeerEvaluation = (submissionIndex) => {
+    setCurrentPeerSubmission(peerSubmissions[submissionIndex]);
+    setShowPeerEvaluation(true);
   };
-
+  
   const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
     }
   };
-
-  const handleRetake = () => {
-    setScore(null);
-    setSubmission('');
-    setFile(null);
-  };
-
+  
   const handleSubmit = () => {
-    if (submission.trim().length < assignment.minWordCount) {
+    if (!submission && !file) {
       toast({
-        title: 'Submission too short',
-        description: `Your submission must be at least ${assignment.minWordCount} characters long.`,
+        title: 'Submission required',
+        description: 'Please enter your solution or upload a file.',
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
       return;
     }
-
+    
     setIsSubmitting(true);
-
-    // Simulate assignment grading (in a real app, this would be a backend call)
-    setTimeout(() => {
-      setIsSubmitting(false);
-      
-      // If this assignment requires peer evaluation
-      if (evaluationRequired) {
-        toast({
-          title: 'Assignment Submitted',
-          description: 'Your assignment has been submitted. Before receiving your final grade, you need to complete peer evaluations.',
-          status: 'info',
-          duration: 5000,
-          isClosable: true,
-        });
+    setRealTimeScore(0);
+    setRealTimeFeedback([{
+      message: 'Starting evaluation...',
+      stage: 'Initialization',
+      timestamp: new Date().toLocaleTimeString()
+    }]);
+    
+    // Simulate real-time evaluation updates
+    const stages = [
+      { message: 'Checking syntax...', stage: 'Syntax', delay: 1000 },
+      { message: 'Syntax looks good!', stage: 'Syntax', delay: 1500 },
+      { message: 'Running test cases...', stage: 'Testing', delay: 2000 },
+      { message: 'Test case 1 passed', stage: 'Testing', delay: 2500 },
+      { message: 'Test case 2 passed', stage: 'Testing', delay: 3000 },
+      { message: 'Test case 3 passed with warnings', stage: 'Testing', delay: 3500 },
+      { message: 'Analyzing code quality...', stage: 'Quality', delay: 4000 },
+      { message: 'Code quality assessment complete', stage: 'Quality', delay: 5000 },
+      { message: 'Finalizing score...', stage: 'Scoring', delay: 5500 }
+    ];
+    
+    let currentIndex = 0;
+    let currentScore = 0;
+    
+    const processStage = () => {
+      if (currentIndex < stages.length) {
+        const stage = stages[currentIndex];
+        setEvaluationStage(stage.stage);
+        setRealTimeFeedback(prev => [...prev, {
+          message: stage.message,
+          stage: stage.stage,
+          timestamp: new Date().toLocaleTimeString()
+        }]);
         
-        // Start the peer evaluation process
-        startNextPeerEvaluation();
+        // Update progress percentage
+        setEvaluationProgress(((currentIndex + 1) / stages.length) * 100);
+        
+        // Increment score gradually
+        currentScore += Math.floor(Math.random() * 10) + 1;
+        setRealTimeScore(Math.min(currentScore, 100));
+        
+        currentIndex++;
+        setTimeout(processStage, stage.delay);
       } else {
+        // Evaluation complete
+        setIsSubmitting(false);
+        setEvaluationStage('Complete');
+        
         // Generate a score between 65 and 100 to make it possible to pass with 85%
         const generatedScore = Math.floor(Math.random() * 36) + 65;
         setScore(generatedScore);
+        
+        // Add final feedback
+        setRealTimeFeedback(prev => [...prev, {
+          message: `Final score: ${generatedScore}%`,
+          stage: 'Complete',
+          timestamp: new Date().toLocaleTimeString()
+        }]);
         
         // Show toast notification with clear indication about passing requirement
         toast({
@@ -271,7 +306,10 @@ if __name__ == "__main__":
           isClosable: true,
         });
       }
-    }, 1500);
+    };
+    
+    // Start the evaluation process
+    setTimeout(processStage, 1000);
   };
 
   const handleComplete = () => {
@@ -302,137 +340,165 @@ if __name__ == "__main__":
                 </Box>
               )}
               
-              <FormControl isRequired>
-                <FormLabel>Your Solution</FormLabel>
+              <FormControl>
+                <FormLabel>Your Solution:</FormLabel>
                 <Textarea 
-                  value={submission}
-                  onChange={(e) => setSubmission(e.target.value)}
-                  placeholder="Type your solution here..."
+                  value={submission} 
+                  onChange={(e) => setSubmission(e.target.value)} 
+                  placeholder="Enter your solution here..."
                   minHeight="200px"
                   bg={inputBg}
-                  borderColor={borderColor}
+                  isDisabled={isSubmitting}
                 />
-                <Text fontSize="sm" color={mutedTextColor} mt={1}>
-                  Minimum {assignment.minWordCount} characters required
-                </Text>
               </FormControl>
               
               <FormControl>
-                <FormLabel>Upload Solution File (Optional)</FormLabel>
-                <Input
-                  type="file"
-                  accept=".py,.txt,.pdf"
-                  onChange={handleFileChange}
-                  bg={inputBg}
-                  borderColor={borderColor}
+                <FormLabel>Or Upload a File:</FormLabel>
+                <Input 
+                  type="file" 
+                  onChange={handleFileChange} 
+                  p={1}
+                  isDisabled={isSubmitting}
                 />
-                <Text fontSize="sm" color={mutedTextColor} mt={1}>
-                  Accepted formats: .py, .txt, .pdf
-                </Text>
+                {file && <Text mt={2} fontSize="sm">{file.name}</Text>}
               </FormControl>
+              
+              {isSubmitting && (
+                <Box mt={4}>
+                  <Text fontWeight="bold">Real-time Evaluation:</Text>
+                  <HStack mt={2} spacing={4}>
+                    <Text>Current Stage: {evaluationStage}</Text>
+                    <Text>Progress: {Math.round(evaluationProgress)}%</Text>
+                    {realTimeScore !== null && <Text>Current Score: {realTimeScore}%</Text>}
+                  </HStack>
+                  <Progress value={evaluationProgress} mt={2} colorScheme="purple" />
+                  
+                  <Box mt={4} p={3} borderWidth="1px" borderRadius="md" maxHeight="200px" overflowY="auto">
+                    {realTimeFeedback.map((feedback, index) => (
+                      <Text key={index} fontSize="sm" color={mutedTextColor}>
+                        [{feedback.timestamp}] [{feedback.stage}] {feedback.message}
+                      </Text>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              
+              {evaluationRequired && evaluationsCompleted < 2 && !isSubmitting && (
+                <Box mt={4} p={4} borderWidth="1px" borderRadius="md" bg={instructionsBg}>
+                  <HStack spacing={2} mb={2}>
+                    <Icon as={FaUserFriends} />
+                    <Text fontWeight="bold">Peer Evaluation Required</Text>
+                  </HStack>
+                  <Text fontSize="sm" mb={3}>
+                    This assignment requires you to evaluate 2 peer submissions before receiving your final grade.
+                    You have completed {evaluationsCompleted} of 2 required evaluations.
+                  </Text>
+                  <HStack spacing={4}>
+                    <Button 
+                      leftIcon={<Icon as={FaUserFriends} />}
+                      colorScheme="blue" 
+                      size="sm"
+                      onClick={() => startPeerEvaluation(0)}
+                      isDisabled={evaluationsCompleted >= 2}
+                    >
+                      Evaluate Submission 1
+                    </Button>
+                    <Button 
+                      leftIcon={<Icon as={FaUserFriends} />}
+                      colorScheme="blue" 
+                      size="sm"
+                      onClick={() => startPeerEvaluation(1)}
+                      isDisabled={evaluationsCompleted >= 2}
+                    >
+                      Evaluate Submission 2
+                    </Button>
+                  </HStack>
+                </Box>
+              )}
+              
+              <Button 
+                onClick={handleSubmit} 
+                colorScheme="purple" 
+                isLoading={isSubmitting}
+                loadingText="Submitting..."
+                isDisabled={isSubmitting}
+              >
+                Submit Assignment
+              </Button>
             </VStack>
           ) : (
-            <VStack spacing={6} align="stretch">
-              <Text fontSize="xl" fontWeight="bold" textAlign="center">
-                Assignment Score: {score}%
-              </Text>
-              
-              <Progress 
-                value={score} 
-                colorScheme={score >= 85 ? "green" : "red"} 
-                height="24px" 
+            <VStack spacing={4} align="stretch">
+              <Alert 
+                status={score >= 85 ? "success" : "warning"}
+                variant="subtle"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                textAlign="center"
+                height="200px"
                 borderRadius="md"
-              />
-              
-              <Box>
-                {score >= 85 ? (
-                  <Alert status="success">
-                    <AlertIcon />
-                    Congratulations! You've passed this assignment.
-                  </Alert>
-                ) : (
-                  <Alert status="error">
-                    <AlertIcon />
-                    You need a score of at least 85% to pass. You can retake this assignment as many times as needed.
-                  </Alert>
-                )}
-              </Box>
-              
-              <Divider my={4} />
-              
-              <Box borderWidth="1px" borderRadius="md" p={3} borderColor={borderColor}>
-                <Text fontWeight="bold" mb={2}>Grading System:</Text>
-                <Text fontSize="sm">
-                  <Code colorScheme="green">A+</Code>: 95-100% - Exceptional work with perfect implementation<br/>
-                  <Code colorScheme="green">A</Code>: 90-94% - Excellent work with minor improvements possible<br/>
-                  <Code colorScheme="green">B+</Code>: 85-89% - Very good work meeting all requirements<br/>
-                  <Code colorScheme="yellow">B</Code>: 80-84% - Good work with some areas for improvement<br/>
-                  <Code colorScheme="yellow">C+</Code>: 75-79% - Satisfactory work with several areas for improvement<br/>
-                  <Code colorScheme="yellow">C</Code>: 70-74% - Acceptable work that meets minimum requirements<br/>
-                  <Code colorScheme="red">F</Code>: Below 70% - Does not meet minimum requirements
+              >
+                <AlertIcon boxSize="40px" mr={0} />
+                <Text fontSize="lg" mt={4} mb={1}>
+                  {score >= 85 ? "Congratulations!" : "Almost there!"}
                 </Text>
+                <Text fontSize="3xl" fontWeight="bold">
+                  {score}%
+                </Text>
+                <Text mt={2}>
+                  {score >= 85 
+                    ? "You've successfully completed this assignment!" 
+                    : "You need at least 85% to pass. You can retake the assignment as many times as needed."}
+                </Text>
+              </Alert>
+              
+              <Divider />
+              
+              <Text fontWeight="bold">Feedback:</Text>
+              <Box p={4} borderWidth="1px" borderRadius="md" bg={instructionsBg}>
+                {realTimeFeedback.map((feedback, index) => (
+                  <Text key={index} fontSize="sm" mb={1}>
+                    <Badge colorScheme={feedback.stage === 'Complete' ? 'green' : 'blue'} mr={2}>
+                      {feedback.stage}
+                    </Badge>
+                    {feedback.message}
+                  </Text>
+                ))}
               </Box>
+              
+              {evaluationRequired && evaluationsCompleted < 2 && (
+                <Alert status="info" borderRadius="md">
+                  <AlertIcon />
+                  <Text>
+                    Please complete {2 - evaluationsCompleted} more peer evaluations to finalize your grade.
+                  </Text>
+                </Alert>
+              )}
             </VStack>
           )}
         </ModalBody>
-
-      {/* Peer Evaluation Modal */}
-      <PeerEvaluation
-        isOpen={showPeerEvaluation}
-        onClose={() => setShowPeerEvaluation(false)}
-        submission={currentPeerSubmission}
-        onEvaluationComplete={handlePeerEvaluationComplete}
-      />
-
+        
         <ModalFooter>
-          <HStack spacing={2}>
-            {evaluationRequired && evaluationsCompleted > 0 && evaluationsCompleted < 2 && (
-              <Badge colorScheme="purple">
-                {evaluationsCompleted}/2 Evaluations Completed
-              </Badge>
-            )}
-            
-            <Button variant="ghost" mr={3} onClick={onClose}>
+          {score !== null ? (
+            <Button colorScheme="purple" onClick={handleComplete}>
+              {score >= 85 ? "Complete" : "Try Again"}
+            </Button>
+          ) : (
+            <Button variant="ghost" onClick={onClose} isDisabled={isSubmitting}>
               Cancel
             </Button>
-            
-            {score === null ? (
-              <>
-                {evaluationRequired && evaluationsCompleted < 2 && submission ? (
-                  <Button
-                    colorScheme="purple"
-                    onClick={startNextPeerEvaluation}
-                    leftIcon={<FaUserFriends />}
-                    ml={2}
-                  >
-                    Evaluate Peers ({evaluationsCompleted}/2)
-                  </Button>
-                ) : null}
-                
-                <Button 
-                  colorScheme="blue" 
-                  onClick={handleSubmit} 
-                  isLoading={isSubmitting}
-                  loadingText="Submitting"
-                >
-                  Submit Assignment
-                </Button>
-              </>
-            ) : (
-              <>
-              {score < 85 && (
-                <Button colorScheme="orange" onClick={handleRetake}>
-                  Retake Assignment
-                </Button>
-              )}
-              <Button colorScheme="blue" onClick={handleComplete}>
-                {score >= 85 ? "Continue to Next Node" : "Close"}
-              </Button>
-              </>
-            )}
-          </HStack>
+          )}
         </ModalFooter>
       </ModalContent>
+      
+      {showPeerEvaluation && (
+        <PeerEvaluation 
+          isOpen={showPeerEvaluation}
+          onClose={() => setShowPeerEvaluation(false)}
+          submission={currentPeerSubmission}
+          onComplete={handlePeerEvaluationComplete}
+        />
+      )}
     </Modal>
   );
 };

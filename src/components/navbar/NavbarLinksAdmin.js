@@ -135,8 +135,11 @@ export default function HeaderLinks(props) {
 
         <SidebarResponsive routes={routes} />
         <CartIcon />
-        <NetworkSwitcher />
-        <ConnectWallet />
+        {/* Wallet components are hidden from UI but still functional */}
+        <Box display="none">
+          <NetworkSwitcher />
+          <ConnectWallet />
+        </Box>
         <Menu>
           <MenuButton p='0px'>
             <Icon

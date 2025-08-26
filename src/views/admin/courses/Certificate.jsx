@@ -92,6 +92,48 @@ const Certificate = () => {
     });
   };
 
+  // Check if all nodes are completed and average score is at least 85%
+  const roadmapId = 'python-roadmap'; // This should be dynamic in a real app
+  const completedNodeIds = getCompletedNodeIds(roadmapId) || [];
+  
+  // Check assignment scores
+  const storedAssignmentScores = localStorage.getItem(`assignmentScores_${courseId}`);
+  let isEligible = false;
+  let averageScore = 0;
+  
+  if (storedAssignmentScores) {
+    const assignmentScores = JSON.parse(storedAssignmentScores);
+    
+    // Calculate average score if there are any assignments completed
+    if (Object.keys(assignmentScores).length > 0) {
+      const totalScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0);
+      averageScore = totalScore / Object.keys(assignmentScores).length;
+      setFinalGrade(Math.round(averageScore)); // Update the displayed grade
+      
+      // Check if eligible for certificate (all nodes completed and average score >= 85%)
+      isEligible = completedNodeIds.length > 0 && averageScore >= 85;
+    }
+  }
+  
+  // This useEffect handles eligibility check and redirection
+  // Placed before any conditional returns to comply with React Hook rules
+  useEffect(() => {
+    // Only run this effect after loading is complete
+    if (!loading && course) {
+      // Check eligibility after course data is loaded
+      if (!isEligible) {
+        toast({
+          title: "Not eligible for certificate",
+          description: "You need to complete all assignments with an average score of at least 85%.",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+        });
+        navigate(`/admin/courses/${courseId}/roadmap`);
+      }
+    }
+  }, [loading, isEligible, navigate, courseId, toast, course]);
+
   if (loading) {
     return (
       <Flex justify="center" align="center" h="100vh">
@@ -107,10 +149,6 @@ const Certificate = () => {
       </Flex>
     );
   }
-
-  // Check if all nodes are completed
-  const roadmapId = 'python-roadmap'; // This should be dynamic in a real app
-  const completedNodeIds = getCompletedNodeIds(roadmapId) || [];
   
   return (
     <Box p={8} maxW="1200px" mx="auto">

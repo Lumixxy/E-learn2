@@ -68,6 +68,27 @@ export const CompletedNodesProvider = ({ children }) => {
     return completedNodes[roadmapId] || [];
   };
 
+  // Check if a node is unlockable based on its dependencies
+  const isNodeUnlockable = (roadmapId, nodeId, dependencies = [], nodes = []) => {
+    // If the node has no dependencies, it's always unlockable
+    if (!dependencies || dependencies.length === 0) {
+      return true;
+    }
+
+    // Check if all dependencies are completed
+    const completedNodesList = getCompletedNodesForRoadmap(roadmapId);
+    
+    // For each dependency, check if it's completed
+    for (const depId of dependencies) {
+      const formattedDepId = String(depId).startsWith('node-') ? String(depId) : `node-${depId}`;
+      if (!completedNodesList.includes(formattedDepId)) {
+        return false; // At least one dependency is not completed
+      }
+    }
+    
+    return true; // All dependencies are completed
+  };
+
   return (
     <CompletedNodesContext.Provider
       value={{
@@ -76,7 +97,8 @@ export const CompletedNodesProvider = ({ children }) => {
         isNodeCompleted,
         getCompletedNodesForRoadmap,
         getRoadmapCompletionPercentage,
-        getCompletedNodeIds
+        getCompletedNodeIds,
+        isNodeUnlockable
       }}
     >
       {children}

@@ -48,13 +48,17 @@ const ConnectWallet = () => {
       });
       onClose();
     } catch (err) {
-      toast({
-        title: 'Connection Failed',
-        description: err.message || 'Failed to connect to MetaMask',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      // Don't show toast for user rejections as we'll show the error component instead
+      if (!err.message?.includes('User rejected the request')) {
+        toast({
+          title: 'Connection Failed',
+          description: err.message || 'Failed to connect to MetaMask',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+      // Error will be displayed via the MetaMaskError component
     }
   };
 

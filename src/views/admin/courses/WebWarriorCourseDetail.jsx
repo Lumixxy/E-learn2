@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Heading, VStack, HStack, Checkbox, Text, Badge, Button, Progress, Spinner } from '@chakra-ui/react';
+import { Box, Heading, VStack, HStack, Checkbox, Text, Badge, Button, Progress, Spinner, Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import { WebWarriorAPI } from '../../../api/webwarrior';
+import WebWarriorProgress from './WebWarriorProgress';
 
 const WebWarriorCourseDetail = () => {
   const { courseId } = useParams();
@@ -36,22 +37,35 @@ const WebWarriorCourseDetail = () => {
 
   return (
     <Box>
-      <Heading size='lg' mb={4}>Modules</Heading>
-      <VStack align='stretch' spacing={3}>
-        {modules.map(m => (
-          <HStack key={m.index} bg='white' borderWidth='1px' borderColor='brand.200' rounded='xl' p={4} justify='space-between'>
-            <HStack>
-              <Checkbox isChecked={m.completed} onChange={() => onToggle(m.index)} />
-              <Text color='navy.700' fontWeight='600'>{m.title}</Text>
-            </HStack>
-            <Badge colorScheme={m.completed ? 'green' : 'gray'}>{m.completed ? 'Done' : 'Pending'}</Badge>
-          </HStack>
-        ))}
-      </VStack>
-      <Box mt={6}><Progress value={progress} h='10px' rounded='full' colorScheme='purple' /></Box>
-      <Button mt={6} colorScheme='purple' isDisabled={!allComplete} onClick={() => navigate(`/admin/adventure-path/courses/${courseId}/assessment`)}>
-        {allComplete ? 'Start Assessment' : 'Complete all modules to unlock assessment'}
-      </Button>
+      <Tabs variant="enclosed" colorScheme="purple" mb={6}>
+        <TabList>
+          <Tab>Modules</Tab>
+          <Tab>Progress Dashboard</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <Heading size='lg' mb={4}>Modules</Heading>
+            <VStack align='stretch' spacing={3}>
+              {modules.map(m => (
+                <HStack key={m.index} bg='white' borderWidth='1px' borderColor='brand.200' rounded='xl' p={4} justify='space-between'>
+                  <HStack>
+                    <Checkbox isChecked={m.completed} onChange={() => onToggle(m.index)} />
+                    <Text color='navy.700' fontWeight='600'>{m.title}</Text>
+                  </HStack>
+                  <Badge colorScheme={m.completed ? 'green' : 'gray'}>{m.completed ? 'Done' : 'Pending'}</Badge>
+                </HStack>
+              ))}
+            </VStack>
+            <Box mt={6}><Progress value={progress} h='10px' rounded='full' colorScheme='purple' /></Box>
+            <Button mt={6} colorScheme='purple' isDisabled={!allComplete} onClick={() => navigate(`/admin/adventure-path/courses/${courseId}/assessment`)}>
+              {allComplete ? 'Start Assessment' : 'Complete all modules to unlock assessment'}
+            </Button>
+          </TabPanel>
+          <TabPanel>
+            <WebWarriorProgress courseId={courseId} />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Box>
   );
 };

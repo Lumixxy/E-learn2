@@ -91,6 +91,7 @@ import AnalyticsSettings from "./AnalyticsSettings";
 import ContentSettings from "./ContentSettings";
 import CommunicationSettings from "./CommunicationSettings";
 import PrivacySettings from './PrivacySettings';
+import StateResetButton from './StateResetButton';
 
 const UserSettings = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -461,6 +462,31 @@ const UserSettings = () => {
           </VStack>
         </ScaleFade>
       )
+    },
+    {
+      name: "Advanced",
+      icon: MdSettings,
+      component: (
+        <ScaleFade initialScale={0.9} in={true}>
+          <VStack spacing={6} align="stretch">
+            <ChakraCard p={6} bg={cardBg} borderWidth="1px" borderColor={borderColor} _hover={{ shadow: "lg" }}>
+              <VStack spacing={4} align="stretch">
+                <HStack>
+                  <Icon as={MdDataUsage} color={brandColor} boxSize={6} />
+                  <Text fontSize="lg" fontWeight="bold" color={textColorPrimary}>
+                    Course Progress Management
+                  </Text>
+                </HStack>
+                <Text color={textColorSecondary}>
+                  Reset your course progress data. This will clear all completed nodes, assignment scores, and other progress data.
+                  This action cannot be undone.
+                </Text>
+                <StateResetButton />
+              </VStack>
+            </ChakraCard>
+          </VStack>
+        </ScaleFade>
+      )
     }
   ];
 
@@ -594,4 +620,4 @@ const UserSettings = () => {
   );
 };
 
-export default UserSettings; 
+export default UserSettings;
