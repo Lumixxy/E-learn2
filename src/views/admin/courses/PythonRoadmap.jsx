@@ -236,6 +236,11 @@ export default function PythonRoadmap() {
     // Resources are displayed in the ResourcesList component in the right panel
 
     const label = String(node?.data?.label || '').toLowerCase();
+    handleNodeNavigation(label);
+  }, []);
+
+  // Separate function to handle navigation based on node label
+  const handleNodeNavigation = useCallback((label) => {
     if (course?.modules) {
       const matchModuleIndex = course.modules.findIndex((m) => {
         const inModuleTitle = String(m.title).toLowerCase().includes(label);

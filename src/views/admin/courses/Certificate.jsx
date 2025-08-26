@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Flex,
@@ -12,9 +12,11 @@ import {
   Divider,
   Badge,
   Icon,
+  useColorMode,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaDownload, FaShare, FaLinkedin, FaTwitter, FaCertificate } from 'react-icons/fa';
+import { FaDownload, FaShare, FaLinkedin, FaTwitter, FaCertificate, FaQrcode } from 'react-icons/fa';
 import { loadCourseById } from 'utils/courseDataLoader';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
 
@@ -26,7 +28,23 @@ const Certificate = () => {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('John Doe'); // In a real app, get from user profile
   const [issueDate, setIssueDate] = useState(new Date().toLocaleDateString());
+  const [finalGrade, setFinalGrade] = useState(92); // In a real app, get from user's course data
+  const [courseDuration, setCourseDuration] = useState('12 weeks'); // In a real app, get from course data
+  const certificateRef = useRef(null);
   const { getCompletedNodeIds } = useCompletedNodes();
+  const { colorMode } = useColorMode();
+  
+  // Generate a unique certificate ID
+  const certificateId = `PGA-${courseId}-${Date.now().toString().slice(-8)}`;
+  
+  // Color scheme based on color mode - moved before conditional returns
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gold', 'purple.400');
+  const headingColor = useColorModeValue('purple.700', 'purple.300');
+  const textColor = useColorModeValue('gray.700', 'gray.200');
+  const accentColor = useColorModeValue('purple.600', 'purple.300');
+  const patternOpacity = useColorModeValue(0.05, 0.1);
+  const detailsBgColor = useColorModeValue("gray.50", "gray.700");
   
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -51,13 +69,17 @@ const Certificate = () => {
   }, [courseId, toast]);
 
   const handleDownload = () => {
-    toast({
-      title: 'Certificate Downloaded',
-      description: 'Your certificate has been downloaded successfully.',
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    });
+    if (certificateRef.current) {
+      // In a real implementation, this would use html2canvas or a similar library
+      // to capture the certificate as an image and download it
+      toast({
+        title: 'Certificate Downloaded',
+        description: 'Your certificate has been downloaded successfully.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleShare = (platform) => {
@@ -104,11 +126,12 @@ const Certificate = () => {
 
       {/* Certificate Container */}
       <Box 
+        ref={certificateRef}
         border="2px solid" 
-        borderColor="gold" 
+        borderColor={borderColor} 
         borderRadius="md" 
         p={8} 
-        bg="white" 
+        bg={bgColor} 
         boxShadow="xl"
         position="relative"
         overflow="hidden"
@@ -121,26 +144,26 @@ const Certificate = () => {
           left={0} 
           right={0} 
           bottom={0} 
-          opacity={0.05} 
+          opacity={patternOpacity} 
           zIndex={0}
           bgImage="url('https://i.imgur.com/7rVzuvu.png')"
           bgSize="cover"
         />
 
         {/* Certificate Content */}
-        <VStack spacing={6} position="relative" zIndex={1}>
+        <VStack spacing={6} position="relative" zIndex={1} color={textColor}>
           <Flex justify="center" align="center" w="full">
-            <Icon as={FaCertificate} color="gold" boxSize={16} mr={4} />
-            <Heading as="h1" size="xl" color="purple.700" fontFamily="serif">
+            <Icon as={FaCertificate} color={borderColor} boxSize={16} mr={4} />
+            <Heading as="h1" size="xl" color={headingColor} fontFamily="serif">
               Certificate of Completion
             </Heading>
           </Flex>
 
-          <Text fontSize="lg" fontStyle="italic" color="gray.600">
+          <Text fontSize="lg" fontStyle="italic">
             This is to certify that
           </Text>
 
-          <Heading as="h2" size="lg" color="purple.800" fontFamily="serif" borderBottom="2px solid" borderColor="purple.200" pb={2}>
+          <Heading as="h2" size="lg" color={headingColor} fontFamily="serif" borderBottom="2px solid" borderColor={accentColor} pb={2}>
             {userName}
           </Heading>
 
@@ -148,24 +171,34 @@ const Certificate = () => {
             has successfully completed the course
           </Text>
 
-          <Heading as="h3" size="lg" color="purple.700" fontFamily="serif">
+          <Heading as="h3" size="lg" color={headingColor} fontFamily="serif">
             {course.title}
           </Heading>
 
           <Text fontSize="md" textAlign="center" maxW="700px">
             demonstrating proficiency in all required skills and knowledge areas
-            with a minimum passing grade of 85% on all assignments.
+            with a minimum passing grade of 85% on all assignments and final project.
           </Text>
 
-          <Divider borderColor="purple.200" />
+          <Divider borderColor={accentColor} />
 
-          <Flex justify="space-between" w="full" pt={4}>
-            <VStack align="flex-start">
+          <Flex justify="space-between" w="full" pt={4} flexWrap="wrap">
+            <VStack align="flex-start" mb={4} mr={4}>
               <Text fontWeight="bold">Issue Date:</Text>
               <Text>{issueDate}</Text>
             </VStack>
 
-            <VStack align="flex-end">
+            <VStack align="flex-start" mb={4} mr={4}>
+              <Text fontWeight="bold">Course Duration:</Text>
+              <Text>{courseDuration}</Text>
+            </VStack>
+
+            <VStack align="flex-start" mb={4} mr={4}>
+              <Text fontWeight="bold">Final Grade:</Text>
+              <Badge colorScheme="green" p={1}>{finalGrade}%</Badge>
+            </VStack>
+
+            <VStack align="flex-end" mb={4}>
               <Text fontWeight="bold">Provider:</Text>
               <Flex align="center">
                 <Text mr={2}>PyGenicArc</Text>
@@ -174,9 +207,12 @@ const Certificate = () => {
             </VStack>
           </Flex>
 
-          <Text fontSize="sm" color="gray.500" mt={4}>
-            Certificate ID: PGA-{courseId}-{Date.now().toString().slice(-8)}
-          </Text>
+          <HStack spacing={4} mt={4}>
+            <Text fontSize="sm" color={textColor}>
+              Certificate ID: {certificateId}
+            </Text>
+            <Icon as={FaQrcode} boxSize={6} color={accentColor} title="QR Code for certificate verification" />
+          </HStack>
         </VStack>
       </Box>
 
@@ -194,9 +230,9 @@ const Certificate = () => {
       </HStack>
 
       {/* Course Details */}
-      <Box bg="gray.50" p={6} borderRadius="md" boxShadow="md">
-        <Heading as="h3" size="md" mb={4}>Course Details</Heading>
-        <VStack align="stretch" spacing={3}>
+      <Box bg={detailsBgColor} p={6} borderRadius="md" boxShadow="md">
+        <Heading as="h3" size="md" mb={4} color={headingColor}>Course Details</Heading>
+        <VStack align="stretch" spacing={3} color={textColor}>
           <Flex>
             <Text fontWeight="bold" w="200px">Course:</Text>
             <Text>{course.title}</Text>
@@ -212,6 +248,14 @@ const Certificate = () => {
           <Flex>
             <Text fontWeight="bold" w="200px">Skills Acquired:</Text>
             <Text>{course.outcomes?.join(', ') || 'Python Programming, Data Structures, Algorithms'}</Text>
+          </Flex>
+          <Flex>
+            <Text fontWeight="bold" w="200px">Final Grade:</Text>
+            <Text>{finalGrade}%</Text>
+          </Flex>
+          <Flex>
+            <Text fontWeight="bold" w="200px">Certificate ID:</Text>
+            <Text>{certificateId}</Text>
           </Flex>
         </VStack>
       </Box>

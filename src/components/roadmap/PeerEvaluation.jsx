@@ -20,7 +20,8 @@ import {
   Stack,
   useToast,
   Heading,
-  Code
+  Code,
+  useColorModeValue
 } from '@chakra-ui/react';
 
 const PeerEvaluation = ({ isOpen, onClose, submission, nodeId, onEvaluationComplete }) => {
@@ -34,6 +35,14 @@ const PeerEvaluation = ({ isOpen, onClose, submission, nodeId, onEvaluationCompl
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
+  
+  // Color mode values for dark/light mode support
+  const bgColor = useColorModeValue("white", "gray.800");
+  const textColor = useColorModeValue("gray.800", "white");
+  const mutedTextColor = useColorModeValue("gray.500", "gray.400");
+  const submissionBg = useColorModeValue("gray.50", "gray.700");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const inputBg = useColorModeValue("white", "whiteAlpha.100");
 
   const handleRatingChange = (category, value) => {
     setRatings(prev => ({
@@ -88,15 +97,15 @@ const PeerEvaluation = ({ isOpen, onClose, submission, nodeId, onEvaluationCompl
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent bg={bgColor} color={textColor}>
         <ModalHeader>Peer Evaluation</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={6} align="stretch">
             <Box>
               <Heading size="sm" mb={2}>Submission to Evaluate:</Heading>
-              <Box p={4} borderRadius="md" bg="gray.50" maxHeight="300px" overflowY="auto">
-                <Code width="100%" p={2} display="block" whiteSpace="pre-wrap">
+              <Box p={4} borderRadius="md" bg={submissionBg} maxHeight="300px" overflowY="auto" borderWidth="1px" borderColor={borderColor}>
+                <Code width="100%" p={2} display="block" whiteSpace="pre-wrap" bg={inputBg} color={textColor}>
                   {submission || "No submission content available."}
                 </Code>
               </Box>
@@ -182,8 +191,10 @@ const PeerEvaluation = ({ isOpen, onClose, submission, nodeId, onEvaluationCompl
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="Provide specific feedback on what was done well and what could be improved..."
                 minHeight="150px"
+                bg={inputBg}
+                borderColor={borderColor}
               />
-              <Text fontSize="sm" color="gray.500" mt={1}>
+              <Text fontSize="sm" color={mutedTextColor} mt={1}>
                 Minimum 50 characters required. Be constructive and specific in your feedback.
               </Text>
             </FormControl>

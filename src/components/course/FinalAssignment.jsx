@@ -130,10 +130,10 @@ const FinalAssignment = ({ isOpen, onClose, courseId, courseName }) => {
   useEffect(() => {
     // In a real app, these would be API calls
     setPendingEvaluations(MOCK_SUBMISSIONS.filter(sub => 
-      !MOCK_EVALUATIONS.some(eval => eval.evaluatorId === 1 && eval.submissionUserId === sub.userId)
+      !MOCK_EVALUATIONS.some(evaluation => evaluation.evaluatorId === 1 && evaluation.submissionUserId === sub.userId)
     ));
     
-    setCompletedEvaluations(MOCK_EVALUATIONS.filter(eval => eval.evaluatorId === 1));
+    setCompletedEvaluations(MOCK_EVALUATIONS.filter(evaluation => evaluation.evaluatorId === 1));
     
     // Check if current user has submitted
     const userSubmission = MOCK_SUBMISSIONS.find(sub => sub.userId === 1);
@@ -142,11 +142,11 @@ const FinalAssignment = ({ isOpen, onClose, courseId, courseName }) => {
       setSubmissionStatus('submitted');
       
       // Get evaluations for current user's submission
-      const userEvals = MOCK_EVALUATIONS.filter(eval => eval.submissionUserId === 1);
+      const userEvals = MOCK_EVALUATIONS.filter(evaluation => evaluation.submissionUserId === 1);
       setEvaluations(userEvals);
       
       // Check if eligible for certificate (at least 2 passing evaluations)
-      const passingEvals = userEvals.filter(eval => eval.score >= assignment.passingScore);
+      const passingEvals = userEvals.filter(evaluation => evaluation.score >= assignment.passingScore);
       setCertificateEligible(passingEvals.length >= 2);
     }
   }, []);
@@ -353,18 +353,18 @@ const FinalAssignment = ({ isOpen, onClose, courseId, courseName }) => {
                         <Box>
                           <Text fontWeight="bold" mb={2}>Evaluations Received:</Text>
                           <VStack spacing={3} align="stretch">
-                            {evaluations.map((eval, index) => (
+                            {evaluations.map((evaluation, index) => (
                               <Box key={index} p={3} borderRadius="md" bg={cardBg} boxShadow="sm" border="1px solid" borderColor={borderColor}>
                                 <HStack justify="space-between">
                                   <HStack>
-                                    <Badge colorScheme={eval.score >= assignment.passingScore ? "green" : "red"}>
-                                      Score: {eval.score}/100
+                                    <Badge colorScheme={evaluation.score >= assignment.passingScore ? "green" : "red"}>
+                                      Score: {evaluation.score}/100
                                     </Badge>
-                                    <Text fontSize="sm" color={mutedColor}>{eval.createdAt}</Text>
+                                    <Text fontSize="sm" color={mutedColor}>{evaluation.createdAt}</Text>
                                   </HStack>
-                                  {renderStarRating(eval.score)}
+                                  {renderStarRating(evaluation.score)}
                                 </HStack>
-                                <Text mt={2}>{eval.feedback}</Text>
+                                <Text mt={2}>{evaluation.feedback}</Text>
                               </Box>
                             ))}
                           </VStack>
@@ -473,18 +473,18 @@ const FinalAssignment = ({ isOpen, onClose, courseId, courseName }) => {
                         </Tr>
                       </Thead>
                       <Tbody>
-                        {completedEvaluations.map((eval, index) => {
-                          const user = MOCK_ENROLLED_USERS.find(u => u.id === eval.submissionUserId);
+                        {completedEvaluations.map((evaluation, index) => {
+                          const user = MOCK_ENROLLED_USERS.find(u => u.id === evaluation.submissionUserId);
                           return (
                             <Tr key={index}>
                               <Td>{user?.name}</Td>
-                              <Td>{eval.createdAt}</Td>
+                              <Td>{evaluation.createdAt}</Td>
                               <Td>
-                                <Badge colorScheme={eval.score >= assignment.passingScore ? "green" : "red"}>
-                                  {eval.score}/100
+                                <Badge colorScheme={evaluation.score >= assignment.passingScore ? "green" : "red"}>
+                                  {evaluation.score}/100
                                 </Badge>
                               </Td>
-                              <Td>{eval.feedback}</Td>
+                              <Td>{evaluation.feedback}</Td>
                             </Tr>
                           );
                         })}
@@ -574,14 +574,14 @@ const FinalAssignment = ({ isOpen, onClose, courseId, courseName }) => {
                       </Thead>
                       <Tbody>
                         {evaluations.length > 0 ? (
-                          evaluations.map((eval, index) => {
-                            const evaluator = MOCK_ENROLLED_USERS.find(u => u.id === eval.evaluatorId);
-                            const isPassing = eval.score >= assignment.passingScore;
+                          evaluations.map((evaluation, index) => {
+                            const evaluator = MOCK_ENROLLED_USERS.find(u => u.id === evaluation.evaluatorId);
+                            const isPassing = evaluation.score >= assignment.passingScore;
                             return (
                               <Tr key={index}>
                                 <Td>{evaluator?.name}</Td>
-                                <Td>{eval.createdAt}</Td>
-                                <Td>{eval.score}/100</Td>
+                                <Td>{evaluation.createdAt}</Td>
+                                <Td>{evaluation.score}/100</Td>
                                 <Td>
                                   <Badge colorScheme={isPassing ? "green" : "red"}>
                                     {isPassing ? "Pass" : "Fail"}

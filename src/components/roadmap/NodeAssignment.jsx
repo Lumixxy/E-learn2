@@ -22,7 +22,8 @@ import {
   useToast,
   Divider,
   Code,
-  Badge
+  Badge,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { FaUserFriends, FaCheck, FaTimes } from 'react-icons/fa';
 import nodeAssignments from '../../data/nodeAssignments';
@@ -38,6 +39,14 @@ const NodeAssignment = ({ isOpen, onClose, nodeId, nodeName, onAssignmentComplet
   const [currentPeerSubmission, setCurrentPeerSubmission] = useState('');
   const [evaluationsCompleted, setEvaluationsCompleted] = useState(0);
   const [evaluationRequired, setEvaluationRequired] = useState(false);
+
+  // Color mode values for dark/light mode support
+  const bgColor = useColorModeValue("white", "gray.800");
+  const textColor = useColorModeValue("gray.800", "white");
+  const mutedTextColor = useColorModeValue("gray.500", "gray.400");
+  const instructionsBg = useColorModeValue("gray.50", "gray.700");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const inputBg = useColorModeValue("white", "whiteAlpha.100");
 
   const toast = useToast();
   
@@ -212,6 +221,12 @@ if __name__ == "__main__":
     }
   };
 
+  const handleRetake = () => {
+    setScore(null);
+    setSubmission('');
+    setFile(null);
+  };
+
   const handleSubmit = () => {
     if (submission.trim().length < assignment.minWordCount) {
       toast({
@@ -247,11 +262,11 @@ if __name__ == "__main__":
         const generatedScore = Math.floor(Math.random() * 36) + 65;
         setScore(generatedScore);
         
-        // Show toast notification
+        // Show toast notification with clear indication about passing requirement
         toast({
           title: 'Assignment Submitted',
-          description: `Your assignment has been submitted and scored ${generatedScore}%`,
-          status: generatedScore >= (assignment.passingGrade || 85) ? 'success' : 'warning',
+          description: `Your assignment has been scored ${generatedScore}%. ${generatedScore >= 85 ? 'You passed!' : 'You need at least 85% to pass. You can retake the assignment as many times as needed.'}`,
+          status: generatedScore >= 85 ? 'success' : 'warning',
           duration: 5000,
           isClosable: true,
         });
@@ -261,8 +276,8 @@ if __name__ == "__main__":
 
   const handleComplete = () => {
     // Pass the score back to the parent component
-    // Use the assignment's passingGrade (default to 85% if not specified)
-    const passingGrade = assignment.passingGrade || 85;
+    // Always use 85% as the passing grade as per requirements
+    const passingGrade = 85;
     if (onAssignmentComplete) {
       onAssignmentComplete(score, score >= passingGrade);
     }
@@ -272,7 +287,7 @@ if __name__ == "__main__":
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent bg={bgColor} color={textColor}>
         <ModalHeader>{assignment.title}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -282,7 +297,7 @@ if __name__ == "__main__":
               <Text>{assignment.description}</Text>
               
               {assignment.instructions && (
-                <Box p={4} borderRadius="md" bg="gray.50" whiteSpace="pre-wrap">
+                <Box p={4} borderRadius="md" bg={instructionsBg} whiteSpace="pre-wrap" borderWidth="1px" borderColor={borderColor}>
                   <Text whiteSpace="pre-wrap">{assignment.instructions}</Text>
                 </Box>
               )}
@@ -294,8 +309,10 @@ if __name__ == "__main__":
                   onChange={(e) => setSubmission(e.target.value)}
                   placeholder="Type your solution here..."
                   minHeight="200px"
+                  bg={inputBg}
+                  borderColor={borderColor}
                 />
-                <Text fontSize="sm" color="gray.500" mt={1}>
+                <Text fontSize="sm" color={mutedTextColor} mt={1}>
                   Minimum {assignment.minWordCount} characters required
                 </Text>
               </FormControl>
@@ -306,8 +323,10 @@ if __name__ == "__main__":
                   type="file"
                   accept=".py,.txt,.pdf"
                   onChange={handleFileChange}
+                  bg={inputBg}
+                  borderColor={borderColor}
                 />
-                <Text fontSize="sm" color="gray.500" mt={1}>
+                <Text fontSize="sm" color={mutedTextColor} mt={1}>
                   Accepted formats: .py, .txt, .pdf
                 </Text>
               </FormControl>
@@ -320,13 +339,13 @@ if __name__ == "__main__":
               
               <Progress 
                 value={score} 
-                colorScheme={score >= (assignment.passingGrade || 85) ? "green" : "red"} 
+                colorScheme={score >= 85 ? "green" : "red"} 
                 height="24px" 
                 borderRadius="md"
               />
               
               <Box>
-                {score >= (assignment.passingGrade || 85) ? (
+                {score >= 85 ? (
                   <Alert status="success">
                     <AlertIcon />
                     Congratulations! You've passed this assignment.
@@ -334,23 +353,23 @@ if __name__ == "__main__":
                 ) : (
                   <Alert status="error">
                     <AlertIcon />
-                    You need a score of at least {assignment.passingGrade || 85}% to pass. Please try again.
+                    You need a score of at least 85% to pass. You can retake this assignment as many times as needed.
                   </Alert>
                 )}
               </Box>
               
               <Divider my={4} />
               
-              <Box>
+              <Box borderWidth="1px" borderRadius="md" p={3} borderColor={borderColor}>
                 <Text fontWeight="bold" mb={2}>Grading System:</Text>
                 <Text fontSize="sm">
-                  <Code>A+</Code>: 95-100% - Exceptional work with perfect implementation<br/>
-                  <Code>A</Code>: 90-94% - Excellent work with minor improvements possible<br/>
-                  <Code>B+</Code>: 85-89% - Very good work meeting all requirements<br/>
-                  <Code>B</Code>: 80-84% - Good work with some areas for improvement<br/>
-                  <Code>C+</Code>: 75-79% - Satisfactory work with several areas for improvement<br/>
-                  <Code>C</Code>: 70-74% - Acceptable work that meets minimum requirements<br/>
-                  <Code>F</Code>: Below 70% - Does not meet minimum requirements
+                  <Code colorScheme="green">A+</Code>: 95-100% - Exceptional work with perfect implementation<br/>
+                  <Code colorScheme="green">A</Code>: 90-94% - Excellent work with minor improvements possible<br/>
+                  <Code colorScheme="green">B+</Code>: 85-89% - Very good work meeting all requirements<br/>
+                  <Code colorScheme="yellow">B</Code>: 80-84% - Good work with some areas for improvement<br/>
+                  <Code colorScheme="yellow">C+</Code>: 75-79% - Satisfactory work with several areas for improvement<br/>
+                  <Code colorScheme="yellow">C</Code>: 70-74% - Acceptable work that meets minimum requirements<br/>
+                  <Code colorScheme="red">F</Code>: Below 70% - Does not meet minimum requirements
                 </Text>
               </Box>
             </VStack>
@@ -400,9 +419,16 @@ if __name__ == "__main__":
                 </Button>
               </>
             ) : (
+              <>
+              {score < 85 && (
+                <Button colorScheme="orange" onClick={handleRetake}>
+                  Retake Assignment
+                </Button>
+              )}
               <Button colorScheme="blue" onClick={handleComplete}>
-                {score >= (assignment.passingGrade || 85) ? "Continue to Next Node" : "Try Again"}
+                {score >= 85 ? "Continue to Next Node" : "Close"}
               </Button>
+              </>
             )}
           </HStack>
         </ModalFooter>

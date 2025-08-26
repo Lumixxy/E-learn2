@@ -24,6 +24,8 @@ import {
   FormLabel,
   FormErrorMessage,
   useDisclosure,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import { FaCheck, FaClock, FaBook, FaCertificate, FaStar, FaLock, FaGraduationCap } from 'react-icons/fa';
 import { loadCourseById } from 'utils/courseDataLoader';
@@ -35,6 +37,10 @@ const CourseEnroll = () => {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const toast = useToast();
   const [showFinalAssignment, setShowFinalAssignment] = useState(false);
+  const [allAssignmentsCompleted, setAllAssignmentsCompleted] = useState(false);
+  const [assignmentScores, setAssignmentScores] = useState({});
+  const [finalProjectScore, setFinalProjectScore] = useState(null);
+  const [overallGrade, setOverallGrade] = useState(null);
 
   const [courseData, setCourseData] = useState({
     title: '',
@@ -76,6 +82,36 @@ const CourseEnroll = () => {
       }
     };
     fetchCourseData();
+    
+    // Check if all assignments are completed with at least 85% score
+    // In a real app, this would fetch from a database
+    const storedAssignmentScores = localStorage.getItem(`assignmentScores_${courseId}`);
+    if (storedAssignmentScores) {
+      const scores = JSON.parse(storedAssignmentScores);
+      setAssignmentScores(scores);
+      
+      // Check if all assignments have a score of at least 85%
+      const allPassed = Object.values(scores).every(score => score >= 85);
+      setAllAssignmentsCompleted(allPassed && Object.keys(scores).length > 0);
+    }
+    
+    // Check if final project is completed
+    const storedFinalProjectScore = localStorage.getItem(`finalProjectScore_${courseId}`);
+    if (storedFinalProjectScore) {
+      const score = JSON.parse(storedFinalProjectScore);
+      setFinalProjectScore(score);
+      
+      // Calculate overall grade if both assignments and final project are completed
+      if (storedAssignmentScores) {
+        const assignmentScores = JSON.parse(storedAssignmentScores);
+        if (Object.keys(assignmentScores).length > 0) {
+          const avgAssignmentScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0) / Object.values(assignmentScores).length;
+          // Overall grade: 60% assignments + 40% final project
+          const overall = Math.round((avgAssignmentScore * 0.6) + (score * 0.4));
+          setOverallGrade(overall);
+        }
+      }
+    }
   }, [courseId]);
 
   // Color mode values
@@ -225,6 +261,62 @@ const CourseEnroll = () => {
                 
                 <Box>
                   <Text fontSize="2xl" fontWeight="bold" color={textColor} mb={4}>
+                    Grade System
+                  </Text>
+                  <Card variant="outline" borderColor="blue.200" bg="blue.50" mb={6}>
+                    <CardBody>
+                      <VStack spacing={4} align="stretch">
+                        <HStack justify="space-between">
+                          <Text fontWeight="bold" color="blue.700">Assignment Evaluations:</Text>
+                          <Text>
+                            {Object.keys(assignmentScores).length > 0 
+                              ? `${Object.keys(assignmentScores).length} completed` 
+                              : 'No assignments completed yet'}
+                          </Text>
+                        </HStack>
+                        {Object.entries(assignmentScores).length > 0 && (
+                          <Box>
+                            {Object.entries(assignmentScores).map(([nodeId, score], index) => (
+                              <HStack key={nodeId} justify="space-between" mt={1}>
+                                <Text fontSize="sm">Assignment {index + 1}:</Text>
+                                <Badge colorScheme={score >= 85 ? 'green' : 'red'}>
+                                  {score}%
+                                </Badge>
+                              </HStack>
+                            ))}
+                          </Box>
+                        )}
+                        <Divider />
+                        <HStack justify="space-between">
+                          <Text fontWeight="bold" color="blue.700">Final Project Score:</Text>
+                          {finalProjectScore ? (
+                            <Badge colorScheme={finalProjectScore >= 85 ? 'green' : 'red'} fontSize="md">
+                              {finalProjectScore}%
+                            </Badge>
+                          ) : (
+                            <Text fontSize="sm">Not completed</Text>
+                          )}
+                        </HStack>
+                        <Divider />
+                        <HStack justify="space-between">
+                          <Text fontWeight="bold" color="blue.700">Overall Grade:</Text>
+                          {overallGrade ? (
+                            <Badge colorScheme={overallGrade >= 85 ? 'green' : 'red'} fontSize="md">
+                              {overallGrade}%
+                            </Badge>
+                          ) : (
+                            <Text fontSize="sm">Not available</Text>
+                          )}
+                        </HStack>
+                      </VStack>
+                    </CardBody>
+                  </Card>
+                </Box>
+                
+                <Divider />
+                
+                <Box>
+                  <Text fontSize="2xl" fontWeight="bold" color={textColor} mb={4}>
                     Final Project
                   </Text>
                   <Card variant="outline" borderColor="purple.200" bg="purple.50" mb={6}>
@@ -237,17 +329,23 @@ const CourseEnroll = () => {
                           </Text>
                           <Text color={mutedColor}>
                             Complete this final project to demonstrate your mastery of all course concepts. 
-                            Your project will be evaluated by your peers, and you'll need to pass at least 
-                            two peer evaluations to earn your certificate.
+                            Your project will be evaluated by your peers, and you'll need to achieve at least 
+                            85% score to earn your certificate.
                           </Text>
+                          {!allAssignmentsCompleted && (
+                            <Alert status="warning" mt={2} size="sm">
+                              <AlertIcon />
+                              You must complete all assignments with at least 85% score to unlock the final project.
+                            </Alert>
+                          )}
                           <Button 
                             colorScheme="purple" 
                             size="sm" 
                             mt={3} 
                             onClick={() => setShowFinalAssignment(true)}
-                            isDisabled={!isEnrolled}
+                            isDisabled={!isEnrolled || !allAssignmentsCompleted}
                           >
-                            Start Final Project
+                            {finalProjectScore ? 'Review Final Project' : 'Start Final Project'}
                           </Button>
                         </Box>
                       </HStack>
@@ -288,8 +386,24 @@ const CourseEnroll = () => {
                               PyGenicArc Certificate
                             </Text>
                             <Text color={mutedColor}>
-                              Earn an industry-recognized certificate upon completion of all assignments with a minimum of 85% score.
+                              Earn an industry-recognized certificate upon completion of all assignments and final project with a minimum of 85% score.
                             </Text>
+                            {finalProjectScore && finalProjectScore >= 85 ? (
+                              <Button
+                                colorScheme="green"
+                                size="sm"
+                                mt={3}
+                                leftIcon={<FaCertificate />}
+                                onClick={() => navigate(`/admin/courses/${courseId}/certificate`)}
+                              >
+                                View Your Certificate
+                              </Button>
+                            ) : (
+                              <Alert status="info" mt={2} size="sm">
+                                <AlertIcon />
+                                Complete the final project with at least 85% score to earn your certificate.
+                              </Alert>
+                            )}
                           </Box>
                         </HStack>
                       </CardBody>

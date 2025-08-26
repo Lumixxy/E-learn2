@@ -131,7 +131,7 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
         setEvaluations(parsedEvaluations);
         
         // Check certificate eligibility (needs at least 2 passing evaluations)
-        const passingEvaluations = parsedEvaluations.filter(evaluation => evaluation.score >= 70);
+        const passingEvaluations = parsedEvaluations.filter(evaluation => evaluation.score >= 85);
         setCertificateEligible(passingEvaluations.length >= 2);
         
         // Calculate average grade
@@ -375,7 +375,7 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
                           <Box key={index} p={4} borderWidth="1px" borderRadius="md">
                             <HStack justify="space-between" mb={2}>
                               <Text fontWeight="bold">Evaluation from {evaluation.evaluatorName}</Text>
-                              <Badge colorScheme={evaluation.score >= 70 ? 'green' : 'red'}>
+                              <Badge colorScheme={evaluation.score >= 85 ? 'green' : 'red'}>
                                 Score: {evaluation.score}%
                               </Badge>
                             </HStack>
@@ -399,10 +399,10 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
                           </HStack>
                           <HStack spacing={4} align="center" mt={2}>
                             <Text>Passing evaluations: 
-                              {evaluations.filter(e => e.score >= 70).length}/2 required
+                              {evaluations.filter(e => e.score >= 85).length}/2 required
                             </Text>
                             <Progress 
-                              value={(evaluations.filter(e => e.score >= 70).length / 2) * 100} 
+                              value={(evaluations.filter(e => e.score >= 85).length / 2) * 100} 
                               colorScheme="green" 
                               size="sm" 
                               width="200px" 
@@ -487,18 +487,18 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
                       <VStack spacing={4}>
                         <Alert status="info" borderRadius="md">
                           <AlertIcon />
-                          You need to receive at least 2 passing evaluations (70% or higher) 
+                          You need to receive at least 2 passing evaluations (85% or higher) 
                           to be eligible for a certificate.
                         </Alert>
                         <Box width="100%">
                           <Text mb={2}>Certificate Eligibility Progress:</Text>
                           <Progress 
-                            value={(evaluations.filter(e => e.score >= 70).length / 2) * 100} 
+                            value={(evaluations.filter(e => e.score >= 85).length / 2) * 100} 
                             colorScheme="purple" 
                             size="md" 
                           />
                           <Text mt={2} fontSize="sm">
-                            {evaluations.filter(e => e.score >= 70).length}/2 passing evaluations
+                            {evaluations.filter(e => e.score >= 85).length}/2 passing evaluations
                           </Text>
                         </Box>
                       </VStack>
@@ -541,8 +541,13 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
 
 // Evaluation Form Component
 const EvaluationForm = ({ submissionId, onSubmit }) => {
-  const [score, setScore] = useState(70);
+  const [score, setScore] = useState(85);
   const [feedback, setFeedback] = useState('');
+  
+  // Color mode values for dark/light mode support
+  const inputBg = useColorModeValue("white", "whiteAlpha.100");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const mutedTextColor = useColorModeValue("gray.500", "gray.400");
   
   const handleSubmit = () => {
     if (feedback.length < 50) {
@@ -561,8 +566,10 @@ const EvaluationForm = ({ submissionId, onSubmit }) => {
             value={score} 
             onChange={(e) => setScore(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))} 
             width="100px"
+            bg={inputBg}
+            borderColor={borderColor}
           />
-          <Text>{score >= 70 ? 'Pass' : 'Fail'}</Text>
+          <Text>{score >= 85 ? 'Pass' : 'Fail'}</Text>
         </HStack>
       </FormControl>
       
@@ -573,8 +580,10 @@ const EvaluationForm = ({ submissionId, onSubmit }) => {
           onChange={(e) => setFeedback(e.target.value)} 
           placeholder="Provide constructive feedback on the submission..."
           minHeight="150px"
+          bg={inputBg}
+          borderColor={borderColor}
         />
-        <Text fontSize="sm" mt={2} color="gray.500">
+        <Text fontSize="sm" mt={2} color={mutedTextColor}>
           Minimum 50 characters required. {feedback.length}/50 characters.
         </Text>
       </FormControl>
