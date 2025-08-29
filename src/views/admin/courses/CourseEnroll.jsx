@@ -26,6 +26,13 @@ import {
   useDisclosure,
   Alert,
   AlertIcon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from '@chakra-ui/react';
 import { FaCheck, FaClock, FaBook, FaCertificate, FaStar, FaLock, FaGraduationCap } from 'react-icons/fa';
 import { loadCourseById } from 'utils/courseDataLoader';
@@ -38,7 +45,7 @@ const CourseEnroll = () => {
   const navigate = useNavigate();
   const [isEnrolled, setIsEnrolled] = useState(false);
   const toast = useToast();
-  const [showFinalAssignment, setShowFinalAssignment] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [allAssignmentsCompleted, setAllAssignmentsCompleted] = useState(false);
   const [assignmentScores, setAssignmentScores] = useState({});
   const [finalProjectScore, setFinalProjectScore] = useState(null);
@@ -168,14 +175,12 @@ const CourseEnroll = () => {
     <Box minH="100vh" bg={bgColor} py={8}>
       <Container maxW="container.xl">
         {/* Final Assignment Modal */}
-        {showFinalAssignment && (
-          <FinalAssignment 
-            isOpen={showFinalAssignment} 
-            onClose={() => setShowFinalAssignment(false)} 
-            roadmapId="python" 
-            courseId={courseId} 
-          />
-        )}
+        <FinalAssignment 
+          isOpen={isOpen} 
+          onClose={onClose} 
+          roadmapId={courseId} 
+          courseId={courseId} 
+        />
         <VStack spacing={8} align="stretch">
           {/* Enrollment */}
           {!isEnrolled ? (
@@ -320,7 +325,7 @@ const CourseEnroll = () => {
                             colorScheme="purple" 
                             size="sm" 
                             mt={3} 
-                            onClick={() => setShowFinalAssignment(true)}
+                            onClick={onOpen}
                             isDisabled={!isEnrolled || !allAssignmentsCompleted}
                           >
                             {finalProjectScore ? 'Review Final Project' : 'Start Final Project'}

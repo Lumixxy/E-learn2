@@ -408,14 +408,13 @@ export default function PythonRoadmap() {
         }
         
         // Update assignment scores with the current assignment
-        if (!assignmentScores[nodeId]) {
-          assignmentScores[nodeId] = score;
-          localStorage.setItem(`assignmentScores_${courseId}`, JSON.stringify(assignmentScores));
-          
-          // Recalculate average after adding new score
-          const totalScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0);
-          averageScore = totalScore / Object.keys(assignmentScores).length;
-        }
+        // Always update the score to allow for retaking assignments
+        assignmentScores[nodeId] = score;
+        localStorage.setItem(`assignmentScores_${courseId}`, JSON.stringify(assignmentScores));
+        
+        // Recalculate average after adding or updating score
+        const totalScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0);
+        averageScore = totalScore / Object.keys(assignmentScores).length;
         
         // Check if all nodes are completed AND average score is at least 85%
         if (allNodesCompleted && averageScore >= 85) {

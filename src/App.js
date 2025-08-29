@@ -7,6 +7,7 @@ import RTLLayout from './layouts/rtl';
 import { XPProvider } from './contexts/XPContext';
 import { CompletedNodesProvider } from './context/CompletedNodesContext';
 import { Web3Provider } from './context/Web3Context';
+import { LearningProvider } from './contexts/LearningContext';
 import {
   ChakraProvider,
   useToast
@@ -60,7 +61,8 @@ export default function Main() {
       <Web3Provider>
         <XPProvider>
           <CompletedNodesProvider>
-            <CartProvider>
+            <LearningProvider>
+              <CartProvider>
               <Routes>
                 <Route path="auth/*" element={<AuthLayout />} />
                 <Route
@@ -77,7 +79,8 @@ export default function Main() {
                 />
                 <Route path="/" element={<Navigate to="/admin/home" replace />} />
               </Routes>
-            </CartProvider>
+              </CartProvider>
+            </LearningProvider>
           </CompletedNodesProvider>
         </XPProvider>
       </Web3Provider>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, lazy } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import {
   Box,
   Flex,
@@ -29,7 +29,9 @@ import {
   Stack,
   Textarea,
   useToast,
+  Spinner,
 } from '@chakra-ui/react';
+
 import {
   FiPlay,
   FiFileText,
@@ -42,16 +44,19 @@ import {
   FiStar,
   FiCode,
   FiMessageSquare,
+  FiBarChart2,
 } from 'react-icons/fi';
 
 export default function CourseDetail() {
   const { courseId } = useParams();
+  const location = useLocation();
   const toast = useToast();
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [selectedModule, setSelectedModule] = useState(0);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCodeEditor, setShowCodeEditor] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(location.state?.openAnalytics || false);
   const [code, setCode] = useState('public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}');
   const [output, setOutput] = useState('');
   const [comments, setComments] = useState([]);
@@ -249,6 +254,18 @@ export default function CourseDetail() {
                   <Text fontSize="sm">Notes</Text>
                 </HStack>
               </Button>
+              <Button 
+                variant="ghost" 
+                justifyContent="flex-start" 
+                p={4} 
+                color={textColor}
+                onClick={() => setShowAnalytics(true)}
+              >
+                <HStack>
+                  <Icon as={FiBarChart2} />
+                  <Text fontSize="sm">Analytics</Text>
+                </HStack>
+              </Button>
             </VStack>
           </VStack>
         </Box>
@@ -422,6 +439,20 @@ export default function CourseDetail() {
           </HStack>
         </VStack>
       </Box>
+
+      {/* Analytics Dashboard Modal */}
+      <Modal isOpen={showAnalytics} onClose={() => setShowAnalytics(false)} size="full">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Course Analytics Dashboard</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <React.Suspense fallback={<Flex justify="center" align="center" minH="60vh"><Spinner size="xl" /></Flex>}>
+              <AdvancedAnalyticsDashboard courseId={courseId} courseData={courseData} isCourseSpecific={true} />
+            </React.Suspense>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

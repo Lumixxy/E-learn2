@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Box, Text, Image, Progress, Button, useColorModeValue, SimpleGrid, Spinner, Center } from "@chakra-ui/react";
+import { Box, Text, Image, Progress, Button, useColorModeValue, SimpleGrid, Spinner, Center, HStack, Icon, Flex } from "@chakra-ui/react";
 import Card from "../card/Card";
 import { Link } from "react-router-dom";
 import { useCompletedNodes } from "../../context/CompletedNodesContext";
+import { FiBarChart2 } from "react-icons/fi";
 
 const InProgressCoursesCard = () => {
   const [courses, setCourses] = useState([]);
@@ -127,19 +128,34 @@ const InProgressCoursesCard = () => {
               <Text fontSize="sm" color={textColorTertiary} mb={4}>
                 {course.progress}% completed • {course.lessons} lessons
               </Text>
-              <Link to={`/admin/courses/${course.id}`}>
-                <Button
-                  colorScheme="blue"
-                  size="md"
-                  w="full"
-                  _hover={{
-                    transform: "scale(1.02)",
-                    transition: "transform 0.2s ease"
-                  }}
-                >
-                  Continue Learning
-                </Button>
-              </Link>
+              <Flex gap={2}>
+                <Link to={`/admin/courses/${course.id}`} style={{ flex: 1 }}>
+                  <Button
+                    colorScheme="blue"
+                    size="md"
+                    w="full"
+                    _hover={{
+                      transform: "scale(1.02)",
+                      transition: "transform 0.2s ease"
+                    }}
+                  >
+                    Continue Learning
+                  </Button>
+                </Link>
+                <Link to={`/admin/courses/${course.id}/analytics`}>
+                  <Button
+                    variant="outline"
+                    colorScheme="blue"
+                    size="md"
+                    _hover={{
+                      transform: "scale(1.02)",
+                      transition: "transform 0.2s ease"
+                    }}
+                  >
+                    <Icon as={FiBarChart2} />
+                  </Button>
+                </Link>
+              </Flex>
             </Box>
           </Card>
         ))}

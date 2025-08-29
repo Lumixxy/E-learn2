@@ -1,14 +1,18 @@
 import React from "react";
-import { Text, HStack, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Text, HStack, VStack, useColorModeValue, Button, Flex, Icon } from "@chakra-ui/react";
 import Card from "../card/Card";
+import { MdInsights } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
-const ProgressAnalyticsCard = () => {
+const ProgressAnalyticsCard = ({ onViewAdvancedAnalytics }) => {
   const textColor = useColorModeValue("gray.700", "white");
   const textColorSecondary = useColorModeValue("gray.500", "whiteAlpha.700");
   const textColorTertiary = useColorModeValue("gray.400", "whiteAlpha.600");
   const blueColor = useColorModeValue("blue.500", "blue.300");
   const greenColor = useColorModeValue("green.500", "green.300");
   const purpleColor = useColorModeValue("purple.500", "purple.300");
+  const buttonBg = useColorModeValue("blue.50", "blue.900");
+  const buttonHoverBg = useColorModeValue("blue.100", "blue.800");
 
   return (
     <Card>
@@ -32,4 +36,4 @@ const ProgressAnalyticsCard = () => {
   );
 };
 
-export default ProgressAnalyticsCard; 
+export default ProgressAnalyticsCard;

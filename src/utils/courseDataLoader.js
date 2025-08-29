@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx';
 
 // Helper to aggregate rows by course and module into a rich structure
-const aggregateRowsToCourses = (rows) => {
+export const aggregateRowsToCourses = (rows) => {
   const courseNameToCourse = new Map();
   let nextCourseId = 1;
 

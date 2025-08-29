@@ -116,7 +116,7 @@ const routes = [
     name: "Course Roadmap",
     layout: "/admin",
     path: "/courses/:courseId/roadmap",
-    component: <PythonRoadmap />,
+    component: <CourseRoadmap />,
     hidden: false,
   },
   {

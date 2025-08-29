@@ -21,6 +21,7 @@ import { StarIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { loadCourseData } from 'utils/courseDataLoader';
 import CourseDialog from 'components/course/CourseDialog';
+import { useLearning } from 'contexts/LearningContext';
 
 const CourseCard = ({ 
   title, 
@@ -108,36 +109,76 @@ const CoursesGrid = () => {
   const toast = useToast();
   const bgColor = useColorModeValue("gray.50", "navy.900");
   const navigate = useNavigate();
+  const { availableCourses } = useLearning();
 
   useEffect(() => {
     console.log('CoursesGrid mounted');
-    const fetchCourses = async () => {
-      try {
-        console.log('Fetching courses...');
-        const courseData = await loadCourseData();
-        console.log('Course data loaded:', courseData);
-        // Filter to Python-related courses if title contains 'Python'
-        const pythonCourses = courseData.filter((c) =>
-          String(c.title || c.course || '').toLowerCase().includes('python')
-        );
-        setCourses(pythonCourses.length ? pythonCourses : courseData);
-        setError(null);
-      } catch (err) {
-        console.error('Error in fetchCourses:', err);
-        setError('Failed to load courses');
-        toast({
-          title: "Error loading courses",
-          description: "Please try again later",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
+    try {
+      console.log('Using available courses from LearningContext');
+      // Get skill filter from URL if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const skillFilter = urlParams.get('skill');
+      
+      let filteredCourses = availableCourses;
+      
+      // Filter courses based on skill parameter if present
+      if (skillFilter) {
+        console.log('Filtering by skill:', skillFilter);
+        // Map skill IDs from skill tree to actual skills in courses
+        const skillMap = {
+          'html': 'html',
+          'css': 'css',
+          'javascript': 'javascript',
+          'react': 'react',
+          'frontend': 'frontend',
+          'backend': 'backend',
+          'java': 'java',
+          'python': 'python',
+          'nodejs': 'nodejs',
+          'database': 'database',
+          'ai': 'ai',
+          'machine-learning': 'machine-learning',
+          'deep-learning': 'deep-learning',
+          'devops': 'devops',
+          'mobile': 'mobile-dev'
+        };
+        
+        const mappedSkill = skillMap[skillFilter] || skillFilter;
+        
+        // Filter courses that have the selected skill
+        filteredCourses = availableCourses.filter(course => {
+          // Check if course has skills array and it includes the mapped skill
+          const hasSkill = course.skills && Array.isArray(course.skills) && 
+                          course.skills.some(skill => skill.toLowerCase() === mappedSkill.toLowerCase());
+          
+          // Check tags as well since some courses might use tags instead of skills
+          const hasTag = course.tags && Array.isArray(course.tags) && 
+                        course.tags.some(tag => tag.toLowerCase() === mappedSkill.toLowerCase());
+          
+          // Also check title and description for the skill name, but with lower priority
+          const titleMatch = String(course.title || '').toLowerCase().includes(mappedSkill.toLowerCase());
+          const descMatch = String(course.description || '').toLowerCase().includes(mappedSkill.toLowerCase());
+          
+          return hasSkill || hasTag || titleMatch || descMatch;
         });
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchCourses();
-  }, [toast]);
+      
+      setCourses(filteredCourses.length ? filteredCourses : availableCourses);
+      setError(null);
+    } catch (err) {
+      console.error('Error in processing courses:', err);
+      setError('Failed to load courses');
+      toast({
+        title: "Error loading courses",
+        description: "Please try again later",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [availableCourses, toast]);
 
   const handleCourseClick = (course) => {
     navigate(`/admin/courses/${course.id}/enroll`);
@@ -200,4 +241,4 @@ const CoursesGrid = () => {
   );
 };
 
-export default CoursesGrid; 
+export default CoursesGrid;

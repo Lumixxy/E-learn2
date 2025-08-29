@@ -1,0 +1,125 @@
+# Course Template YAML
+# This template defines the structure for automated course generation
+
+course_structure:
+  metadata:
+    id_prefix: "tech_"  # Prefix for course IDs
+    id_padding: 3      # Number of digits to pad the ID with
+    base_price_range: [999, 3999]  # Min and max base price
+    discount_percentage: 50  # Standard discount percentage
+    free_course_probability: 0.1  # 10% chance of being free
+    certificate_threshold_range: [70, 85]  # Min and max certificate threshold
+
+  # Technology categories and their associated skills
+  technologies:
+    - name: "JavaScript"
+      skills: ["javascript", "frontend"]
+      categories: ["Web Development", "Frontend Development"]
+      levels: ["Beginner", "Intermediate", "Advanced"]
+      title_formats:
+        Beginner: "{technology} Fundamentals"
+        Intermediate: "{technology} Masterclass"
+        Advanced: "Advanced {technology} Techniques"
+      description_format: "Master {technology} for {category} with hands-on projects and real-world applications."
+      image_format: "https://source.unsplash.com/random/300x200?{technology_lowercase},coding"
+
+    - name: "Python"
+      skills: ["python", "backend"]
+      categories: ["Web Development", "Backend Development", "Data Science", "Machine Learning"]
+      levels: ["Beginner", "Intermediate", "Advanced"]
+      title_formats:
+        Beginner: "{technology} Fundamentals"
+        Intermediate: "{technology} Masterclass"
+        Advanced: "Advanced {technology} Techniques"
+      description_format: "Master {technology} for {category} with hands-on projects and real-world applications."
+      image_format: "https://source.unsplash.com/random/300x200?{technology_lowercase},coding"
+
+  # Add more technologies as needed...
+
+  # Categories and their associated skills
+  categories:
+    - name: "Web Development"
+      skills: ["web", "html", "css", "javascript"]
+    - name: "Mobile Development"
+      skills: ["mobile"]
+    - name: "Game Development"
+      skills: ["game-development"]
+    - name: "Data Science"
+      skills: ["data-science"]
+    - name: "Machine Learning"
+      skills: ["machine-learning", "ai"]
+    - name: "DevOps"
+      skills: ["devops"]
+    - name: "Cloud Computing"
+      skills: ["cloud"]
+    - name: "Blockchain"
+      skills: ["blockchain"]
+    - name: "Cybersecurity"
+      skills: ["security"]
+    - name: "IoT"
+      skills: ["iot"]
+    - name: "AR/VR"
+      skills: ["ar-vr"]
+    - name: "Embedded Systems"
+      skills: ["embedded"]
+    - name: "Database Administration"
+      skills: ["database"]
+    - name: "Network Engineering"
+      skills: ["networking"]
+    - name: "UI/UX Design"
+      skills: ["ui-ux", "design"]
+    - name: "Frontend Development"
+      skills: ["frontend", "html", "css", "javascript"]
+    - name: "Backend Development"
+      skills: ["backend"]
+    - name: "Full Stack Development"
+      skills: ["fullstack", "frontend", "backend"]
+
+  # Course levels
+  levels: ["Beginner", "Intermediate", "Advanced"]
+
+  # Sample authors
+  authors:
+    - "John Smith"
+    - "Maria Garcia"
+    - "David Johnson"
+    - "Sarah Chen"
+    - "Michael Brown"
+    - "Jennifer Lee"
+    - "Robert Kim"
+    - "Lisa Patel"
+    - "James Wilson"
+    - "Emily Davis"
+    - "Daniel Martinez"
+    - "Sophia Anderson"
+    - "Matthew Taylor"
+    - "Olivia Thomas"
+    - "Andrew Jackson"
+
+  # Module templates
+  module_templates:
+    - name: "Introduction to {technology}"
+      lessons:
+        - "Overview of {technology}"
+        - "Setting up your development environment"
+        - "Your first {technology} project"
+    - name: "{technology} Core Concepts"
+      lessons:
+        - "Understanding {technology} syntax"
+        - "Working with {technology} data structures"
+        - "Control flow in {technology}"
+    - name: "Advanced {technology} Features"
+      lessons:
+        - "Object-oriented programming in {technology}"
+        - "Functional programming with {technology}"
+        - "Error handling and debugging"
+    - name: "Building Projects with {technology}"
+      lessons:
+        - "Project planning and architecture"
+        - "Implementing core functionality"
+        - "Testing and deployment"
+    - name: "{technology} Best Practices"
+      lessons:
+        - "Code organization and style"
+        - "Performance optimization"
+        - "Security considerations"

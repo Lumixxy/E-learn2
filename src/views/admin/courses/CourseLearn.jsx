@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -37,6 +37,7 @@ import {
   FiLock,
   FiAward,
   FiFileText,
+  FiTrendingUp,
 } from 'react-icons/fi';
 import axios from 'axios';
 import { loadCourseById } from 'utils/courseDataLoader';
@@ -61,6 +62,11 @@ const CourseLearn = () => {
       return {};
     }
   });
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  
+  // Lazy load the analytics dashboard component
+  const AdvancedAnalyticsDashboard = lazy(() => import('../../../components/analytics/AdvancedAnalyticsDashboard'));
+  
   const { isOpen: isCertificateOpen, onOpen: onCertificateOpen, onClose: onCertificateClose } = useDisclosure();
   const toast = useToast();
 
@@ -439,6 +445,18 @@ const CourseLearn = () => {
                   <Text fontSize="sm">Certificates</Text>
                 </HStack>
               </Button>
+              <Button 
+                variant="ghost" 
+                justifyContent="flex-start" 
+                p={4} 
+                color={textColor}
+                onClick={() => setShowAnalytics(true)}
+              >
+                <HStack>
+                  <Icon as={FiTrendingUp} />
+                  <Text fontSize="sm">Analytics Dashboard</Text>
+                </HStack>
+              </Button>
             </VStack>
           </VStack>
         </Box>
@@ -508,8 +526,22 @@ const CourseLearn = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      {/* Analytics Dashboard Modal */}
+      <Modal isOpen={showAnalytics} onClose={() => setShowAnalytics(false)} size="full">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Course Analytics Dashboard</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Suspense fallback={<Flex justify="center" align="center" minH="60vh"><Spinner size="xl" /></Flex>}>
+              <AdvancedAnalyticsDashboard courseId={courseId} courseData={courseData} />
+            </Suspense>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
 
-export default CourseLearn; 
+export default CourseLearn;
