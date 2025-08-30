@@ -85,8 +85,8 @@ const CourseCard = ({
           </HStack>
           
           <Flex justify="space-between" align="center" w="100%" pt={2}>
-            <Text fontSize="lg" fontWeight="bold" color={textColor}>
-              {price}
+            <Text fontSize="lg" fontWeight="bold" color="green.500">
+              Free
             </Text>
             <Link to={`/admin/courses/${id}/enroll`}>
               <Button colorScheme="purple" size="sm" borderRadius="md">

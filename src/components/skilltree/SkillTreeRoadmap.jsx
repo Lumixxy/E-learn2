@@ -320,16 +320,38 @@ const SkillTreeRoadmap = () => {
   const playNodeClickSound = useCallback(() => {
     if (!audioInitialized || !synth.current) return;
     
-    // Play a bell-like sound
-    synth.current.triggerAttackRelease('C5', '16n');
+    // Debounce audio calls to prevent timing errors
+    const now = Date.now();
+    const timeSinceLastAudio = now - (synth.current.lastTriggerTime || 0);
+    if (timeSinceLastAudio < 100) return; // Minimum 100ms between calls
+    
+    // Play a bell-like sound with proper timing
+    try {
+      const toneNow = Tone.now();
+      synth.current.triggerAttackRelease('C5', '16n', toneNow);
+      synth.current.lastTriggerTime = now;
+    } catch (error) {
+      console.log('Audio click error:', error);
+    }
   }, [audioInitialized]);
   
   // Play rocket movement sound
   const playRocketSound = useCallback(() => {
     if (!audioInitialized || !noise.current) return;
     
-    // Play a whoosh sound
-    noise.current.triggerAttackRelease('16n');
+    // Debounce audio calls to prevent timing errors
+    const now = Date.now();
+    const timeSinceLastAudio = now - (noise.current.lastTriggerTime || 0);
+    if (timeSinceLastAudio < 100) return; // Minimum 100ms between calls
+    
+    // Play a whoosh sound with proper timing
+    try {
+      const toneNow = Tone.now();
+      noise.current.triggerAttackRelease('16n', toneNow);
+      noise.current.lastTriggerTime = now;
+    } catch (error) {
+      console.log('Audio rocket error:', error);
+    }
   }, [audioInitialized]);
 
   // Function to calculate node positions
@@ -437,12 +459,18 @@ const SkillTreeRoadmap = () => {
        rocketRef.current.style.transform = `rotate(${angle + Math.PI / 2}rad)`;
      }
      
-     // Play rocket movement sound
+     // Play rocket movement sound with debouncing
      if (audioInitialized && noise.current) {
-       try {
-         noise.current.triggerAttackRelease('16n');
-       } catch (error) {
-         console.log('Audio error:', error);
+       const now = Date.now();
+       const timeSinceLastAudio = now - (noise.current.lastTriggerTime || 0);
+       if (timeSinceLastAudio >= 100) { // Minimum 100ms between calls
+         try {
+           const toneNow = Tone.now();
+           noise.current.triggerAttackRelease('16n', toneNow);
+           noise.current.lastTriggerTime = now;
+         } catch (error) {
+           console.log('Audio error:', error);
+         }
        }
      }
      
@@ -546,7 +574,8 @@ const SkillTreeRoadmap = () => {
     if (node.name && (!node.children || node.children.length === 0 || node.forceRedirect)) {
       // Delay redirection to allow animation to complete
       setTimeout(() => {
-        navigate(`/admin/courses?skill=${nodeId}`);
+        // Navigate to filtered courses view for leaf nodes
+        navigate(`/admin/courses/skill/${nodeId}`);
       }, 1000); // Delay redirection by 1 second to allow animation to complete
       return;
     }

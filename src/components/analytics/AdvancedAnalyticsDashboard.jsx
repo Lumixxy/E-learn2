@@ -51,6 +51,21 @@ import {
   MdAssignment,
   MdQuiz
 } from 'react-icons/md';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  ChartTooltip,
+  Legend,
+  ArcElement,
+  RadialLinearScale,
+  Filler
+);
 // Chart components already imported and registered at the top of the file
 
 const AdvancedAnalyticsDashboard = ({ courseId = null, courseData = null, isCourseSpecific = false }) => {

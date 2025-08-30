@@ -29,12 +29,11 @@ import {
   SliderFilledTrack,
   SliderThumb,
   SliderMark,
-  IconButton,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, SearchIcon } from "@chakra-ui/icons";
 
 import { useToast } from "@chakra-ui/react";
-import { convertToINR, formatPrice } from "utils/priceUtils";
+import { convertToINR } from "utils/priceUtils";
 import NFT from "components/card/NFT";
 import Banner from "./components/Banner";
 import { useCart } from "../../../contexts/CartContext";
@@ -48,7 +47,6 @@ export default function Marketplace() {
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [minRating, setMinRating] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filteredCourses, setFilteredCourses] = useState([]);
@@ -86,8 +84,6 @@ export default function Marketplace() {
 
   // Chakra UI hooks
   const textColor = useColorModeValue("navy.700", "white");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.200");
-  const bgColor = useColorModeValue("white", "navy.800");
   const shadow = useColorModeValue(
     "14px 17px 40px 4px rgba(112, 144, 176, 0.08)",
     "0px 0px 0px 0px rgba(112, 144, 176, 0.08)"
@@ -181,16 +177,10 @@ export default function Marketplace() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Handler to add course to cart
+  // Handler to redirect to course enrollment
   const handleBuyCourse = (course) => {
-    addToCart(course);
-    toast({
-      title: 'Course added to cart!',
-      description: `${course.title || course.name} has been added to your cart`,
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-    });
+    // Navigate to course enrollment page for immediate enrollment
+    window.location.href = `/admin/courses/${course.id}/enroll`;
   };
 
   return (
@@ -255,7 +245,7 @@ export default function Marketplace() {
                 author={course.author}
                 bidders={course.bidders}
                 download={course.download}
-                buttonText="Buy Course"
+                buttonText="Enroll Now"
                 courseObj={course}
                 onBuy={handleBuyCourse}
                 isInCart={isInCart(course.id)}

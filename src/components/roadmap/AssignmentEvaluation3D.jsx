@@ -205,7 +205,7 @@ const AssignmentEvaluation3D = ({ evaluations = [], userScore = 0, passingScore 
       
       // Add label
       const criteria = ['Functionality', 'Code Quality', 'Documentation', 'Innovation', 'UX'];
-      const textSprite = createTextSprite(criteria[i]);
+      const textSprite = createTextSprite(criteria[i], spriteTextColor);
       textSprite.position.set(x * 1.2, 0, z * 1.2);
       scene.add(textSprite);
     }
@@ -309,7 +309,7 @@ const AssignmentEvaluation3D = ({ evaluations = [], userScore = 0, passingScore 
     scene.add(userBar);
     
     // Add user score label
-    const userScoreLabel = createTextSprite(`Your Score: ${userScore}`);
+    const userScoreLabel = createTextSprite(`Your Score: ${userScore}`, spriteTextColor);
     userScoreLabel.position.set(0, userScore / 20 + 0.3, 0);
     scene.add(userScoreLabel);
     
@@ -321,7 +321,7 @@ const AssignmentEvaluation3D = ({ evaluations = [], userScore = 0, passingScore 
     scene.add(passingLine);
     
     // Add passing score label
-    const passingScoreLabel = createTextSprite(`Passing: ${passingScore}`);
+    const passingScoreLabel = createTextSprite(`Passing: ${passingScore}`, spriteTextColor);
     passingScoreLabel.position.set(2.5, passingScore / 20 + 0.2, 0);
     scene.add(passingScoreLabel);
     
@@ -424,14 +424,14 @@ const AssignmentEvaluation3D = ({ evaluations = [], userScore = 0, passingScore 
   };
   
   // Helper function to create text sprites
-  const createTextSprite = (text) => {
+  const createTextSprite = (text, textColor) => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     canvas.width = 256;
     canvas.height = 128;
     
     context.font = '24px Arial';
-    context.fillStyle = useColorModeValue('#1a202c', '#ffffff');
+    context.fillStyle = textColor;
     context.textAlign = 'center';
     context.fillText(text, 128, 64);
     

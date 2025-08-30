@@ -7,16 +7,17 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
 } from 'react-flow-renderer';
-import { Box, VStack, Text, useColorModeValue, Flex, Button, useToast, Icon, Badge } from '@chakra-ui/react';
+import { Box, VStack, Text, useToast, Button, HStack, Progress, Badge, Icon } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FiAward, FiTarget, FiTrendingUp } from 'react-icons/fi';
 import { loadCourseById } from 'utils/courseDataLoader';
-import WebWarriorAPI from 'api/webwarrior';
 import NodeQuiz from '../../../components/roadmap/NodeQuiz';
 import NodeAssignment from '../../../components/roadmap/NodeAssignment';
-import ResourcesList from '../../../components/roadmap/ResourcesList';
+import AssignmentFlow from '../../../components/assignment/AssignmentFlow';
+import CertificateGenerator from '../../../components/certificate/CertificateGenerator';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
+import { useXP } from '../../../contexts/XPContext';
 import nodeQuizzes from '../../../data/nodeQuizzes';
-import { FaCertificate, FaLock, FaUnlock, FaCheck, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 
 const foggyBg = {
   background: 'linear-gradient(120deg, #e0f2ff 0%, #b3c6e0 100%)',
@@ -37,26 +38,21 @@ const CourseRoadmap = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
-  const [apiRoadmap, setApiRoadmap] = useState(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [assignmentOpen, setAssignmentOpen] = useState(false);
-  const [completedAssignments, setCompletedAssignments] = useState({});
-  const [assignmentScores, setAssignmentScores] = useState({});
-  const [certificateEligible, setCertificateEligible] = useState(false);
+  const [showCertificate, setShowCertificate] = useState(false);
   const toast = useToast();
   const { isNodeCompleted, markNodeAsCompleted } = useCompletedNodes();
-
-  // Function to check if a node is unlockable based on its dependencies
-  const isNodeUnlockable = (roadmapId, nodeId, dependencies) => {
-    // If there are no dependencies, the node is unlockable
-    if (!dependencies || dependencies.length === 0) return true;
-    
-    // Check if all dependencies are completed with at least 85% score
-    return dependencies.every(depId => {
-      const formattedDepId = depId.startsWith('node-') ? depId : `node-${depId}`;
-      return isNodeCompleted(roadmapId, formattedDepId);
-    });
-  };
+  const { 
+    userXP, 
+    completeLesson, 
+    completeQuiz, 
+    completeModule, 
+    completeCourse, 
+    isCourseCompleted,
+    isModuleCompleted,
+    getCurrentLevelInfo 
+  } = useXP();
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
@@ -85,26 +81,29 @@ const CourseRoadmap = () => {
           
           if (rm) {
             console.log('Using roadmap:', rm);
-            setApiRoadmap(rm);
+            setRoadmapData(rm);
             
             // Build nodes/edges from API nodes and their dependencies
-            const apiNodes = (rm?.nodes || []).map((n) => ({
-              id: String(n.node_id),
-              type: 'default',
-              data: { label: n.label, description: n.description },
-              position: { x: n.position_x || 0, y: n.position_y || 0 },
-              style: {
-                width: 180,
-                height: 60,
-                borderRadius: 8,
-                padding: '10px',
-                background: isNodeCompleted(rm.id, `node-${n.node_id}`) ? '#4CAF50' : '#2196F3',
-                color: 'white',
-                border: '1px solid #1565C0',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                fontWeight: 'bold',
-              },
-            }));
+            const apiNodes = (rm?.nodes || []).map((n) => {
+              const nodeCompleted = isNodeCompleted(rm.id, `node-${n.node_id}`) || isModuleCompleted(courseId, n.node_id);
+              return {
+                id: String(n.node_id),
+                type: 'default',
+                data: { label: n.label, description: n.description },
+                position: { x: n.position_x || 0, y: n.position_y || 0 },
+                style: {
+                  width: 180,
+                  height: 60,
+                  borderRadius: 8,
+                  padding: '10px',
+                  background: nodeCompleted ? '#4CAF50' : '#2196F3',
+                  color: 'white',
+                  border: '1px solid #1565C0',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  fontWeight: 'bold',
+                },
+              };
+            });
             
             const apiEdges = [];
             (rm?.nodes || []).forEach((n) => {
@@ -131,23 +130,26 @@ const CourseRoadmap = () => {
 
         // Fallback to generating a roadmap from course modules
         if (c?.modules) {
-          const generatedNodes = c.modules.map((module, index) => ({
-            id: String(index),
-            type: 'default',
-            data: { label: module.title, description: module.description || '' },
-            position: { x: 250, y: 100 + index * 100 },
-            style: {
-              width: 180,
-              height: 60,
-              borderRadius: 8,
-              padding: '10px',
-              background: '#2196F3',
-              color: 'white',
-              border: '1px solid #1565C0',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              fontWeight: 'bold',
-            },
-          }));
+          const generatedNodes = c.modules.map((module, index) => {
+            const moduleCompleted = isModuleCompleted(courseId, module.id);
+            return {
+              id: String(index),
+              type: 'default',
+              data: { label: module.title, description: module.description || '' },
+              position: { x: 250, y: 100 + index * 100 },
+              style: {
+                width: 180,
+                height: 60,
+                borderRadius: 8,
+                padding: '10px',
+                background: moduleCompleted ? '#4CAF50' : '#2196F3',
+                color: 'white',
+                border: '1px solid #1565C0',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                fontWeight: 'bold',
+              },
+            };
+          });
           
           const generatedEdges = [];
           for (let i = 0; i < c.modules.length - 1; i++) {
@@ -174,7 +176,7 @@ const CourseRoadmap = () => {
     };
     
     fetchRoadmapData();
-  }, [courseId, setNodes, setEdges]);
+  }, [courseId, setNodes, setEdges, isNodeCompleted, isModuleCompleted]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -190,19 +192,9 @@ const CourseRoadmap = () => {
     if (nodeHasQuiz) {
       setQuizOpen(true);
     } else {
-      // If no quiz, try to navigate to course content
-      const moduleIndex = parseInt(node.id);
-      if (!isNaN(moduleIndex) && course?.modules?.[moduleIndex]) {
-        const selectedModule = course.modules[moduleIndex];
-        const firstLessonWithLink = selectedModule?.lessons?.find((l) => l.websiteLink);
-        const targetUrl = firstLessonWithLink?.websiteLink;
-        
-        if (targetUrl) {
-          window.open(targetUrl, '_blank', 'noopener,noreferrer');
-        } else {
-          navigate(`/admin/courses/${courseId}/learn?moduleIndex=${moduleIndex}`);
-        }
-      }
+      // Check if this is an assignment node
+      const assignmentKey = `${course?.skillTag || 'general'}-${node.id}-1`;
+      setAssignmentOpen(true);
     }
   };
 
@@ -210,17 +202,23 @@ const CourseRoadmap = () => {
   const handleQuizComplete = (score, nodeId) => {
     setQuizOpen(false);
     
+    // Award XP for quiz completion
+    const xpResult = completeQuiz(courseId, nodeId, `quiz-${nodeId}`, score);
+    
     if (score >= 85) {
       toast({
         title: "Quiz Completed",
-        description: `You scored ${score}%! You can now proceed to the next node.`,
+        description: `You scored ${score}%! ${xpResult.xpAwarded ? `+${xpResult.xpAwarded} XP` : ''} ${xpResult.leveledUp ? `Level up to ${xpResult.newLevel}!` : ''}`,
         status: "success",
         duration: 5000,
         isClosable: true,
       });
       
       // Mark node as completed in context
-      markNodeAsCompleted(roadmapData.id, `node-${nodeId}`, score);
+      markNodeAsCompleted('course-roadmap', `node-${nodeId}`, score);
+      
+      // Complete module in XP system
+      completeModule(courseId, nodeId);
       
       // Update node style to show completion
       setNodes((nds) =>
@@ -237,6 +235,9 @@ const CourseRoadmap = () => {
           return node;
         })
       );
+      
+      // Check if all modules are completed
+      checkCourseCompletion();
     } else {
       toast({
         title: "Quiz Failed",
@@ -252,38 +253,20 @@ const CourseRoadmap = () => {
   const handleAssignmentComplete = (score, nodeId) => {
     setAssignmentOpen(false);
     
+    // Award XP for assignment completion
+    const xpResult = completeModule(courseId, nodeId);
+    
     if (score >= 85) {
       toast({
         title: "Assignment Completed",
-        description: `You scored ${score}%! You can now proceed to the next node.`,
+        description: `You scored ${score}%! ${xpResult.xpAwarded ? `+${xpResult.xpAwarded} XP` : ''} ${xpResult.leveledUp ? `Level up to ${xpResult.newLevel}!` : ''}`,
         status: "success",
         duration: 5000,
         isClosable: true,
       });
       
-      // Update completed assignments
-      setCompletedAssignments((prev) => ({
-        ...prev,
-        [nodeId]: true,
-      }));
-      
-      // Update assignment scores
-      setAssignmentScores((prev) => ({
-        ...prev,
-        [nodeId]: score,
-      }));
-      
-      // Save to localStorage
-      localStorage.setItem(
-        `assignmentScores_${courseId}`,
-        JSON.stringify({
-          ...assignmentScores,
-          [nodeId]: score,
-        })
-      );
-      
       // Mark node as completed in context
-      markNodeAsCompleted(roadmapData.id, `node-${nodeId}`, score);
+      markNodeAsCompleted('course-roadmap', `node-${nodeId}`, score);
       
       // Update node style to show completion
       setNodes((nds) =>
@@ -300,6 +283,9 @@ const CourseRoadmap = () => {
           return node;
         })
       );
+      
+      // Check if all modules are completed
+      checkCourseCompletion();
     } else {
       toast({
         title: "Assignment Failed",
@@ -310,6 +296,50 @@ const CourseRoadmap = () => {
       });
     }
   };
+  
+  // Check if course is complete and show certificate
+  const checkCourseCompletion = () => {
+    if (!course || !nodes) return;
+    
+    const completedNodes = nodes.filter(node => 
+      node.style.background === '#4CAF50' || isModuleCompleted(courseId, node.id)
+    );
+    
+    // If all nodes are completed and course not already completed
+    if (completedNodes.length === nodes.length && !isCourseCompleted(courseId)) {
+      // Complete course and award XP
+      const courseResult = completeCourse(courseId, course.skillTag);
+      
+      setTimeout(() => {
+        toast({
+          title: "🎉 Course Completed!",
+          description: `Congratulations! You've completed the entire course. ${courseResult.xpAwarded ? `+${courseResult.xpAwarded} XP` : ''} ${courseResult.leveledUp ? `Level up to ${courseResult.newLevel}!` : ''}`,
+          status: "success",
+          duration: 8000,
+          isClosable: true,
+        });
+        
+        // Show certificate after a delay
+        setTimeout(() => {
+          setShowCertificate(true);
+        }, 2000);
+      }, 1000);
+    }
+  };
+  
+  // Get course progress
+  const getCourseProgress = () => {
+    if (!nodes || nodes.length === 0) return 0;
+    
+    const completedNodes = nodes.filter(node => 
+      node.style.background === '#4CAF50' || isModuleCompleted(courseId, node.id)
+    );
+    
+    return Math.round((completedNodes.length / nodes.length) * 100);
+  };
+  
+  const courseProgress = getCourseProgress();
+  const levelInfo = getCurrentLevelInfo();
 
   if (loading) {
     return (
@@ -337,15 +367,43 @@ const CourseRoadmap = () => {
           </Text>
           <Text>Complete each node to progress through the course</Text>
           
-          {certificateEligible && (
-            <Button
-              leftIcon={<Icon as={FaCertificate} />}
-              colorScheme="green"
-              onClick={() => navigate(`/admin/courses/${courseId}/certificate`)}
-            >
-              View Certificate
-            </Button>
-          )}
+          {/* Course Progress and Stats */}
+          <HStack spacing={8} wrap="wrap" justify="center">
+            <VStack>
+              <Text fontSize="sm" opacity={0.8}>Course Progress</Text>
+              <HStack>
+                <Progress value={courseProgress} width="150px" colorScheme="green" />
+                <Text fontSize="sm" fontWeight="bold">{courseProgress}%</Text>
+              </HStack>
+            </VStack>
+            
+            <VStack>
+              <Text fontSize="sm" opacity={0.8}>Your Level</Text>
+              <Badge colorScheme="purple" px={3} py={1} borderRadius="full">
+                Level {levelInfo.level} - {levelInfo.title}
+              </Badge>
+            </VStack>
+            
+            <VStack>
+              <Text fontSize="sm" opacity={0.8}>Total XP</Text>
+              <HStack>
+                <Icon as={FiTrendingUp} color="blue.400" />
+                <Text fontSize="sm" fontWeight="bold">{(userXP?.totalXP || 0).toLocaleString()}</Text>
+              </HStack>
+            </VStack>
+            
+            {courseProgress === 100 && (
+              <Button
+                leftIcon={<Icon as={FiAward} />}
+                colorScheme="gold"
+                variant="outline"
+                onClick={() => setShowCertificate(true)}
+                size="sm"
+              >
+                View Certificate
+              </Button>
+            )}
+          </HStack>
         </VStack>
         
         <Box height="70vh" border="1px solid #e2e8f0" borderRadius="md" overflow="hidden">
@@ -374,13 +432,26 @@ const CourseRoadmap = () => {
         )}
         
         {selectedNodeId && assignmentOpen && (
-          <NodeAssignment
+          <AssignmentFlow
             isOpen={assignmentOpen}
             onClose={() => setAssignmentOpen(false)}
-            nodeId={selectedNodeId}
+            courseId={courseId}
+            moduleId={selectedNodeId}
+            assignmentId={`${course?.skillTag || 'general'}-${selectedNodeId}-1`}
             onComplete={(score) => handleAssignmentComplete(score, selectedNodeId)}
           />
         )}
+        
+        {showCertificate && course && (
+          <CertificateGenerator
+            isOpen={showCertificate}
+            onClose={() => setShowCertificate(false)}
+            courseData={course}
+            userInfo={{ name: 'Student' }} // Replace with actual user data
+            completionDate={new Date()}
+          />
+        )}
+
       </Box>
     </Box>
   );

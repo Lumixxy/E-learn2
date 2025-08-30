@@ -84,7 +84,44 @@ const fetchFirstAvailable = async (paths) => {
 
 export const loadCourseData = async () => {
   try {
-    // Try multiple candidate locations for the provided Excel
+    // Try to load both course data sources and combine them
+    let allCourses = [];
+    
+    // Load main courses from courses.json
+    try {
+      const response = await fetch('/data/courses.json');
+      if (response.ok) {
+        const courses = await response.json();
+        if (Array.isArray(courses) && courses.length > 0) {
+          allCourses = [...courses];
+          console.log(`Loaded ${courses.length} courses from courses.json`);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load courses.json:', error);
+    }
+    
+    // Load technical courses from technical_courses.json
+    try {
+      const response = await fetch('/data/technical_courses.json');
+      if (response.ok) {
+        const technicalCourses = await response.json();
+        if (Array.isArray(technicalCourses) && technicalCourses.length > 0) {
+          allCourses = [...allCourses, ...technicalCourses];
+          console.log(`Loaded ${technicalCourses.length} technical courses from technical_courses.json`);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load technical_courses.json:', error);
+    }
+    
+    // If we have combined courses, return them
+    if (allCourses.length > 0) {
+      console.log(`Total courses loaded: ${allCourses.length}`);
+      return allCourses;
+    }
+
+    // Fallback: Try multiple candidate locations for Excel files
     const candidatePaths = [
       // Provided file path variants
       '/Explore%20Courses/courses/data/mit_ocw_courses.xlsx',
@@ -106,7 +143,7 @@ export const loadCourseData = async () => {
     return courses;
   } catch (error) {
     console.error('Error loading Excel course data:', error);
-    // Fallback: fetch sample data from public/data
+    // Final fallback: fetch sample data from public/data
     try {
       const response = await fetch('/data/course_sample_data.json');
       if (!response.ok) throw new Error('Failed to fetch course sample data');
@@ -124,11 +161,21 @@ export const loadCourseData = async () => {
 };
 
 export const loadCourseById = async (courseId) => {
+  console.log('loadCourseById: Looking for course with ID:', courseId);
   const courses = await loadCourseData();
+  console.log('loadCourseById: Total courses available:', courses.length);
+  console.log('loadCourseById: Sample course IDs:', courses.slice(0, 5).map(c => c.id));
+  
   // Try matching by numeric id, string id, or title slug
   const numericId = isNaN(Number(courseId)) ? null : Number(courseId);
   const byId = courses.find((c) => (numericId !== null && c.id === numericId) || String(c.id) === String(courseId));
+  console.log('loadCourseById: Direct ID match result:', byId ? byId.id : 'Not found');
+  
   if (byId) return byId;
+  
   const normalized = String(courseId).toLowerCase().replace(/[-_]/g, ' ').trim();
-  return courses.find((c) => String(c.title).toLowerCase().includes(normalized));
+  const byTitle = courses.find((c) => String(c.title).toLowerCase().includes(normalized));
+  console.log('loadCourseById: Title-based match result:', byTitle ? byTitle.id : 'Not found');
+  
+  return byTitle;
 };

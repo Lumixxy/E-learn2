@@ -39,6 +39,92 @@ import { loadCourseById } from 'utils/courseDataLoader';
 import FinalAssignment from '../../../components/roadmap/FinalAssignment';
 import CourseProgressViz from '../../../components/course/CourseProgressViz';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
+import { useXP } from '../../../contexts/XPContext';
+
+// Helper function to generate dynamic course outcomes based on course content
+const generateCourseOutcomes = (course) => {
+  const outcomes = [];
+  
+  // Add skill-specific outcomes based on course tags/skillTag
+  const skillTag = course.skillTag || course.category;
+  if (skillTag) {
+    switch (skillTag.toLowerCase()) {
+      case 'html':
+        outcomes.push('Master HTML5 semantic elements and structure');
+        outcomes.push('Create responsive web layouts');
+        outcomes.push('Implement forms and accessibility features');
+        break;
+      case 'css':
+        outcomes.push('Style websites with advanced CSS techniques');
+        outcomes.push('Create responsive designs with Flexbox and Grid');
+        outcomes.push('Implement animations and transitions');
+        break;
+      case 'javascript':
+        outcomes.push('Write modern JavaScript with ES6+ features');
+        outcomes.push('Manipulate the DOM and handle events');
+        outcomes.push('Work with APIs and asynchronous programming');
+        break;
+      case 'react':
+        outcomes.push('Build interactive user interfaces with React');
+        outcomes.push('Manage application state effectively');
+        outcomes.push('Create reusable components and hooks');
+        break;
+      case 'python':
+        outcomes.push('Write clean, efficient Python code');
+        outcomes.push('Work with data structures and algorithms');
+        outcomes.push('Build applications using Python frameworks');
+        break;
+      case 'java':
+        outcomes.push('Develop robust Java applications');
+        outcomes.push('Implement object-oriented programming concepts');
+        outcomes.push('Work with Java frameworks and libraries');
+        break;
+      case 'nodejs':
+      case 'node':
+        outcomes.push('Build scalable server-side applications');
+        outcomes.push('Work with databases and APIs');
+        outcomes.push('Implement authentication and security');
+        break;
+      case 'database':
+        outcomes.push('Design and optimize database schemas');
+        outcomes.push('Write complex SQL queries');
+        outcomes.push('Implement database security and performance tuning');
+        break;
+      default:
+        outcomes.push(`Master ${skillTag} fundamentals and best practices`);
+        outcomes.push(`Build real-world projects using ${skillTag}`);
+        outcomes.push(`Advance your career in ${skillTag} development`);
+    }
+  }
+  
+  // Add general outcomes based on modules
+  if (course.modules && course.modules.length > 0) {
+    outcomes.push(`Complete ${course.modules.length} comprehensive modules`);
+    outcomes.push('Work on hands-on projects and assignments');
+  }
+  
+  // Add level-specific outcomes
+  const level = course.level?.toLowerCase();
+  if (level === 'beginner') {
+    outcomes.push('Build a strong foundation for further learning');
+  } else if (level === 'intermediate') {
+    outcomes.push('Advance your existing skills to the next level');
+  } else if (level === 'advanced') {
+    outcomes.push('Master advanced concepts and industry best practices');
+  }
+  
+  // Add certificate outcome
+  outcomes.push('Earn an industry-recognized certificate upon completion');
+  
+  return outcomes;
+};
+
+// Helper function to format course price
+const formatCoursePrice = (price, isFree) => {
+  if (isFree || price === 0) return 'Free';
+  if (price === null || price === undefined || typeof price !== 'number') return 'Free';
+  return `₹${price.toLocaleString()}`;
+};
 
 const CourseEnroll = () => {
   const { courseId } = useParams();
@@ -58,15 +144,12 @@ const CourseEnroll = () => {
     nodeQuizzes,
     certificateEligible
   } = useCompletedNodes();
+  
+  // XP system integration
+  const { userXP, getCurrentLevelInfo } = useXP();
+  const levelInfo = getCurrentLevelInfo();
 
-  const [courseData, setCourseData] = useState({
-    title: '',
-    description: '',
-    provider: '',
-    modules: [],
-    outcomes: [],
-    certificates: []
-  });
+  const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -74,23 +157,24 @@ const CourseEnroll = () => {
     const fetchCourseData = async () => {
       try {
         setLoading(true);
+        console.log('CourseEnroll: Attempting to load course with ID:', courseId);
         const course = await loadCourseById(courseId);
-        if (!course) throw new Error('Course not found');
-        // Normalize to existing shape used by the enroll page
-        setCourseData({
-          title: course.title,
-          description: course.description,
-          provider: course.instructor,
-          price: course.price || 'Free',
-          modules: course.modules?.map((m) => ({
-            title: m.title,
-            duration: m.duration || '—',
-            content: m.description || '',
-            topics: (m.lessons || []).map((l) => l.title),
-          })) || [],
-          outcomes: [],
-          certificates: [],
-        });
+        console.log('CourseEnroll: Course loaded:', course);
+        if (!course) {
+          console.error('CourseEnroll: Course not found for ID:', courseId);
+          throw new Error('Course not found');
+        }
+        
+        // Store the complete course data with enhanced outcomes
+        const enhancedCourse = {
+          ...course,
+          // Generate dynamic learning outcomes based on course content
+          outcomes: generateCourseOutcomes(course),
+          // Ensure price formatting
+          price: formatCoursePrice(course.price, course.isFree),
+        };
+        
+        setCourseData(enhancedCourse);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -165,9 +249,14 @@ const CourseEnroll = () => {
     </Box>;
   }
 
-  if (!courseData || Object.keys(courseData).length === 0) {
+  if (!courseData) {
     return <Box minH="100vh" bg={bgColor} py={8} display="flex" justifyContent="center" alignItems="center">
-      <Text fontSize="2xl">No course data found.</Text>
+      <VStack spacing={4}>
+        <Text fontSize="2xl" color={textColor}>Course not found</Text>
+        <Button onClick={() => navigate('/admin/courses')} colorScheme="blue">
+          Browse All Courses
+        </Button>
+      </VStack>
     </Box>;
   }
 
@@ -184,25 +273,119 @@ const CourseEnroll = () => {
         <VStack spacing={8} align="stretch">
           {/* Enrollment */}
           {!isEnrolled ? (
-            <Card bg={cardBg} borderRadius="xl" overflow="hidden">
-              <CardBody p={8}>
-                <VStack spacing={6} align="stretch">
-                  <Box>
-                    <HStack spacing={4} mb={2}>
-                      <Image src="https://via.placeholder.com/60x60/1f77b4/ffffff?text=MIT" alt="MIT" w="60px" h="60px" />
-                      <Text fontSize="sm" color={mutedColor}>{courseData.provider}</Text>
-                    </HStack>
-                    <Text fontSize="3xl" fontWeight="bold" color={textColor} mb={4}>
-                      {courseData.title}
-                    </Text>
-                    <Text fontSize="lg" color={mutedColor} mb={4}>
-                      {courseData.description}
-                    </Text>
+            <Card bg={cardBg} borderRadius="xl" overflow="hidden" shadow="xl">
+              <CardBody p={0}>
+                <HStack spacing={0} align="stretch">
+                  {/* Course Image */}
+                  <Box position="relative" minW="300px" maxW="300px">
+                    <Image 
+                      src={courseData.image || courseData.imageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop'} 
+                      alt={courseData.title}
+                      w="100%" 
+                      h="250px" 
+                      objectFit="cover"
+                    />
+                    {courseData.isFree && (
+                      <Badge
+                        position="absolute"
+                        top={3}
+                        left={3}
+                        colorScheme="green"
+                        borderRadius="full"
+                        px={3}
+                        py={1}
+                        fontSize="sm"
+                        fontWeight="bold"
+                      >
+                        FREE
+                      </Badge>
+                    )}
                   </Box>
-                  <Button colorScheme="purple" size="lg" onClick={handleEnroll}>
-                    Enroll Now - {courseData.price}
-                  </Button>
-                </VStack>
+                  
+                  {/* Course Info */}
+                  <VStack align="stretch" spacing={4} p={8} flex={1}>
+                    <Box>
+                      <HStack spacing={2} mb={2}>
+                        <Text fontSize="sm" color={mutedColor}>{courseData.author || courseData.instructor || 'Course Instructor'}</Text>
+                        {courseData.level && (
+                          <Badge colorScheme={courseData.level.toLowerCase() === 'beginner' ? 'green' : courseData.level.toLowerCase() === 'intermediate' ? 'yellow' : 'red'} size="sm">
+                            {courseData.level}
+                          </Badge>
+                        )}
+                      </HStack>
+                      <Text fontSize="3xl" fontWeight="bold" color={textColor} mb={3}>
+                        {courseData.title}
+                      </Text>
+                      
+                      {/* Rating */}
+                      {courseData.rating && (
+                        <HStack spacing={2} mb={3}>
+                          <HStack spacing={1}>
+                            {[...Array(5)].map((_, i) => (
+                              <Icon key={i} as={FaStar} color={i < Math.floor(courseData.rating) ? "yellow.400" : "gray.300"} />
+                            ))}
+                          </HStack>
+                          <Text fontSize="sm" color={mutedColor}>({courseData.rating.toFixed(1)})</Text>
+                          {courseData.totalRatings && (
+                            <Text fontSize="sm" color={mutedColor}>• {courseData.totalRatings.toLocaleString()} students
+                            </Text>
+                          )}
+                        </HStack>
+                      )}
+                      
+                      <Text fontSize="lg" color={mutedColor} mb={4} noOfLines={3}>
+                        {courseData.description}
+                      </Text>
+                      
+                      {/* Course Stats */}
+                      <HStack spacing={6} mb={4} flexWrap="wrap">
+                        {courseData.duration && (
+                          <HStack spacing={1}>
+                            <Icon as={FaClock} color={mutedColor} />
+                            <Text fontSize="sm" color={mutedColor}>{courseData.duration}</Text>
+                          </HStack>
+                        )}
+                        {courseData.modules && (
+                          <HStack spacing={1}>
+                            <Icon as={FaBook} color={mutedColor} />
+                            <Text fontSize="sm" color={mutedColor}>{courseData.modules.length} modules</Text>
+                          </HStack>
+                        )}
+                        <HStack spacing={1}>
+                          <Icon as={FaCertificate} color={mutedColor} />
+                          <Text fontSize="sm" color={mutedColor}>Certificate included</Text>
+                        </HStack>
+                      </HStack>
+                      
+                      {/* Tags */}
+                      {courseData.tags && courseData.tags.length > 0 && (
+                        <HStack spacing={2} mb={4} flexWrap="wrap">
+                          {courseData.tags.slice(0, 4).map((tag, index) => (
+                            <Badge key={index} variant="subtle" colorScheme="blue" fontSize="xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </HStack>
+                      )}
+                    </Box>
+                    
+                    <VStack align="stretch" spacing={3}>
+                      <HStack justify="space-between" align="center">
+                        <Text fontSize="2xl" fontWeight="bold" color="green.500">
+                          {courseData.price}
+                        </Text>
+                        {courseData.originalPrice && courseData.originalPrice > (courseData.price || 0) && (
+                          <Text fontSize="lg" textDecoration="line-through" color={mutedColor}>
+                            ₹{typeof courseData.originalPrice === 'number' ? courseData.originalPrice.toLocaleString() : '0'}
+                          </Text>
+                        )}
+                      </HStack>
+                      <Button colorScheme="purple" size="lg" onClick={handleEnroll} w="100%">
+                        Enroll Now
+                      </Button>
+                    </VStack>
+                  </VStack>
+                </HStack>
               </CardBody>
             </Card>
           ) : (
@@ -232,7 +415,7 @@ const CourseEnroll = () => {
                     {courseData.outcomes && courseData.outcomes.map((outcome, index) => (
                       <ListItem key={index}>
                         <ListIcon as={FaCheck} color="green.500" />
-                        {outcome}
+                        <Text as="span" fontSize="md">{outcome}</Text>
                       </ListItem>
                     ))}
                   </List>
@@ -248,23 +431,39 @@ const CourseEnroll = () => {
                     {courseData.modules && courseData.modules.map((module, index) => (
                       <Card key={index} variant="outline">
                         <CardBody>
-                          <VStack align="stretch" spacing={2}>
+                          <VStack align="stretch" spacing={3}>
                             <HStack justify="space-between">
-                              <Text fontWeight="bold" color={textColor}>
+                              <Text fontWeight="bold" color={textColor} fontSize="lg">
                                 Module {index + 1}: {module.title}
                               </Text>
-                              <Badge colorScheme="purple">{module.duration}</Badge>
+                              <Badge colorScheme="purple" px={3} py={1} borderRadius="full">
+                                {module.duration || '30 min'}
+                              </Badge>
                             </HStack>
-                            <Text fontSize="sm" color={mutedColor} mb={2}>
-                              {module.content}
-                            </Text>
-                            <List spacing={2}>
-                              {module.topics.map((topic, topicIndex) => (
-                                <ListItem key={topicIndex} color={mutedColor}>
-                                  • {topic}
-                                </ListItem>
-                              ))}
-                            </List>
+                            {module.description && (
+                              <Text fontSize="sm" color={mutedColor} mb={2}>
+                                {module.description}
+                              </Text>
+                            )}
+                            {module.lessons && module.lessons.length > 0 && (
+                              <Box>
+                                <Text fontSize="sm" fontWeight="semibold" color={textColor} mb={2}>
+                                  Lessons ({module.lessons.length}):
+                                </Text>
+                                <List spacing={1}>
+                                  {module.lessons.slice(0, 5).map((lesson, lessonIndex) => (
+                                    <ListItem key={lessonIndex} color={mutedColor} fontSize="sm">
+                                      • {lesson.title}
+                                    </ListItem>
+                                  ))}
+                                  {module.lessons.length > 5 && (
+                                    <ListItem color={mutedColor} fontSize="sm" fontStyle="italic">
+                                      • +{module.lessons.length - 5} more lessons
+                                    </ListItem>
+                                  )}
+                                </List>
+                              </Box>
+                            )}
                           </VStack>
                         </CardBody>
                       </Card>

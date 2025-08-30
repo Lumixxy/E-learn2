@@ -144,7 +144,7 @@ const UserCard = ({ user, rank, isPodium = false, podiumColors, crownColors }) =
             </Tooltip>
           </HStack>
           <Text fontWeight="bold" fontSize={rank === 1 ? "2xl" : "xl"} color={textColor}>
-            {user.points.toLocaleString()}
+            {(user.points || 0).toLocaleString()}
           </Text>
           <Text color="gray.400" fontSize="sm">
             points
@@ -201,7 +201,7 @@ const UserCard = ({ user, rank, isPodium = false, podiumColors, crownColors }) =
         </HStack>
         <Box textAlign="right">
           <Text fontWeight="bold" fontSize="2xl" color={textColor}>
-            {user.points.toLocaleString()}
+            {(user.points || 0).toLocaleString()}
           </Text>
           <Text color="gray.400" fontSize="sm">
             points
@@ -585,7 +585,7 @@ const Leaderboard = () => {
                 </HStack>
                 <Box textAlign="right">
                   <Text fontWeight="bold" fontSize="2xl" color={textColor}>
-                    {currentUser.points.toLocaleString()}
+                    {(currentUser.points || 0).toLocaleString()}
                   </Text>
                   <Text color="gray.400" fontSize="sm">
                     points

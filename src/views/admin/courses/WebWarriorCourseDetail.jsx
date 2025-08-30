@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Heading, VStack, HStack, Checkbox, Text, Badge, Button, Progress, Spinner, Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import { WebWarriorAPI } from '../../../api/webwarrior';
@@ -11,7 +11,7 @@ const WebWarriorCourseDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       const data = await WebWarriorAPI.getModules(courseId);
       setModules(data);
@@ -20,9 +20,11 @@ const WebWarriorCourseDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
 
-  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [courseId]);
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const onToggle = async (idx) => {
     await WebWarriorAPI.completeModule(courseId, idx);

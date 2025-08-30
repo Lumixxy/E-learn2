@@ -22,6 +22,7 @@ import Home from "views/admin/home";
 
 import CourseDetail from "views/admin/courses/CourseDetail";
 import Courses from "views/admin/courses/Courses";
+import FilteredCourses from "views/admin/courses/FilteredCourses";
 import AdventurePathPage from "views/admin/courses/AdventurePathPage";
 import WebWarriorGrid from "views/admin/courses/WebWarriorGrid";
 import WebWarriorCourseDetail from "views/admin/courses/WebWarriorCourseDetail";
@@ -96,6 +97,13 @@ const routes = [
     layout: "/admin",
     path: "/courses/:courseId",
     component: <CourseDetail />,
+    hidden: true,
+  },
+  {
+    name: "Filtered Courses",
+    layout: "/admin",
+    path: "/courses/skill/:skillTag",
+    component: <FilteredCourses />,
     hidden: true,
   },
   {

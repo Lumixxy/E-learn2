@@ -72,6 +72,28 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
   const textColor = useColorModeValue('gray.800', 'white');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   
+  // Function to generate certificate and store it in localStorage
+  const generateCertificate = (averageScore) => {
+    // Create certificate data
+    const certificateData = {
+      courseId,
+      courseName: assignment?.courseName || 'Python Programming',
+      userName: 'John Doe', // In a real app, get from user profile
+      issueDate: new Date().toISOString(),
+      grade: averageScore.toFixed(1),
+      certificateId: `PGA-${courseId}-${Date.now().toString().slice(-8)}`,
+      completed: true
+    };
+    
+    // Store certificate in localStorage
+    const storedCertificates = localStorage.getItem('userCertificates') || '{}';
+    const certificates = JSON.parse(storedCertificates);
+    certificates[courseId] = certificateData;
+    localStorage.setItem('userCertificates', JSON.stringify(certificates));
+    
+    return certificateData;
+  };
+  
   // Mock data for final assignment
   useEffect(() => {
     // In a real application, this would be fetched from an API
@@ -185,7 +207,7 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
         isClosable: true,
       });
     }
-  }, [certificateEligible, certificateGenerated, evaluations, toast, generateCertificate]);
+  }, [certificateEligible, certificateGenerated, evaluations, toast]);
 
   const handleSubmit = () => {
     if (solution.length < assignment.minCharacters) {
@@ -260,28 +282,6 @@ const FinalAssignment = ({ isOpen, onClose, roadmapId, courseId }) => {
     addXP(50);
   };
 
-  // Function to generate certificate and store it in localStorage
-  const generateCertificate = (averageScore) => {
-    // Create certificate data
-    const certificateData = {
-      courseId,
-      courseName: assignment?.courseName || 'Python Programming',
-      userName: 'John Doe', // In a real app, get from user profile
-      issueDate: new Date().toISOString(),
-      grade: averageScore.toFixed(1),
-      certificateId: `PGA-${courseId}-${Date.now().toString().slice(-8)}`,
-      completed: true
-    };
-    
-    // Store certificate in localStorage
-    const storedCertificates = localStorage.getItem('userCertificates') || '{}';
-    const certificates = JSON.parse(storedCertificates);
-    certificates[courseId] = certificateData;
-    localStorage.setItem('userCertificates', JSON.stringify(certificates));
-    
-    return certificateData;
-  };
-  
   const handleClaimCertificate = () => {
     // Mark the final project as completed
     markNodeAsCompleted(roadmapId, 'final-project');

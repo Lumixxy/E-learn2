@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
+import AdvancedAnalyticsDashboard from '../../../components/analytics/AdvancedAnalyticsDashboard';
 import {
   Box,
   Flex,

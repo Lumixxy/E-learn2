@@ -8,7 +8,7 @@ import ReactFlow, {
   addEdge,
 } from 'react-flow-renderer';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, useToast, Box, Text, Badge, Flex, Icon } from '@chakra-ui/react';
+import { Button, useToast, Box, Text, Flex, Icon, VStack, Link } from '@chakra-ui/react';
 import { loadCourseById } from 'utils/courseDataLoader';
 import WebWarriorAPI from 'api/webwarrior';
 import NodeQuiz from '../../../components/roadmap/NodeQuiz';
@@ -16,7 +16,7 @@ import NodeAssignment from '../../../components/roadmap/NodeAssignment';
 import ResourcesList from '../../../components/roadmap/ResourcesList';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
 import nodeQuizzes from '../../../data/nodeQuizzes';
-import { FaCertificate, FaLock, FaUnlock, FaCheck, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
+import { FaCertificate, FaLock, FaUnlock, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 
 const foggyBg = {
   background: 'linear-gradient(120deg, #e0f2ff 0%, #b3c6e0 100%)',
@@ -41,13 +41,12 @@ export default function PythonRoadmap() {
   const [quizOpen, setQuizOpen] = useState(false);
   const [assignmentOpen, setAssignmentOpen] = useState(false);
   const [completedAssignments, setCompletedAssignments] = useState({});
-  const [assignmentScores, setAssignmentScores] = useState({});
   const [certificateEligible, setCertificateEligible] = useState(false);
   const toast = useToast();
   const { isNodeCompleted, markNodeAsCompleted } = useCompletedNodes();
 
   // Function to check if a node is unlockable based on its dependencies
-  const isNodeUnlockable = (roadmapId, nodeId, dependencies) => {
+  const isNodeUnlockable = useCallback((roadmapId, nodeId, dependencies) => {
     // If there are no dependencies, the node is unlockable
     if (!dependencies || dependencies.length === 0) return true;
     
@@ -56,7 +55,7 @@ export default function PythonRoadmap() {
       const formattedDepId = depId.startsWith('node-') ? depId : `node-${depId}`;
       return isNodeCompleted(roadmapId, formattedDepId);
     });
-  };
+  }, [isNodeCompleted]);
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
@@ -187,7 +186,7 @@ export default function PythonRoadmap() {
       }
     };
     fetchRoadmapData();
-  }, [courseId, setNodes, setEdges]);
+  }, [courseId, setNodes, setEdges, isNodeCompleted]);
 
   // Initialize nodes/edges after static roadmap data loads
   useEffect(() => {
@@ -220,7 +219,7 @@ export default function PythonRoadmap() {
     if (roadmapData.nodes && roadmapData.nodes.length > 0) {
       setSelectedNodeId(roadmapData.nodes[0].id);
     }
-  }, [roadmapData, setNodes, setEdges]);
+  }, [roadmapData, setNodes, setEdges, isNodeCompleted]);
 
   // Load the course to resolve website links for modules/lessons
   useEffect(() => {
@@ -236,6 +235,29 @@ export default function PythonRoadmap() {
   }, [courseId]);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)), [setEdges]);
+
+  // Separate function to handle navigation based on node label
+  const handleNodeNavigation = useCallback((label) => {
+    if (course?.modules) {
+      const matchModuleIndex = course.modules.findIndex((m) => {
+        const inModuleTitle = String(m.title).toLowerCase().includes(label);
+        const inLessons = (m.lessons || []).some((l) => String(l.title).toLowerCase().includes(label));
+        return inModuleTitle || inLessons;
+      });
+      if (matchModuleIndex >= 0) {
+        const module = course.modules[matchModuleIndex];
+        const matchingLesson = (module.lessons || []).find((l) => String(l.title).toLowerCase().includes(label));
+        const firstLessonWithLink = matchingLesson?.websiteLink ? matchingLesson : (module.lessons || []).find((l) => l.websiteLink);
+        const targetUrl = firstLessonWithLink?.websiteLink;
+        if (targetUrl) {
+          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+          return;
+        }
+        navigate(`/admin/courses/${courseId}/learn?moduleIndex=${matchModuleIndex}`);
+        return;
+      }
+    }
+  }, [course, courseId, navigate]);
 
   // Handle node click: Show node info in right panel, with option to take quiz
   const onNodeClick = useCallback(async (event, node) => {
@@ -280,30 +302,7 @@ export default function PythonRoadmap() {
 
     const label = String(node?.data?.label || '').toLowerCase();
     handleNodeNavigation(label);
-  }, [edges, toast, apiRoadmap, isNodeCompleted, isNodeUnlockable]);
-
-  // Separate function to handle navigation based on node label
-  const handleNodeNavigation = useCallback((label) => {
-    if (course?.modules) {
-      const matchModuleIndex = course.modules.findIndex((m) => {
-        const inModuleTitle = String(m.title).toLowerCase().includes(label);
-        const inLessons = (m.lessons || []).some((l) => String(l.title).toLowerCase().includes(label));
-        return inModuleTitle || inLessons;
-      });
-      if (matchModuleIndex >= 0) {
-        const module = course.modules[matchModuleIndex];
-        const matchingLesson = (module.lessons || []).find((l) => String(l.title).toLowerCase().includes(label));
-        const firstLessonWithLink = matchingLesson?.websiteLink ? matchingLesson : (module.lessons || []).find((l) => l.websiteLink);
-        const targetUrl = firstLessonWithLink?.websiteLink;
-        if (targetUrl) {
-          window.open(targetUrl, '_blank', 'noopener,noreferrer');
-          return;
-        }
-        navigate(`/admin/courses/${courseId}/learn?moduleIndex=${matchModuleIndex}`);
-        return;
-      }
-    }
-  }, [course, courseId, navigate]);
+  }, [edges, toast, apiRoadmap, isNodeCompleted, isNodeUnlockable, handleNodeNavigation]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
 
@@ -345,12 +344,6 @@ export default function PythonRoadmap() {
   // Handle assignment completion
   const handleAssignmentComplete = (score, passed) => {
     if (selectedNodeId) {
-      // Store the assignment score
-      setAssignmentScores(prev => ({
-        ...prev,
-        [selectedNodeId]: score
-      }));
-      
       // Only mark as completed if passed
       if (passed) {
         setCompletedAssignments(prev => ({
@@ -524,157 +517,108 @@ export default function PythonRoadmap() {
           )}
         </div>
         {/* Content right */}
-        <div style={{ width: '40vw', height: '100vh', overflowY: 'auto', background: 'rgba(255,255,255,0.85)', padding: '48px 32px', zIndex: 2 }}>
-          <h2 style={{ color: '#2563eb', fontSize: '2rem', fontWeight: 700, marginBottom: 16 }}>
-            {selectedNode?.data?.label}
-            {isSelectedNodeCompleted && (
-              <span style={{ marginLeft: '10px', color: '#16a34a', fontSize: '1rem' }}>✓ Completed</span>
-            )}
-          </h2>
-          <p style={{ color: '#334155', fontSize: '1.1rem', lineHeight: 1.7 }}>{selectedNode?.data?.description}</p>
-          
-          {/* Node completion status */}
-          <Box 
-            mt={4} 
-            mb={4} 
-            p={3} 
-            borderRadius="md" 
-            bg={isSelectedNodeCompleted ? "green.50" : "blue.50"}
-            border="1px solid"
-            borderColor={isSelectedNodeCompleted ? "green.200" : "blue.200"}
-          >
-            <Flex align="center">
-              <Icon 
-                as={isSelectedNodeCompleted ? FaCheckCircle : FaInfoCircle} 
-                color={isSelectedNodeCompleted ? "green.500" : "blue.500"} 
-                mr={2} 
-              />
-              <Text>
-                {isSelectedNodeCompleted 
-                  ? "You have completed this node. Continue your journey!" 
-                  : "Complete this node to progress in your learning path."}
-              </Text>
-            </Flex>
-          </Box>
-          
-          {/* Certificate Status */}
-          <Box 
-            mt={6} 
-            p={4} 
-            borderRadius="md" 
-            bg={certificateEligible ? "green.50" : "gray.50"}
-            border="1px solid"
-            borderColor={certificateEligible ? "green.200" : "gray.200"}
-          >
-            <Flex align="center" justify="space-between">
-              <Flex align="center">
-                <Icon 
-                  as={certificateEligible ? FaUnlock : FaLock} 
-                  color={certificateEligible ? "green.500" : "gray.500"} 
-                  mr={3} 
-                  boxSize={5}
-                />
-                <Box>
-                  <Text fontWeight="bold" color={certificateEligible ? "green.700" : "gray.700"}>
-                    Certificate Status
-                  </Text>
-                  <Text fontSize="sm" color={certificateEligible ? "green.600" : "gray.600"}>
-                    {certificateEligible 
-                      ? "You are eligible to receive a certificate!" 
-                      : "Complete all assignments with at least 85% to earn your certificate"}
-                  </Text>
-                </Box>
-              </Flex>
-              {certificateEligible && (
-                <Button 
-                  colorScheme="green" 
-                  size="sm"
-                  leftIcon={<Icon as={FaCertificate} />}
-                  onClick={() => navigate(`/admin/courses/${courseId}/certificate`)}
-                >
-                  View Certificate
-                </Button>
-              )}
-            </Flex>
-          </Box>
-          
-          {/* Mark as Read/Take Quiz button - always show when a node is selected */}
-          {selectedNode && (
-            <div style={{ display: 'flex', marginTop: '20px' }}>
-              {!isSelectedNodeCompleted && (
+        <div style={{ width: '40vw', height: '100vh', overflowY: 'auto', background: 'rgba(255,255,255,0.95)', padding: '32px', zIndex: 2, borderLeft: '1px solid #e2e8f0' }}>
+          {selectedNode ? (
+            <>
+              {/* Node Header */}
+              <Box mb={6}>
+                <Text fontSize="2xl" fontWeight="bold" color="blue.600" mb={2}>
+                  {selectedNode?.data?.label}
+                  {isSelectedNodeCompleted && (
+                    <Icon as={FaCheckCircle} color="green.500" ml={3} boxSize={6} />
+                  )}
+                </Text>
+                <Text color="gray.600" fontSize="md" lineHeight="1.6">
+                  {selectedNode?.data?.description || `Learn the fundamentals and build your skills.`}
+                </Text>
+              </Box>
+              
+              {/* Take Quiz Button - Green button exactly like screenshot */}
+              <Box mb={6}>
                 <Button
                   onClick={() => {
-                    const roadmapId = apiRoadmap?.id || 'python-roadmap';
-                    const nodeId = selectedNodeId.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`;
-                    
-                    // Check if there's a quiz for this node
-                    const hasQuiz = nodeQuizzes[nodeId];
-                    
+                    const hasQuiz = nodeQuizzes[selectedNodeId?.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`];
                     if (hasQuiz) {
-                      // If there's a quiz, open it instead of marking as read directly
                       setQuizOpen(true);
                     } else {
-                      // If no quiz, mark as read directly
-                      markNodeAsCompleted(roadmapId, nodeId);
-                      
-                      // Update the nodes to reflect completion status
-                      setNodes(nodes => nodes.map(node => {
-                        if (node.id === selectedNodeId) {
-                          return {
-                            ...node,
-                            style: {
-                              ...node.style,
-                              backgroundColor: '#4ade80',
-                              border: '2px solid #16a34a'
-                            }
-                          };
-                        }
-                        return node;
-                      }));
+                      toast({
+                        title: "Quiz completed!",
+                        description: "Great job! You can now proceed to the next node.",
+                        status: "success",
+                        duration: 3000,
+                        isClosable: true,
+                      });
                     }
                   }}
-                  colorScheme="green"
-                  size="md"
-                  mr={2}
-                  leftIcon={<span role="img" aria-label="mark-read">✓</span>}
+                  bg="green.500"
+                  color="white"
+                  size="lg"
+                  width="200px"
+                  height="50px"
+                  fontSize="16px"
+                  fontWeight="bold"
+                  borderRadius="8px"
+                  _hover={{
+                    bg: "green.600",
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                  }}
+                  _active={{
+                    bg: "green.700",
+                    transform: 'translateY(0px)'
+                  }}
+                  transition="all 0.2s"
                 >
-                  {nodeQuizzes[selectedNodeId?.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`] ? 'Take Quiz' : 'Mark as Read'}
+                  Take Quiz
                 </Button>
-              )}
+              </Box>
               
-              {/* Quiz button - show only if a quiz exists for this node and the node is already completed */}
-              {isSelectedNodeCompleted && nodeQuizzes[selectedNodeId?.startsWith('node-') ? selectedNodeId : `node-${selectedNodeId}`] && (
-                <Button
-                  onClick={() => setQuizOpen(true)}
-                  colorScheme="blue"
-                  size="md"
-                  mr={2}
-                  leftIcon={<span role="img" aria-label="quiz">📝</span>}
-                >
-                  Retake Quiz
-                </Button>
-              )}
-              
-              {/* Assignment button - always show when a node is selected */}
-              <Button
-                onClick={() => setAssignmentOpen(true)}
-                colorScheme="purple"
-                size="md"
-                leftIcon={<span role="img" aria-label="assignment">📋</span>}
-              >
-                {completedAssignments[selectedNodeId] ? 'Review Assignment' : 'Start Assignment'}
-              </Button>
-            </div>
-          )}
-          
-          {/* Resources section - always show when a node is selected */}
-          {selectedNodeId && (
-            <div style={{ marginTop: '30px' }}>
-              <h3 style={{ color: '#2c3e50', fontSize: '1.5rem', fontWeight: '600', marginBottom: '15px' }}>
-                Resources:
-              </h3>
-              <ResourcesList nodeId={selectedNodeId} />
-            </div>
+              {/* Resources Section */}
+              <Box>
+                <Text fontSize="xl" fontWeight="bold" color="gray.800" mb={4}>
+                  Resources
+                </Text>
+                
+                {/* Documentation */}
+                <Box mb={4}>
+                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={2}>
+                    Documentation
+                  </Text>
+                  <ResourcesList nodeId={selectedNodeId} />
+                </Box>
+                
+                {/* Tutorial */}
+                <Box mb={4}>
+                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={2}>
+                    Tutorial
+                  </Text>
+                  <VStack spacing={1} align="stretch">
+                    <Link 
+                      href="https://realpython.com/" 
+                      isExternal 
+                      color="blue.600" 
+                      fontSize="sm"
+                      _hover={{ color: 'blue.800', textDecoration: 'underline' }}
+                    >
+                      Real Python Tutorials ↗
+                    </Link>
+                    <Text fontSize="xs" color="gray.500">
+                      Real Python
+                    </Text>
+                  </VStack>
+                </Box>
+              </Box>
+            </>
+          ) : (
+            <Box textAlign="center" py={20}>
+              <Icon as={FaInfoCircle} boxSize={16} color="gray.400" mb={4} />
+              <Text fontSize="lg" color="gray.500" fontWeight="medium">
+                Select a node to view resources and assignments
+              </Text>
+              <Text fontSize="md" color="gray.400" mt={2}>
+                Click on any node in the roadmap to get started
+              </Text>
+            </Box>
           )}
         </div>
       </div>

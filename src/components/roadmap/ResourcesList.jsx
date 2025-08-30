@@ -1,11 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, Link, VStack, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
+import { 
+  Box, 
+  Text, 
+  Link, 
+  VStack, 
+  HStack,
+  Spinner, 
+  Alert, 
+  AlertIcon, 
+  Badge,
+  Button,
+  Icon,
+  Divider,
+  Card,
+  CardBody,
+  useColorModeValue,
+  Tooltip,
+  Flex
+} from '@chakra-ui/react';
+import { FiExternalLink, FiVideo, FiBook, FiFileText, FiCode, FiAward } from 'react-icons/fi';
 import WebWarriorAPI from '../../api/webwarrior';
 
 const ResourcesList = ({ nodeId }) => {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Color mode values
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const cardBg = useColorModeValue('gray.50', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const mutedColor = useColorModeValue('gray.600', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  
+  // Resource type icons and colors
+  const getResourceIcon = (type) => {
+    const iconMap = {
+      'video': { icon: FiVideo, color: 'red.500' },
+      'docs': { icon: FiBook, color: 'blue.500' },
+      'course': { icon: FiFileText, color: 'green.500' },
+      'assignment': { icon: FiCode, color: 'purple.500' },
+      'tutorial': { icon: FiAward, color: 'orange.500' },
+      'documentation': { icon: FiBook, color: 'blue.500' }
+    };
+    return iconMap[type?.toLowerCase()] || { icon: FiFileText, color: 'gray.500' };
+  };
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -13,431 +52,125 @@ const ResourcesList = ({ nodeId }) => {
         setLoading(true);
         setError(null);
         
-        // MIT OCW based resources mapped to node IDs
+        // Enhanced MIT OCW based resources mapped to node IDs
         const mitResourcesMap = {
-          // Node IDs from roadmap.json
+          // Node IDs from roadmap.json - Python Basics
           '1': [
             {
               title: 'MIT Lecture 1: What is Computation?',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-1-what-is-computation/',
               type: 'video',
-              source: 'MIT OCW'
+              source: 'MIT OCW',
+              description: 'Introduction to computational thinking and Python basics'
             },
             {
               title: 'Python Official Tutorial - Introduction',
               url: 'https://docs.python.org/3/tutorial/introduction.html',
               type: 'docs',
-              source: 'Python.org'
+              source: 'Python.org',
+              description: 'Official Python documentation for beginners'
             },
             {
-              title: 'MIT Course Syllabus',
+              title: 'MIT Course Syllabus and Materials',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/',
               type: 'course',
-              source: 'MIT OCW'
+              source: 'MIT OCW',
+              description: 'Complete MIT 6.0001 course materials'
+            },
+            {
+              title: 'MIT Problem Set 1',
+              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps1/',
+              type: 'assignment',
+              source: 'MIT OCW',
+              description: 'Practice problems for Python basics'
             }
           ],
-          // Python Basics (node-1) - already defined above
           // Data Structures (node-2)
           '2': [
             {
               title: 'MIT Lecture 5: Tuples, Lists, Aliasing, Mutability, and Cloning',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-5-tuples-lists-aliasing-mutability-and-cloning/',
               type: 'video',
-              source: 'MIT OCW'
+              source: 'MIT OCW',
+              description: 'Comprehensive coverage of Python data structures'
             },
             {
               title: 'Python Data Structures Documentation',
               url: 'https://docs.python.org/3/tutorial/datastructures.html',
               type: 'docs',
-              source: 'Python.org'
+              source: 'Python.org',
+              description: 'Official guide to lists, tuples, dictionaries, and sets'
             },
             {
-              title: 'MIT Problem Set 4',
+              title: 'MIT Problem Set 4 - Word Game',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps4/',
               type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Variables and Data Types
-          'variables': [
-            {
-              title: 'MIT Lecture 2: Branching and Iteration',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-2-branching-and-iteration/',
-              type: 'video',
-              source: 'MIT OCW'
+              source: 'MIT OCW',
+              description: 'Hands-on practice with data structures'
             },
-            {
-              title: 'Python Data Types Tutorial',
-              url: 'https://docs.python.org/3/tutorial/introduction.html#numbers',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 1',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps1/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Data Structures
-          'Data Structures': [
-            {
-              title: 'MIT Lecture 5: Tuples, Lists, Aliasing, Mutability, and Cloning',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-5-tuples-lists-aliasing-mutability-and-cloning/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Data Structures Documentation',
-              url: 'https://docs.python.org/3/tutorial/datastructures.html',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 4',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps4/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Functions and Abstraction
-          'functions': [
-            {
-              title: 'MIT Lecture 3: String Manipulation, Guess and Check, Approximations, Bisection',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-3-string-manipulation-guess-and-check-approximations-bisection/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Functions Tutorial',
-              url: 'https://docs.python.org/3/tutorial/controlflow.html#defining-functions',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 2',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps2/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Loops and Iteration
-          'loops': [
-            {
-              title: 'MIT Lecture 4: Decomposition, Abstraction, and Functions',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-4-decomposition-abstraction-and-functions/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Loops Tutorial',
-              url: 'https://docs.python.org/3/tutorial/controlflow.html#for-statements',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 3',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps3/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Tuples and Lists
-          'tuples_lists': [
-            {
-              title: 'MIT Lecture 5: Tuples, Lists, Aliasing, Mutability, and Cloning',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-5-tuples-lists-aliasing-mutability-and-cloning/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Data Structures Tutorial',
-              url: 'https://docs.python.org/3/tutorial/datastructures.html',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 4',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps4/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Recursion and Dictionaries
-          'recursion': [
             {
               title: 'MIT Lecture 6: Recursion and Dictionaries',
               url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-6-recursion-and-dictionaries/',
               type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Recursion Tutorial',
-              url: 'https://docs.python.org/3/tutorial/controlflow.html#defining-functions',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 5',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps5/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Testing and Debugging
-          'testing': [
-            {
-              title: 'MIT Lecture 7: Testing, Debugging, Exceptions, and Assertions',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-7-testing-debugging-exceptions-and-assertions/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Testing Tutorial',
-              url: 'https://docs.python.org/3/library/unittest.html',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 6',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps6/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Object-Oriented Programming
-          'object_oriented': [
-            {
-              title: 'MIT Lecture 8: Object Oriented Programming',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-8-object-oriented-programming/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Classes Tutorial',
-              url: 'https://docs.python.org/3/tutorial/classes.html',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Problem Set 7',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps7/',
-              type: 'assignment',
-              source: 'MIT OCW'
-            }
-          ],
-          // Computational Complexity
-          'complexity': [
-            {
-              title: 'MIT Lecture 10: Understanding Program Efficiency, Part 1',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-10-understanding-program-efficiency-part-1/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'MIT Lecture 11: Understanding Program Efficiency, Part 2',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-11-understanding-program-efficiency-part-2/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Performance Tutorial',
-              url: 'https://docs.python.org/3/library/timeit.html',
-              type: 'docs',
-              source: 'Python.org'
-            }
-          ],
-          // Search and Sort Algorithms
-          'search_sort': [
-            {
-              title: 'MIT Lecture 12: Searching and Sorting Algorithms',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-12-searching-and-sorting-algorithms/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Sorting Tutorial',
-              url: 'https://docs.python.org/3/howto/sorting.html',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Final Project',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/final-project/',
-              type: 'assignment',
-              source: 'MIT OCW'
+              source: 'MIT OCW',
+              description: 'Advanced data structures and recursion concepts'
             }
           ],
           // Algorithms (node-3)
           '3': [
             {
-              title: 'MIT Lecture 12: Searching and Sorting Algorithms',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-12-searching-and-sorting-algorithms/',
+              title: 'MIT 6.006 Introduction to Algorithms',
+              url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/',
+              type: 'course',
+              source: 'MIT OCW',
+              description: 'Complete algorithms course covering sorting, searching, and optimization'
+            },
+            {
+              title: 'MIT Lecture: Algorithmic Thinking, Peak Finding',
+              url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/resources/lecture-1-algorithmic-thinking-peak-finding/',
               type: 'video',
-              source: 'MIT OCW'
+              source: 'MIT OCW',
+              description: 'Introduction to algorithmic thinking and problem-solving'
             },
             {
-              title: 'Python Algorithm Resources',
-              url: 'https://docs.python.org/3/library/heapq.html',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Algorithm Lecture Notes',
-              url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/',
-              type: 'course',
-              source: 'MIT OCW'
-            }
-          ],
-          // OOP & Advanced Topics (node-4)
-          '4': [
-            {
-              title: 'MIT Lecture 9: Python Classes and Inheritance',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-9-python-classes-and-inheritance/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Advanced OOP Documentation',
-              url: 'https://docs.python.org/3/tutorial/classes.html#inheritance',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Advanced Python Programming',
-              url: 'https://ocw.mit.edu/courses/6-0002-introduction-to-computational-thinking-and-data-science-fall-2016/',
-              type: 'course',
-              source: 'MIT OCW'
-            }
-          ],
-          // Package Managers (node-7)
-          '7': [
-            {
-              title: 'Python Packaging User Guide',
-              url: 'https://packaging.python.org/en/latest/',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'MIT Python Environment Setup',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/pages/syllabus/',
-              type: 'course',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python Package Index',
-              url: 'https://pypi.org/',
-              type: 'docs',
-              source: 'PyPI'
-            }
-          ],
-          // Version Control (node-5)
-          '5': [
-            {
-              title: 'MIT Missing Semester: Version Control (Git)',
-              url: 'https://missing.csail.mit.edu/2020/version-control/',
-              type: 'lecture',
-              source: 'MIT'
-            },
-            {
-              title: 'Git and GitHub for Python Developers',
-              url: 'https://ocw.mit.edu/courses/res-str-001-geographic-information-system-gis-tutorial-january-iap-2016/pages/part-1-introduction/git-and-github/',
-              type: 'tutorial',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Git Basics Exercise',
-              url: 'https://missing.csail.mit.edu/2020/version-control/#exercises',
+              title: 'MIT Problem Set - Algorithms',
+              url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/assignments/',
               type: 'assignment',
-              source: 'MIT'
-            }
-          ],
-          
-          // Repo Hosting (node-6)
-          '6': [
-            {
-              title: 'GitHub for MIT Projects',
-              url: 'https://libguides.mit.edu/c.php?g=176372&p=1159529',
-              type: 'guide',
-              source: 'MIT'
+              source: 'MIT OCW',
+              description: 'Practical algorithm implementation challenges'
             },
             {
-              title: 'MIT Open Source Projects on GitHub',
-              url: 'https://github.com/mit',
-              type: 'resource',
-              source: 'GitHub'
-            },
-            {
-              title: 'Collaborative Development with GitHub',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/pages/syllabus/',
-              type: 'guide',
-              source: 'MIT OCW'
-            }
-          ],
-          
-          // Frameworks (node-8)
-          '8': [
-            {
-              title: 'MIT Web Development with Python',
-              url: 'https://ocw.mit.edu/courses/6-148-web-programming-competition-january-iap-2011/',
-              type: 'course',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Django Documentation',
-              url: 'https://docs.djangoproject.com/',
+              title: 'Python Algorithm Documentation',
+              url: 'https://docs.python.org/3/library/collections.html',
               type: 'docs',
-              source: 'Django Project'
-            },
-            {
-              title: 'Flask Documentation',
-              url: 'https://flask.palletsprojects.com/',
-              type: 'docs',
-              source: 'Pallets Projects'
-            }
-          ],
-          // Testing (node-9)
-          '9': [
-            {
-              title: 'MIT Lecture 7: Testing, Debugging, Exceptions, and Assertions',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-7-testing-debugging-exceptions-and-assertions/',
-              type: 'video',
-              source: 'MIT OCW'
-            },
-            {
-              title: 'Python unittest Documentation',
-              url: 'https://docs.python.org/3/library/unittest.html',
-              type: 'docs',
-              source: 'Python.org'
-            },
-            {
-              title: 'Python pytest Documentation',
-              url: 'https://docs.pytest.org/',
-              type: 'docs',
-              source: 'pytest.org'
+              source: 'Python.org',
+              description: 'Python collections and algorithm utilities'
             }
           ]
         };
         
-        // Default resources if no specific MIT resources are found for the node
+        // Default resources when no specific mapping is found
         const defaultResources = [
           {
-            title: 'MIT Introduction to Computer Science and Programming in Python',
-            url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/',
-            type: 'Course',
-            source: 'MIT OCW'
+            title: 'MIT OpenCourseWare - Computer Science',
+            url: 'https://ocw.mit.edu/search/?d=Electrical%20Engineering%20and%20Computer%20Science&s=department_course_numbers.sort_coursenum',
+            type: 'course',
+            source: 'MIT OCW',
+            description: 'Browse all MIT computer science courses'
           },
           {
             title: 'Python Official Documentation',
             url: 'https://docs.python.org/3/',
-            type: 'Documentation',
-            source: 'Python.org'
+            type: 'docs',
+            source: 'Python.org',
+            description: 'Complete Python language reference'
           },
           {
-            title: 'MIT Python Lectures',
-            url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/video_galleries/lecture-videos/',
-            type: 'Video',
-            source: 'MIT OCW'
+            title: 'Real Python Tutorials',
+            url: 'https://realpython.com/',
+            type: 'tutorial',
+            source: 'Real Python',
+            description: 'Practical Python programming tutorials'
           }
         ];
         
@@ -531,80 +264,44 @@ const ResourcesList = ({ nodeId }) => {
     );
   }
 
-  // Group resources by type
-  const groupedResources = resources.reduce((acc, resource) => {
-    const type = resource.type || 'Other';
-    if (!acc[type]) {
-      acc[type] = [];
-    }
-    acc[type].push(resource);
-    return acc;
-  }, {});
-
-  // Get resource types in a specific order
-  const orderedTypes = ['video', 'docs', 'course', 'assignment', 'Documentation', 'Tutorial', 'Other'];
-  const resourceTypes = Object.keys(groupedResources).sort((a, b) => {
-    const indexA = orderedTypes.indexOf(a);
-    const indexB = orderedTypes.indexOf(b);
-    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-  });
-
   return (
-    <VStack spacing={6} align="stretch">
-      {resourceTypes.map(type => (
-        <Box key={type}>
-          <Text 
-            fontSize="md" 
-            fontWeight="bold" 
-            color="blue.700" 
-            mb={3}
-            textTransform="capitalize"
-            borderBottom="2px solid"
-            borderColor="blue.100"
-            pb={1}
+    <VStack spacing={1} align="stretch">
+      {/* Simple MIT OCW links that match the screenshot style */}
+      {resources.length > 0 && resources.map((resource, index) => (
+        <Box key={index}>
+          <Link 
+            href={resource.url} 
+            isExternal 
+            color="blue.600" 
+            fontSize="sm"
+            _hover={{ color: 'blue.800', textDecoration: 'underline' }}
+            mb={0}
           >
-            {type === 'docs' ? 'Documentation' : type}
+            {resource.title} ↗
+          </Link>
+          <Text fontSize="xs" color="gray.500" mt={0}>
+            {resource.source}
           </Text>
-          
-          <VStack spacing={3} align="stretch">
-            {groupedResources[type].map((resource, index) => (
-              <Box 
-                key={index}
-                p={4}
-                borderWidth="1px"
-                borderRadius="md"
-                borderColor="blue.100"
-                bg="white"
-                transition="all 0.2s"
-                _hover={{ 
-                  transform: 'translateY(-2px)', 
-                  boxShadow: 'md',
-                  borderColor: 'blue.300'
-                }}
-              >
-                <Link 
-                  href={resource.url} 
-                  isExternal 
-                  color="blue.600" 
-                  fontWeight="semibold"
-                  fontSize="md"
-                  display="flex"
-                  alignItems="center"
-                >
-                  {resource.title}
-                  <Text as="span" ml={2}>↗</Text>
-                </Link>
-                
-                {resource.source && (
-                  <Text fontSize="sm" color="gray.500" mt={1}>
-                    Source: {resource.source}
-                  </Text>
-                )}
-              </Box>
-            ))}
-          </VStack>
         </Box>
       ))}
+      
+      {/* If no specific resources, show default MIT OCW link */}
+      {resources.length === 0 && (
+        <Box>
+          <Link 
+            href="https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/" 
+            isExternal 
+            color="blue.600" 
+            fontSize="sm"
+            _hover={{ color: 'blue.800', textDecoration: 'underline' }}
+          >
+            MIT Python Course ↗
+          </Link>
+          <Text fontSize="xs" color="gray.500">
+            MIT OCW
+          </Text>
+        </Box>
+      )}
     </VStack>
   );
 };
