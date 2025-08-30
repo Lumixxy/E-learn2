@@ -72,9 +72,10 @@ const ModernCourseCard = ({
     });
   };
   
-  // Handle card click - navigate to course roadmap for learning flow
+  // Handle card click - navigate to course enrollment first
   const handleCardClick = () => {
-    navigate(`/admin/courses/${course.id}/roadmap`);
+    // Navigate to enrollment page first, then to roadmap after enrollment
+    navigate(`/admin/courses/${course.id}/enroll`);
   };
   
   // Format duration

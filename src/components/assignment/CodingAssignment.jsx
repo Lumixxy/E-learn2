@@ -26,7 +26,7 @@ import { FiCode, FiPlay, FiCheckCircle, FiArrowLeft, FiArrowRight } from 'react-
 import { useXP } from '../../contexts/XPContext';
 import mitPythonAssignments from '../../data/mitPythonAssignments';
 
-const AssignmentFlow = ({ isOpen, onClose, courseId, moduleId, assignmentId, onComplete }) => {
+const CodingAssignment = ({ isOpen, onClose, courseId, moduleId, assignmentId, onComplete }) => {
   const [currentProblem, setCurrentProblem] = useState(0);
   const [userCode, setUserCode] = useState('');
   const [testResults, setTestResults] = useState([]);
@@ -64,7 +64,7 @@ const AssignmentFlow = ({ isOpen, onClose, courseId, moduleId, assignmentId, onC
     }
   }, [currentProblem, currentProblemData]);
 
-  // Run code tests
+  // Run code tests (simplified - in production this would be server-side)
   const runTests = () => {
     if (!currentProblemData?.testCases) {
       toast({
@@ -76,8 +76,10 @@ const AssignmentFlow = ({ isOpen, onClose, courseId, moduleId, assignmentId, onC
       return [];
     }
 
+    // Simulate test execution
     const results = currentProblemData.testCases.map((testCase, index) => {
-      const passed = Math.random() > 0.3; // Simulate test execution
+      // In a real implementation, this would send code to a secure sandbox
+      const passed = Math.random() > 0.3; // Simulate some tests passing
       
       return {
         id: index,
@@ -141,6 +143,7 @@ const AssignmentFlow = ({ isOpen, onClose, courseId, moduleId, assignmentId, onC
       isClosable: true,
     });
     
+    // Show peer evaluation option after submission
     setShowPeerEvaluation(true);
     
     if (onComplete) {
@@ -384,4 +387,4 @@ const AssignmentFlow = ({ isOpen, onClose, courseId, moduleId, assignmentId, onC
   );
 };
 
-export default AssignmentFlow;
+export default CodingAssignment;

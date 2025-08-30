@@ -234,7 +234,12 @@ const CourseEnroll = () => {
   };
 
   const handleStartCourse = () => {
-    navigate(`/admin/courses/${courseId}/roadmap`);
+    // Check if this is the MIT Python course
+    if (courseId === 'mit-python' || courseData?.title?.includes('MIT') || courseData?.title?.includes('Python')) {
+      navigate('/admin/mit-python-roadmap');
+    } else {
+      navigate(`/admin/courses/${courseId}/roadmap`);
+    }
   };
 
   if (loading) {

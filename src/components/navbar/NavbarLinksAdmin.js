@@ -52,10 +52,11 @@ export default function HeaderLinks(props) {
   );
 
   // Get XP from XPContext
-  const { totalXP } = useXP();
-  const maxXP = 1500;
-  const xpPercentage = (totalXP / maxXP) * 100;
-  const xpNeededToLevelUp = maxXP - totalXP;
+  const { userXP, getCurrentLevelInfo } = useXP();
+  const levelInfo = getCurrentLevelInfo();
+  const currentXP = userXP?.totalXP || 0;
+  const xpPercentage = levelInfo?.progress || 0;
+  const xpNeededToLevelUp = levelInfo?.nextLevelXP - levelInfo?.currentLevelXP || 0;
   const dayStreak = 7; // Hardcoded Day Streak value
 
   const progressGradient = `linear-gradient(to right, ${useColorModeValue("brand.500", "brand.400")}, ${useColorModeValue("blue.500", "blue.300")})`;
@@ -112,7 +113,7 @@ export default function HeaderLinks(props) {
           >
             <Icon as={GiAchievement} color={ethColor} w='18px' h='18px' me='4px' />
             <Text fontSize="sm" color={textColor} whiteSpace="nowrap">
-              {totalXP}/{maxXP}
+              Level {levelInfo?.level || 1} • {currentXP} XP
             </Text>
             <Box w='100px' ml="8px">
               <Progress

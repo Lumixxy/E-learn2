@@ -5,15 +5,17 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 // XP Configuration
 const XP_CONFIG = {
-  // Base XP values for different activities
   activities: {
     LESSON_COMPLETE: 25,
     QUIZ_PASSED: 50,
+    PERFECT_QUIZ: 25,
     ASSIGNMENT_SUBMITTED: 75,
     MODULE_COMPLETE: 100,
-    COURSE_COMPLETE: 500,
-    PERFECT_QUIZ: 100, // Bonus for 100% quiz score
-    STREAK_BONUS: 25,   // Daily streak bonus
+    COURSE_COMPLETE: 200,
+    ACHIEVEMENT: 50,
+    DAILY_LOGIN: 10,
+    STREAK_BONUS: 20,
+    peer_evaluation: 50
   },
   
   // Level thresholds (cumulative XP required)
@@ -296,8 +298,8 @@ export const XPProvider = ({ children }) => {
 
   // Check if course is completed
   const isCourseCompleted = (courseId) => {
-    return userXP.completedCourses.some(c => 
-      typeof c === 'string' ? c === courseId : c.courseId === courseId
+    return userXP.completedCourses.some(course => 
+      typeof course === 'string' ? course === courseId : course.courseId === courseId
     );
   };
 
@@ -309,6 +311,61 @@ export const XPProvider = ({ children }) => {
   // Check if lesson is completed
   const isLessonCompleted = (courseId, moduleId, lessonId) => {
     return userXP.completedLessons.includes(`${courseId}-${moduleId}-${lessonId}`);
+  };
+
+  // Check certificate eligibility
+  const checkCertificateEligibility = (courseId) => {
+    const courseProgress = userXP.courseProgress[courseId];
+    if (!courseProgress) return false;
+    
+    // Check if course is completed and user has done peer evaluations
+    return courseProgress.completed && 
+           (courseProgress.peerEvaluationsCompleted || 0) >= 2;
+  };
+
+  // Award XP for peer evaluation
+  const awardPeerEvaluationXP = (courseId, submissionId, score) => {
+    const xpAmount = XP_CONFIG.activities.peer_evaluation || 50;
+    const newTotalXP = userXP.totalXP + xpAmount;
+    const levelInfo = calculateLevel(newTotalXP);
+    const leveledUp = levelInfo.level > userXP.level;
+    
+    setUserXP(prev => {
+      // Update peer evaluation count for certificate eligibility
+      const updatedCourseProgress = {
+        ...prev.courseProgress,
+        [courseId]: {
+          ...(prev.courseProgress?.[courseId] || {}),
+          peerEvaluationsCompleted: ((prev.courseProgress?.[courseId]?.peerEvaluationsCompleted) || 0) + 1
+        }
+      };
+      
+      const newState = {
+        ...prev,
+        totalXP: newTotalXP,
+        level: levelInfo.level,
+        courseProgress: updatedCourseProgress,
+        lastActivity: new Date().toISOString(),
+        streak: {
+          ...prev.streak,
+          current: prev.streak.lastActivity && 
+                   new Date().toDateString() === new Date(prev.streak.lastActivity).toDateString()
+                   ? prev.streak.current 
+                   : prev.streak.current + 1,
+          lastActivity: new Date().toISOString()
+        }
+      };
+      
+      localStorage.setItem('elearn_user_xp', JSON.stringify(newState));
+      
+      return newState;
+    });
+    
+    return {
+      xpAwarded: xpAmount,
+      leveledUp,
+      newLevel: levelInfo.level
+    };
   };
 
   // Reset user progress (for testing/admin)
@@ -342,6 +399,7 @@ export const XPProvider = ({ children }) => {
   const value = {
     userXP,
     awardXP,
+    addXP: awardXP, // Alias for compatibility
     completeLesson,
     completeQuiz,
     submitAssignment,
@@ -352,6 +410,8 @@ export const XPProvider = ({ children }) => {
     isCourseCompleted,
     isModuleCompleted,
     isLessonCompleted,
+    checkCertificateEligibility,
+    awardPeerEvaluationXP,
     resetProgress,
     XP_CONFIG
   };

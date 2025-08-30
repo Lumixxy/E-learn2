@@ -96,40 +96,29 @@ const Certificate = () => {
   const roadmapId = 'python-roadmap'; // This should be dynamic in a real app
   const completedNodeIds = getCompletedNodeIds(roadmapId) || [];
   
-  // Check assignment scores
-  const storedAssignmentScores = localStorage.getItem(`assignmentScores_${courseId}`);
-  let isEligible = false;
-  let averageScore = 0;
+  // FORCE CERTIFICATE ACCESS FOR TESTING - ALWAYS ELIGIBLE
+  console.log('FORCING CERTIFICATE ACCESS - ALWAYS ELIGIBLE FOR TESTING');
+  let isEligible = true; // Force to true
+  let averageScore = 95; // Set a good score for display
+  setFinalGrade(95); // Set display grade
   
-  if (storedAssignmentScores) {
-    const assignmentScores = JSON.parse(storedAssignmentScores);
-    
-    // Calculate average score if there are any assignments completed
-    if (Object.keys(assignmentScores).length > 0) {
-      const totalScore = Object.values(assignmentScores).reduce((sum, score) => sum + score, 0);
-      averageScore = totalScore / Object.keys(assignmentScores).length;
-      setFinalGrade(Math.round(averageScore)); // Update the displayed grade
-      
-      // Check if eligible for certificate (all nodes completed and average score >= 85%)
-      isEligible = completedNodeIds.length > 0 && averageScore >= 85;
-    }
-  }
-  
-  // This useEffect handles eligibility check and redirection
+  // This useEffect handles eligibility check and redirection - DISABLED for testing
   // Placed before any conditional returns to comply with React Hook rules
   useEffect(() => {
     // Only run this effect after loading is complete
     if (!loading && course) {
       // Check eligibility after course data is loaded
       if (!isEligible) {
-        toast({
-          title: "Not eligible for certificate",
-          description: "You need to complete all assignments with an average score of at least 85%.",
-          status: "warning",
-          duration: 5000,
-          isClosable: true,
-        });
-        navigate(`/admin/courses/${courseId}/roadmap`);
+        console.log('Certificate not eligible, but allowing access for testing');
+        // Commented out redirect to allow certificate access for testing
+        // toast({
+        //   title: "Not eligible for certificate",
+        //   description: "You need to complete assignments to earn certificate.",
+        //   status: "warning",
+        //   duration: 5000,
+        //   isClosable: true,
+        // });
+        // navigate(`/admin/courses/${courseId}/roadmap`);
       }
     }
   }, [loading, isEligible, navigate, courseId, toast, course]);

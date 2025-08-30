@@ -29,9 +29,11 @@ import WebWarriorCourseDetail from "views/admin/courses/WebWarriorCourseDetail";
 import CourseAssessment from "views/admin/courses/CourseAssessment";
 import FinalAssessment from "views/admin/courses/FinalAssessment";
 import CourseEnroll from "views/admin/courses/CourseEnroll";
+import CourseEnrollment from "views/admin/courses/CourseEnrollment";
 import CourseLearn from "views/admin/courses/CourseLearn";
 import CourseRoadmap from "views/admin/courses/CourseRoadmap";
 import PythonRoadmap from "views/admin/courses/PythonRoadmap";
+import MITPythonRoadmap from "views/admin/courses/MITPythonRoadmap";
 import Certificate from "views/admin/courses/Certificate";
 import CourseImport from "views/admin/courses/CourseImport";
 import WalletDashboard from "views/admin/wallet";
@@ -126,6 +128,20 @@ const routes = [
     path: "/courses/:courseId/roadmap",
     component: <CourseRoadmap />,
     hidden: false,
+  },
+  {
+    name: "MIT Python Roadmap",
+    layout: "/admin",
+    path: "/mit-python-roadmap",
+    icon: <Icon as={MdSchool} width="20px" height="20px" color="inherit" />,
+    component: <MITPythonRoadmap />,
+  },
+  {
+    name: "Course Enrollment",
+    layout: "/admin",
+    path: "/course-enrollment",
+    icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
+    component: <CourseEnrollment />,
   },
   {
     name: "Course Certificate",

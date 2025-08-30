@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -7,7 +7,21 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
 } from 'react-flow-renderer';
-import { Box, VStack, Text, useToast, Button, HStack, Progress, Badge, Icon } from '@chakra-ui/react';
+import { 
+  Box, 
+  VStack, 
+  Text, 
+  useToast, 
+  Button, 
+  HStack, 
+  Progress, 
+  Badge, 
+  Icon,
+  Grid,
+  GridItem,
+  Spinner,
+  Center
+} from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FiAward, FiTarget, FiTrendingUp } from 'react-icons/fi';
 import { loadCourseById } from 'utils/courseDataLoader';
@@ -17,7 +31,10 @@ import AssignmentFlow from '../../../components/assignment/AssignmentFlow';
 import CertificateGenerator from '../../../components/certificate/CertificateGenerator';
 import { useCompletedNodes } from '../../../context/CompletedNodesContext';
 import { useXP } from '../../../contexts/XPContext';
-import nodeQuizzes from '../../../data/nodeQuizzes';
+import { mitPythonRoadmap } from '../../../data/mitPythonRoadmap';
+import mitPythonQuizzes from '../../../data/mitPythonQuizzes';
+import PeerEvaluation from '../../../components/assignment/PeerEvaluation';
+import ResourcesList from '../../../components/roadmap/ResourcesList';
 
 const foggyBg = {
   background: 'linear-gradient(120deg, #e0f2ff 0%, #b3c6e0 100%)',
@@ -187,7 +204,7 @@ const CourseRoadmap = () => {
     setSelectedNodeId(node.id);
     
     // Check if node has a quiz
-    const nodeHasQuiz = nodeQuizzes[node.id] !== undefined;
+    const nodeHasQuiz = mitPythonQuizzes[node.id];
     
     if (nodeHasQuiz) {
       setQuizOpen(true);
@@ -406,21 +423,30 @@ const CourseRoadmap = () => {
           </HStack>
         </VStack>
         
-        <Box height="70vh" border="1px solid #e2e8f0" borderRadius="md" overflow="hidden">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={handleNodeClick}
-            fitView
-          >
-            <Controls />
-            <MiniMap />
-            <Background variant="dots" gap={12} size={1} />
-          </ReactFlow>
-        </Box>
+        <Grid templateColumns="3fr 1fr" gap={4}>
+          <GridItem>
+            <Box height="70vh" border="1px solid #e2e8f0" borderRadius="md" overflow="hidden">
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeClick={handleNodeClick}
+                fitView
+              >
+                <Controls />
+                <MiniMap />
+                <Background variant="dots" gap={12} size={1} />
+              </ReactFlow>
+            </Box>
+          </GridItem>
+          <GridItem>
+            {selectedNodeId && (
+              <ResourcesList nodeId={selectedNodeId} />
+            )}
+          </GridItem>
+        </Grid>
         
         {selectedNodeId && quizOpen && (
           <NodeQuiz
@@ -451,7 +477,6 @@ const CourseRoadmap = () => {
             completionDate={new Date()}
           />
         )}
-
       </Box>
     </Box>
   );
