@@ -34,6 +34,13 @@ import CourseLearn from "views/admin/courses/CourseLearn";
 import CourseRoadmap from "views/admin/courses/CourseRoadmap";
 import PythonRoadmap from "views/admin/courses/PythonRoadmap";
 import MITPythonRoadmap from "views/admin/courses/MITPythonRoadmap";
+import HTMLRoadmap from "views/admin/courses/HTMLRoadmap";
+import CSSRoadmap from "views/admin/courses/CSSRoadmap";
+import NodeJSRoadmap from "views/admin/courses/NodeJSRoadmap";
+import ReactRoadmap from "views/admin/courses/ReactRoadmap";
+import JavaScriptRoadmap from "views/admin/courses/JavaScriptRoadmap";
+import JavaRoadmap from "views/admin/courses/JavaRoadmap";
+import DatabaseRoadmap from "views/admin/courses/DatabaseRoadmap";
 import Certificate from "views/admin/courses/Certificate";
 import CourseImport from "views/admin/courses/CourseImport";
 import WalletDashboard from "views/admin/wallet";
@@ -58,14 +65,14 @@ const routes = [
     icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
     component: <Courses />,
   },
-  // Temporarily hidden Adventure Path
-  // {
-  //   name: "Adventure Path",
-  //   layout: "/admin",
-  //   path: "/adventure-path",
-  //   icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
-  //   component: <AdventurePathPage />,
-  // },
+  {
+    name: "Adventure Path",
+    layout: "/admin",
+    path: "/adventure-path",
+    icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
+    component: <AdventurePathPage />,
+    hidden: true
+  },
   {
     name: "Adventure Course Detail",
     layout: "/admin",
@@ -93,6 +100,7 @@ const routes = [
     path: "/my-learning",
     icon: <Icon as={MdSchool} width="20px" height="20px" color="inherit" />,
     component: <MyLearning />,
+    hidden: true,
   },
   {
     name: "Course Detail",
@@ -127,7 +135,7 @@ const routes = [
     layout: "/admin",
     path: "/courses/:courseId/roadmap",
     component: <CourseRoadmap />,
-    hidden: false,
+    hidden: true,
   },
   {
     name: "MIT Python Roadmap",
@@ -135,9 +143,59 @@ const routes = [
     path: "/mit-python-roadmap",
     icon: <Icon as={MdSchool} width="20px" height="20px" color="inherit" />,
     component: <MITPythonRoadmap />,
+    hidden: true,
   },
   {
-    name: "Course Enrollment",
+    name: "HTML Roadmap",
+    layout: "/admin",
+    path: "/html-roadmap",
+    component: <HTMLRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "CSS Roadmap",
+    layout: "/admin",
+    path: "/css-roadmap",
+    component: <CSSRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "Node.js Roadmap",
+    layout: "/admin",
+    path: "/nodejs-roadmap",
+    component: <NodeJSRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "React Roadmap",
+    layout: "/admin",
+    path: "/react-roadmap",
+    component: <ReactRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "JavaScript Roadmap",
+    layout: "/admin",
+    path: "/javascript-roadmap",
+    component: <JavaScriptRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "Java Roadmap",
+    layout: "/admin",
+    path: "/java-roadmap",
+    component: <JavaRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "Database Roadmap",
+    layout: "/admin",
+    path: "/database-roadmap",
+    component: <DatabaseRoadmap />,
+    hidden: true,
+  },
+  {
+    name: "My Learning",
     layout: "/admin",
     path: "/course-enrollment",
     icon: <Icon as={MdLibraryBooks} width="20px" height="20px" color="inherit" />,
@@ -174,7 +232,39 @@ const routes = [
     component: <ResumeGenerator />,
   },
 
-  {    name: "Leaderboard",    layout: "/admin",    path: "/leaderboard",    icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,    component: <Leaderboard />,  },  {    name: "Wallet",    layout: "/admin",    path: "/wallet",    icon: <Icon as={MdAccountBalanceWallet} width="20px" height="20px" color="inherit" />,    component: <WalletDashboard />,    hidden: true,  },  {    name: "Profile",    layout: "/admin",    path: "/profile",    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,    component: <Profile />,  },  {    name: "Skill Tree Roadmap",    layout: "/admin",    path: "/skilltree",    component: <SkillTreeRoadmap />,    hidden: true,  },  {    path: "courses/import",    element: <CourseImport />,  },
+  {
+    name: "Leaderboard",
+    layout: "/admin",
+    path: "/leaderboard",
+    icon: <Icon as={MdLeaderboard} width="20px" height="20px" color="inherit" />,
+    component: <Leaderboard />,
+  },
+  {
+    name: "Wallet",
+    layout: "/admin",
+    path: "/wallet",
+    icon: <Icon as={MdAccountBalanceWallet} width="20px" height="20px" color="inherit" />,
+    component: <WalletDashboard />,
+    hidden: true,
+  },
+  {
+    name: "Profile",
+    layout: "/admin",
+    path: "/profile",
+    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
+    component: <Profile />,
+  },
+  {
+    name: "Skill Tree Roadmap",
+    layout: "/admin",
+    path: "/skilltree",
+    component: <SkillTreeRoadmap />,
+    hidden: true,
+  },
+  {
+    path: "courses/import",
+    element: <CourseImport />,
+  },
 ];
 
 export default routes;

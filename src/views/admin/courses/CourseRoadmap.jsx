@@ -75,6 +75,21 @@ const CourseRoadmap = () => {
     const fetchRoadmapData = async () => {
       try {
         setLoading(true);
+        
+        // Redirect specific courses to their dedicated roadmap components
+        if (courseId === 'javascript') {
+          navigate('/admin/javascript-roadmap');
+          return;
+        }
+        if (courseId === 'java') {
+          navigate('/admin/java-roadmap');
+          return;
+        }
+        if (courseId === 'database') {
+          navigate('/admin/database-roadmap');
+          return;
+        }
+        
         // Load course to determine roadmap title
         const c = await loadCourseById(courseId);
         setCourse(c || null);

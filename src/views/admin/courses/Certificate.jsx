@@ -92,6 +92,57 @@ const Certificate = () => {
     });
   };
 
+  // Get course-specific certificate data
+  const getCertificateData = (courseId) => {
+    const courseTemplates = {
+      'html': {
+        title: 'HTML Fundamentals Certification',
+        description: 'Successfully completed comprehensive HTML training',
+        skills: ['HTML Structure', 'Semantic Elements', 'Forms', 'Accessibility'],
+        duration: '6 weeks',
+        instructor: 'Prof. Emily Carter'
+      },
+      'css': {
+        title: 'CSS Styling and Layout Certification',
+        description: 'Successfully completed advanced CSS training',
+        skills: ['CSS Fundamentals', 'Flexbox', 'Grid', 'Responsive Design'],
+        duration: '8 weeks',
+        instructor: 'Dr. James Wilson'
+      },
+      'nodejs': {
+        title: 'Node.js Backend Development Certification',
+        description: 'Successfully completed Node.js backend development training',
+        skills: ['Node.js Basics', 'Express.js', 'APIs', 'Database Integration'],
+        duration: '10 weeks',
+        instructor: 'Dr. Maria Rodriguez'
+      },
+      'react': {
+        title: 'React.js Frontend Development Certification',
+        description: 'Successfully completed React.js frontend development training',
+        skills: ['React Fundamentals', 'Components', 'State Management', 'Hooks'],
+        duration: '12 weeks',
+        instructor: 'Prof. David Kim'
+      },
+      'mit-python': {
+        title: 'MIT 6.0001: Introduction to Computer Science and Programming in Python',
+        description: 'Successfully completed MIT\'s renowned computer science course',
+        skills: ['Python Basics', 'Data Structures', 'Algorithms', 'OOP'],
+        duration: '12 weeks',
+        instructor: 'Dr. Ana Bell'
+      }
+    };
+
+    return courseTemplates[courseId] || {
+      title: course?.title || 'Course Completion Certificate',
+      description: 'Successfully completed the course',
+      skills: ['Programming', 'Problem Solving'],
+      duration: '12 weeks',
+      instructor: 'Course Instructor'
+    };
+  };
+
+  const certificateData = getCertificateData(courseId);
+
   // Check if all nodes are completed and average score is at least 85%
   const roadmapId = 'python-roadmap'; // This should be dynamic in a real app
   const completedNodeIds = getCompletedNodeIds(roadmapId) || [];
@@ -199,13 +250,24 @@ const Certificate = () => {
           </Text>
 
           <Heading as="h3" size="lg" color={headingColor} fontFamily="serif">
-            {course.title}
+            {certificateData.title}
           </Heading>
 
           <Text fontSize="md" textAlign="center" maxW="700px">
-            demonstrating proficiency in all required skills and knowledge areas
+            {certificateData.description} and demonstrating proficiency in all required skills and knowledge areas
             with a minimum passing grade of 85% on all assignments and final project.
           </Text>
+
+          <Box mt={4} mb={4}>
+            <Text fontWeight="bold" mb={2}>Skills Mastered:</Text>
+            <Flex wrap="wrap" gap={2}>
+              {certificateData.skills.map((skill, index) => (
+                <Badge key={index} colorScheme="purple" variant="subtle" p={2}>
+                  {skill}
+                </Badge>
+              ))}
+            </Flex>
+          </Box>
 
           <Divider borderColor={accentColor} />
 
@@ -217,7 +279,12 @@ const Certificate = () => {
 
             <VStack align="flex-start" mb={4} mr={4}>
               <Text fontWeight="bold">Course Duration:</Text>
-              <Text>{courseDuration}</Text>
+              <Text>{certificateData.duration}</Text>
+            </VStack>
+
+            <VStack align="flex-start" mb={4} mr={4}>
+              <Text fontWeight="bold">Instructor:</Text>
+              <Text>{certificateData.instructor}</Text>
             </VStack>
 
             <VStack align="flex-start" mb={4} mr={4}>

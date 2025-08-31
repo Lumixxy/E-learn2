@@ -27,7 +27,7 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { HiCheckCircle, HiStar, HiLockClosed, HiExternalLink, HiGift } from 'react-icons/hi';
-import { useXP } from 'contexts/XPContext';
+import { useXP } from '../../../contexts/XPContext';
 
 // Quest data with MIT resources and quiz questions
 const quests_data = [

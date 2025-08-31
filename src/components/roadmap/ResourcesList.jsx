@@ -23,7 +23,7 @@ import WebWarriorAPI from '../../api/webwarrior';
 
 const ResourcesList = ({ nodeId }) => {
   const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
   // Color mode values
@@ -47,166 +47,35 @@ const ResourcesList = ({ nodeId }) => {
   };
 
   useEffect(() => {
-    const fetchResources = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Enhanced MIT OCW based resources mapped to node IDs
-        const mitResourcesMap = {
-          // Node IDs from roadmap.json - Python Basics
-          '1': [
-            {
-              title: 'MIT Lecture 1: What is Computation?',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-1-what-is-computation/',
-              type: 'video',
-              source: 'MIT OCW',
-              description: 'Introduction to computational thinking and Python basics'
-            },
-            {
-              title: 'Python Official Tutorial - Introduction',
-              url: 'https://docs.python.org/3/tutorial/introduction.html',
-              type: 'docs',
-              source: 'Python.org',
-              description: 'Official Python documentation for beginners'
-            },
-            {
-              title: 'MIT Course Syllabus and Materials',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/',
-              type: 'course',
-              source: 'MIT OCW',
-              description: 'Complete MIT 6.0001 course materials'
-            },
-            {
-              title: 'MIT Problem Set 1',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps1/',
-              type: 'assignment',
-              source: 'MIT OCW',
-              description: 'Practice problems for Python basics'
-            }
-          ],
-          // Data Structures (node-2)
-          '2': [
-            {
-              title: 'MIT Lecture 5: Tuples, Lists, Aliasing, Mutability, and Cloning',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-5-tuples-lists-aliasing-mutability-and-cloning/',
-              type: 'video',
-              source: 'MIT OCW',
-              description: 'Comprehensive coverage of Python data structures'
-            },
-            {
-              title: 'Python Data Structures Documentation',
-              url: 'https://docs.python.org/3/tutorial/datastructures.html',
-              type: 'docs',
-              source: 'Python.org',
-              description: 'Official guide to lists, tuples, dictionaries, and sets'
-            },
-            {
-              title: 'MIT Problem Set 4 - Word Game',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/ps4/',
-              type: 'assignment',
-              source: 'MIT OCW',
-              description: 'Hands-on practice with data structures'
-            },
-            {
-              title: 'MIT Lecture 6: Recursion and Dictionaries',
-              url: 'https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-6-recursion-and-dictionaries/',
-              type: 'video',
-              source: 'MIT OCW',
-              description: 'Advanced data structures and recursion concepts'
-            }
-          ],
-          // Algorithms (node-3)
-          '3': [
-            {
-              title: 'MIT 6.006 Introduction to Algorithms',
-              url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/',
-              type: 'course',
-              source: 'MIT OCW',
-              description: 'Complete algorithms course covering sorting, searching, and optimization'
-            },
-            {
-              title: 'MIT Lecture: Algorithmic Thinking, Peak Finding',
-              url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/resources/lecture-1-algorithmic-thinking-peak-finding/',
-              type: 'video',
-              source: 'MIT OCW',
-              description: 'Introduction to algorithmic thinking and problem-solving'
-            },
-            {
-              title: 'MIT Problem Set - Algorithms',
-              url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/assignments/',
-              type: 'assignment',
-              source: 'MIT OCW',
-              description: 'Practical algorithm implementation challenges'
-            },
-            {
-              title: 'Python Algorithm Documentation',
-              url: 'https://docs.python.org/3/library/collections.html',
-              type: 'docs',
-              source: 'Python.org',
-              description: 'Python collections and algorithm utilities'
-            }
-          ]
-        };
-        
-        // Default resources when no specific mapping is found
-        const defaultResources = [
-          {
-            title: 'MIT OpenCourseWare - Computer Science',
-            url: 'https://ocw.mit.edu/search/?d=Electrical%20Engineering%20and%20Computer%20Science&s=department_course_numbers.sort_coursenum',
-            type: 'course',
-            source: 'MIT OCW',
-            description: 'Browse all MIT computer science courses'
-          },
-          {
-            title: 'Python Official Documentation',
-            url: 'https://docs.python.org/3/',
-            type: 'docs',
-            source: 'Python.org',
-            description: 'Complete Python language reference'
-          },
-          {
-            title: 'Real Python Tutorials',
-            url: 'https://realpython.com/',
-            type: 'tutorial',
-            source: 'Real Python',
-            description: 'Practical Python programming tutorials'
-          }
-        ];
-        
-        // Extract node ID without any prefix
-        const cleanNodeId = nodeId.replace('node-', '');
-        
-        // Check if we have MIT resources for this node
-        if (mitResourcesMap[cleanNodeId]) {
-          console.log(`Using MIT resources for node: ${cleanNodeId}`);
-          setResources(mitResourcesMap[cleanNodeId]);
-        } else {
-          try {
-            // Try to get resources from API if no MIT resources found
-            const data = await WebWarriorAPI.getNodeResources(nodeId);
-            if (data && data.length > 0) {
-              setResources(data);
-            } else {
-              // If API returns empty array, use default resources
-              setResources(defaultResources);
-            }
-          } catch (apiErr) {
-            console.error('Error fetching node resources from API:', apiErr);
-            // If API call fails, use default resources
-            setResources(defaultResources);
-          }
-        }
-      } catch (err) {
-        console.error('Error in resource handling:', err);
-        setError('Failed to load resources. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    // Instant loading - no async operations
     if (nodeId) {
-      fetchResources();
+      const instantResources = [
+        {
+          title: 'Node.js Documentation',
+          url: 'https://nodejs.org/docs',
+          type: 'docs',
+          source: 'Node.js',
+          description: 'Official Node.js documentation'
+        },
+        {
+          title: 'Express.js Guide',
+          url: 'https://expressjs.com',
+          type: 'docs',
+          source: 'Express',
+          description: 'Express.js framework guide'
+        },
+        {
+          title: 'MDN JavaScript',
+          url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+          type: 'docs',
+          source: 'MDN',
+          description: 'JavaScript reference'
+        }
+      ];
+      
+      setResources(instantResources);
+      setLoading(false);
+      setError(null);
     }
   }, [nodeId]);
 

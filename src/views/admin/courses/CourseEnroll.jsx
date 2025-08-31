@@ -234,12 +234,19 @@ const CourseEnroll = () => {
   };
 
   const handleStartCourse = () => {
-    // Check if this is the MIT Python course
-    if (courseId === 'mit-python' || courseData?.title?.includes('MIT') || courseData?.title?.includes('Python')) {
-      navigate('/admin/mit-python-roadmap');
-    } else {
-      navigate(`/admin/courses/${courseId}/roadmap`);
-    }
+    // Map course IDs to their specific roadmap routes
+    const courseRoutes = {
+      'mit-python': '/admin/mit-python-roadmap',
+      'python': '/admin/mit-python-roadmap', // Redirect python to MIT Python
+      'html': '/admin/html-roadmap',
+      'css': '/admin/css-roadmap',
+      'nodejs': '/admin/nodejs-roadmap',
+      'react': '/admin/react-roadmap'
+    };
+    
+    const route = courseRoutes[courseId] || `/admin/courses/${courseId}/roadmap`;
+    console.log('Navigating to course roadmap:', route);
+    navigate(route);
   };
 
   if (loading) {

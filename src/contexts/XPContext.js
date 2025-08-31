@@ -15,7 +15,8 @@ const XP_CONFIG = {
     ACHIEVEMENT: 50,
     DAILY_LOGIN: 10,
     STREAK_BONUS: 20,
-    peer_evaluation: 50
+    peer_evaluation: 50,
+    course_enrollment: 25
   },
   
   // Level thresholds (cumulative XP required)
@@ -59,7 +60,7 @@ export const XPProvider = ({ children }) => {
   const [userXP, setUserXP] = useState(() => {
     // Load from localStorage
     const saved = localStorage.getItem('elearn_user_xp');
-    return saved ? JSON.parse(saved) : {
+    const parsed = saved ? JSON.parse(saved) : {
       totalXP: 0,
       level: 1,
       currentLevelXP: 0,
@@ -81,6 +82,13 @@ export const XPProvider = ({ children }) => {
         totalStudyTime: 0, // in minutes
       }
     };
+    
+    // Ensure totalXP is always a number
+    if (parsed && typeof parsed.totalXP !== 'number') {
+      parsed.totalXP = Number(parsed.totalXP) || 0;
+    }
+    
+    return parsed;
   });
 
   // Save to localStorage whenever userXP changes
@@ -115,8 +123,8 @@ export const XPProvider = ({ children }) => {
 
   // Award XP for an activity
   const awardXP = (activity, amount = null, metadata = {}) => {
-    const xpAmount = amount || XP_CONFIG.activities[activity] || 0;
-    const newTotalXP = userXP.totalXP + xpAmount;
+    const xpAmount = Number(amount || XP_CONFIG.activities[activity] || 0);
+    const newTotalXP = Number(userXP.totalXP) + xpAmount;
     const levelInfo = calculateLevel(newTotalXP);
     
     // Check for level up
@@ -325,8 +333,8 @@ export const XPProvider = ({ children }) => {
 
   // Award XP for peer evaluation
   const awardPeerEvaluationXP = (courseId, submissionId, score) => {
-    const xpAmount = XP_CONFIG.activities.peer_evaluation || 50;
-    const newTotalXP = userXP.totalXP + xpAmount;
+    const xpAmount = Number(XP_CONFIG.activities.peer_evaluation || 50);
+    const newTotalXP = Number(userXP.totalXP) + xpAmount;
     const levelInfo = calculateLevel(newTotalXP);
     const leveledUp = levelInfo.level > userXP.level;
     
@@ -396,6 +404,8 @@ export const XPProvider = ({ children }) => {
     localStorage.setItem('elearn_user_xp', JSON.stringify(initialState));
   };
 
+  const getTotalXP = () => userXP.totalXP;
+
   const value = {
     userXP,
     awardXP,
@@ -413,6 +423,7 @@ export const XPProvider = ({ children }) => {
     checkCertificateEligibility,
     awardPeerEvaluationXP,
     resetProgress,
+    getTotalXP,
     XP_CONFIG
   };
 

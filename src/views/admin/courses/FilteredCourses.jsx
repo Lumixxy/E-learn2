@@ -64,16 +64,138 @@ const FilteredCourses = () => {
         
         let coursesData = [];
         
+        // Create course data for new technologies if not available
+        const newTechCourses = [
+          {
+            id: 'mit-python',
+            title: 'MIT 6.0001: Introduction to Computer Science and Programming in Python',
+            author: 'Dr. Ana Bell',
+            category: 'Computer Science',
+            level: 'Beginner',
+            price: 0,
+            isFree: true,
+            rating: 4.8,
+            image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?q=80&w=2070&auto=format&fit=crop',
+            tags: ['Python', 'Computer Science', 'Programming', 'MIT'],
+            description: 'Learn fundamental programming concepts with Python from MIT\'s renowned computer science course.',
+            skillTags: ['python', 'programming', 'computer-science']
+          },
+          {
+            id: 'javascript',
+            title: 'JavaScript Frontend Development',
+            author: 'Prof. Sarah Johnson',
+            category: 'Frontend Development',
+            level: 'Beginner to Intermediate',
+            price: 0,
+            isFree: true,
+            rating: 4.8,
+            image: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?q=80&w=2070&auto=format&fit=crop',
+            tags: ['JavaScript', 'Frontend', 'Programming', 'Web Development'],
+            description: 'Master modern JavaScript programming for web development.',
+            skillTags: ['javascript', 'frontend', 'programming']
+          },
+          {
+            id: 'java',
+            title: 'Java Programming Mastery',
+            author: 'Dr. Michael Chen',
+            category: 'Backend Development',
+            level: 'Intermediate to Advanced',
+            price: 0,
+            isFree: true,
+            rating: 4.9,
+            image: 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=2069&auto=format&fit=crop',
+            tags: ['Java', 'OOP', 'Programming', 'Backend'],
+            description: 'Master object-oriented programming with Java from fundamentals to advanced concepts.',
+            skillTags: ['java', 'programming', 'backend']
+          },
+          {
+            id: 'database',
+            title: 'Database Management Mastery',
+            author: 'Prof. Lisa Wang',
+            category: 'Data Management',
+            level: 'Intermediate to Advanced',
+            price: 0,
+            isFree: true,
+            rating: 4.8,
+            image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2070&auto=format&fit=crop',
+            tags: ['Database', 'SQL', 'NoSQL', 'Data Management'],
+            description: 'Master SQL, database design, and both relational and NoSQL databases.',
+            skillTags: ['database', 'sql', 'data']
+          },
+          {
+            id: 'html',
+            title: 'HTML Fundamentals',
+            author: 'Prof. Emily Carter',
+            category: 'Frontend Development',
+            level: 'Beginner',
+            price: 0,
+            isFree: true,
+            rating: 4.7,
+            image: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop',
+            tags: ['HTML', 'Web Development', 'Frontend'],
+            description: 'Master the building blocks of the web with comprehensive HTML training.',
+            skillTags: ['html', 'frontend', 'web-development']
+          },
+          {
+            id: 'css',
+            title: 'CSS Styling and Layout',
+            author: 'Dr. James Wilson',
+            category: 'Frontend Development',
+            level: 'Beginner to Intermediate',
+            price: 0,
+            isFree: true,
+            rating: 4.8,
+            image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2070&auto=format&fit=crop',
+            tags: ['CSS', 'Web Development', 'Frontend', 'Design'],
+            description: 'Create beautiful, responsive web designs with modern CSS techniques.',
+            skillTags: ['css', 'frontend', 'web-development']
+          },
+          {
+            id: 'nodejs',
+            title: 'Node.js Backend Development',
+            author: 'Dr. Maria Rodriguez',
+            category: 'Backend Development',
+            level: 'Intermediate',
+            price: 0,
+            isFree: true,
+            rating: 4.9,
+            image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2070&auto=format&fit=crop',
+            tags: ['Node.js', 'Backend', 'JavaScript', 'Server'],
+            description: 'Build scalable server-side applications with Node.js and Express.',
+            skillTags: ['nodejs', 'backend', 'javascript']
+          },
+          {
+            id: 'react',
+            title: 'React.js Frontend Development',
+            author: 'Prof. David Kim',
+            category: 'Frontend Development',
+            level: 'Intermediate',
+            price: 0,
+            isFree: true,
+            rating: 4.8,
+            image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+            tags: ['React', 'Frontend', 'JavaScript', 'Framework'],
+            description: 'Build modern, interactive user interfaces with React and its ecosystem.',
+            skillTags: ['react', 'frontend', 'javascript']
+          }
+        ];
+
         // Try to use courses from learning context first
         if (availableCourses && availableCourses.length > 0) {
-          coursesData = availableCourses;
+          coursesData = [...availableCourses, ...newTechCourses];
         } else {
-          // Fallback to loading from JSON file
-          const response = await fetch('/data/courses.json');
-          if (!response.ok) {
-            throw new Error('Failed to fetch courses data');
+          // Fallback to loading from JSON file and add new tech courses
+          try {
+            const response = await fetch('/data/courses.json');
+            if (response.ok) {
+              const jsonCourses = await response.json();
+              coursesData = [...jsonCourses, ...newTechCourses];
+            } else {
+              coursesData = newTechCourses;
+            }
+          } catch {
+            coursesData = newTechCourses;
           }
-          coursesData = await response.json();
         }
         
         // Auto-tag courses that don't have skill tags

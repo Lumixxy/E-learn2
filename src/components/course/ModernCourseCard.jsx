@@ -58,9 +58,12 @@ const ModernCourseCard = ({
     if (onEnroll) {
       onEnroll(course);
     } else {
-      // Default enrollment behavior - navigate directly to enrollment page
-      console.log('Navigating to:', `/admin/courses/${course.id}/enroll`);
-      navigate(`/admin/courses/${course.id}/enroll`);
+      // Navigate to course enrollment page for proper enrollment flow
+      if (['html', 'css', 'nodejs', 'react'].includes(course.id)) {
+        navigate('/admin/course-enrollment');
+      } else {
+        navigate(`/admin/courses/${course.id}/enroll`);
+      }
     }
     
     toast({
@@ -72,10 +75,14 @@ const ModernCourseCard = ({
     });
   };
   
-  // Handle card click - navigate to course enrollment first
+  // Handle card click - navigate to course enrollment page
   const handleCardClick = () => {
-    // Navigate to enrollment page first, then to roadmap after enrollment
-    navigate(`/admin/courses/${course.id}/enroll`);
+    // Navigate to enrollment page for proper enrollment flow
+    if (['html', 'css', 'nodejs', 'react'].includes(course.id)) {
+      navigate('/admin/course-enrollment');
+    } else {
+      navigate(`/admin/courses/${course.id}/enroll`);
+    }
   };
   
   // Format duration

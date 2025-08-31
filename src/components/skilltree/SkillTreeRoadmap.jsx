@@ -574,7 +574,7 @@ const SkillTreeRoadmap = () => {
     if (node.name && (!node.children || node.children.length === 0 || node.forceRedirect)) {
       // Delay redirection to allow animation to complete
       setTimeout(() => {
-        // Navigate to filtered courses view for leaf nodes
+        // Navigate to filtered courses view for all leaf nodes to show course enrollment cards
         navigate(`/admin/courses/skill/${nodeId}`);
       }, 1000); // Delay redirection by 1 second to allow animation to complete
       return;

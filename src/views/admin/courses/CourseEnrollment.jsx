@@ -83,6 +83,78 @@ const CourseEnrollment = () => {
       enrolled: false
     },
     {
+      id: 'html',
+      title: 'HTML Fundamentals',
+      description: 'Master the building blocks of the web with comprehensive HTML training.',
+      instructor: 'Prof. Emily Carter',
+      duration: '6 weeks',
+      difficulty: 'Beginner',
+      students: 38420,
+      rating: 4.7,
+      price: 'Free',
+      topics: ['HTML Structure', 'Semantic Elements', 'Forms', 'Accessibility', 'Best Practices'],
+      prerequisites: 'None',
+      certificate: true,
+      estimatedHours: 30,
+      modules: 8,
+      assignments: 4,
+      enrolled: false
+    },
+    {
+      id: 'css',
+      title: 'CSS Styling and Layout',
+      description: 'Create beautiful, responsive web designs with modern CSS techniques.',
+      instructor: 'Dr. James Wilson',
+      duration: '8 weeks',
+      difficulty: 'Beginner to Intermediate',
+      students: 35680,
+      rating: 4.8,
+      price: 'Free',
+      topics: ['CSS Fundamentals', 'Flexbox', 'Grid', 'Animations', 'Responsive Design'],
+      prerequisites: 'Basic HTML knowledge',
+      certificate: true,
+      estimatedHours: 40,
+      modules: 10,
+      assignments: 5,
+      enrolled: false
+    },
+    {
+      id: 'nodejs',
+      title: 'Node.js Backend Development',
+      description: 'Build scalable server-side applications with Node.js and Express.',
+      instructor: 'Dr. Maria Rodriguez',
+      duration: '10 weeks',
+      difficulty: 'Intermediate',
+      students: 29340,
+      rating: 4.9,
+      price: 'Free',
+      topics: ['Node.js Basics', 'Express.js', 'APIs', 'Database Integration', 'Authentication'],
+      prerequisites: 'JavaScript fundamentals',
+      certificate: true,
+      estimatedHours: 50,
+      modules: 12,
+      assignments: 6,
+      enrolled: false
+    },
+    {
+      id: 'react',
+      title: 'React.js Frontend Development',
+      description: 'Build modern, interactive user interfaces with React and its ecosystem.',
+      instructor: 'Prof. David Kim',
+      duration: '12 weeks',
+      difficulty: 'Intermediate',
+      students: 42150,
+      rating: 4.8,
+      price: 'Free',
+      topics: ['React Fundamentals', 'Components', 'State Management', 'Hooks', 'Testing'],
+      prerequisites: 'JavaScript and HTML/CSS knowledge',
+      certificate: true,
+      estimatedHours: 60,
+      modules: 14,
+      assignments: 7,
+      enrolled: false
+    },
+    {
       id: 'web-development',
       title: 'Full Stack Web Development',
       description: 'Master modern web development with React, Node.js, and database technologies.',
@@ -98,6 +170,24 @@ const CourseEnrollment = () => {
       estimatedHours: 80,
       modules: 16,
       assignments: 8,
+      enrolled: false
+    },
+    {
+      id: 'database',
+      title: 'Database Management Mastery',
+      description: 'Master SQL, NoSQL, and database design principles for modern applications.',
+      instructor: 'Prof. Lisa Wang',
+      duration: '12 weeks',
+      difficulty: 'Intermediate to Advanced',
+      students: 31200,
+      rating: 4.8,
+      price: 'Free',
+      topics: ['SQL & NoSQL', 'Database Design', 'Performance Optimization', 'Security', 'Transactions'],
+      prerequisites: 'Basic programming knowledge',
+      certificate: true,
+      estimatedHours: 60,
+      modules: 10,
+      assignments: 6,
       enrolled: false
     },
     {
@@ -173,11 +263,24 @@ const CourseEnrollment = () => {
   };
 
   const startCourse = (courseId) => {
-    if (courseId === 'mit-python') {
-      navigate('/admin/mit-python-roadmap');
-    } else {
-      navigate(`/admin/course-roadmap/${courseId}`);
-    }
+    console.log('Starting course with ID:', courseId);
+    
+    // Map course IDs to their specific roadmap routes
+    const courseRoutes = {
+      'mit-python': '/admin/mit-python-roadmap', // MIT Python course
+      'python': '/admin/mit-python-roadmap', // Redirect python to MIT Python
+      'html': '/admin/html-roadmap',
+      'css': '/admin/css-roadmap',
+      'nodejs': '/admin/nodejs-roadmap',
+      'react': '/admin/react-roadmap',
+      'javascript': '/admin/javascript-roadmap',
+      'java': '/admin/java-roadmap',
+      'database': '/admin/database-roadmap'
+    };
+    
+    const route = courseRoutes[courseId] || `/admin/courses/${courseId}/roadmap`;
+    console.log('Navigating to:', route);
+    navigate(route);
   };
 
   // Check if course is eligible for certificate - FORCED TRUE FOR ALL COURSES

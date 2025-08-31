@@ -23,6 +23,7 @@ import {
 import { useXP } from '../../contexts/XPContext';
 import { useCompletedNodes } from '../../context/CompletedNodesContext';
 import nodeQuizzes from '../../data/nodeQuizzes';
+import nodejsQuizzes from '../../data/nodejsQuizzes';
 
 // Sample quiz data structure - will be replaced by nodeQuizzes import
 // Keeping this as fallback
@@ -213,16 +214,23 @@ const NodeQuiz = ({ nodeId, roadmapId, isOpen, onClose, onQuizComplete }) => {
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   useEffect(() => {
-    // Try to get quiz from nodeQuizzes first, then fall back to sample data if needed
-    if (nodeId && nodeQuizzes[nodeId]) {
+    // Try to get quiz from course-specific quiz data first
+    if (nodeId && nodejsQuizzes[nodeId]) {
+      setCurrentQuiz(nodejsQuizzes[nodeId]);
+    } else if (nodeId && nodeQuizzes[nodeId]) {
       setCurrentQuiz(nodeQuizzes[nodeId]);
     } else if (nodeId && sampleQuizzes[nodeId]) {
       setCurrentQuiz(sampleQuizzes[nodeId]);
     } else {
-      // Fallback to a default quiz if the nodeId doesn't match
-      const quizIds = Object.keys(nodeQuizzes).length > 0 ? Object.keys(nodeQuizzes) : Object.keys(sampleQuizzes);
-      if (quizIds.length > 0) {
-        setCurrentQuiz(quizIds[0].startsWith('node-') ? nodeQuizzes[quizIds[0]] : sampleQuizzes[quizIds[0]]);
+      // Fallback based on roadmap type
+      if (roadmapId === 'nodejs' && Object.keys(nodejsQuizzes).length > 0) {
+        const firstNodejsQuiz = Object.keys(nodejsQuizzes)[0];
+        setCurrentQuiz(nodejsQuizzes[firstNodejsQuiz]);
+      } else {
+        const quizIds = Object.keys(nodeQuizzes).length > 0 ? Object.keys(nodeQuizzes) : Object.keys(sampleQuizzes);
+        if (quizIds.length > 0) {
+          setCurrentQuiz(quizIds[0].startsWith('node-') ? nodeQuizzes[quizIds[0]] : sampleQuizzes[quizIds[0]]);
+        }
       }
     }
 

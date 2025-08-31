@@ -20,11 +20,15 @@ import { FiDownload, FiShare2, FiAward, FiCalendar, FiUser } from 'react-icons/f
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useXP } from '../../contexts/XPContext';
+import { getCertificateData } from '../../data/certificateData';
 
 const CertificateGenerator = ({ 
   isOpen, 
   onClose, 
-  courseData, 
+  courseId,
+  courseName,
+  completedNodes = [],
+  totalNodes = 0,
   userInfo = {},
   completionDate = new Date()
 }) => {
@@ -33,23 +37,29 @@ const CertificateGenerator = ({
   const toast = useToast();
   const { userXP, getCurrentLevelInfo } = useXP();
   
+  // Get course-specific certificate data
+  const certData = getCertificateData(courseId);
+  
   // Color mode values
   const bgColor = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('gray.800', 'white');
   const mutedColor = useColorModeValue('gray.600', 'gray.400');
   
   // User info with defaults
-  const studentName = userInfo.name || 'Student Name';
-  const instructorName = courseData?.author || courseData?.instructor || 'Course Instructor';
-  const courseName = courseData?.title || 'Course Title';
-  const courseId = courseData?.id || 'COURSE001';
+  const studentName = userInfo.name || 'Adela Parkson';
+  const instructorName = certData.instructor;
+  const courseTitle = certData.courseName;
+  const institution = certData.institution;
+  const duration = certData.duration;
+  const skills = certData.skills;
   const levelInfo = getCurrentLevelInfo();
+  const completionPercentage = totalNodes > 0 ? Math.round((completedNodes.length / totalNodes) * 100) : 100;
 
   // Certificate styles
   const certificateStyles = {
     width: '210mm',
     height: '297mm', // A4 size
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: certData.color,
     color: 'white',
     padding: '40px',
     fontFamily: '"Times New Roman", serif',
@@ -257,30 +267,42 @@ const CertificateGenerator = ({
                   maxWidth="700px"
                   lineHeight={1.2}
                 >
-                  {courseName}
+                  {courseTitle}
+                </Text>
+                
+                <Text fontSize="16px" fontWeight="normal" opacity={0.9} maxWidth="600px" textAlign="center">
+                  {certData.description}
                 </Text>
                 
                 <HStack spacing={8} mt={6}>
                   <VStack>
-                    <Text fontSize="14px" opacity={0.8}>Course Level</Text>
-                    <Text fontSize="18px" fontWeight="bold">
-                      {courseData?.level || 'Intermediate'}
+                    <Text fontSize="14px" opacity={0.8}>Institution</Text>
+                    <Text fontSize="16px" fontWeight="bold">
+                      {institution}
                     </Text>
                   </VStack>
                   
                   <VStack>
                     <Text fontSize="14px" opacity={0.8}>Duration</Text>
-                    <Text fontSize="18px" fontWeight="bold">
-                      {courseData?.duration || '8 weeks'}
+                    <Text fontSize="16px" fontWeight="bold">
+                      {duration}
                     </Text>
                   </VStack>
                   
                   <VStack>
-                    <Text fontSize="14px" opacity={0.8}>Student Level</Text>
-                    <Text fontSize="18px" fontWeight="bold">
-                      {levelInfo.title}
+                    <Text fontSize="14px" opacity={0.8}>Completion</Text>
+                    <Text fontSize="16px" fontWeight="bold">
+                      {completionPercentage}%
                     </Text>
                   </VStack>
+                </HStack>
+                
+                <HStack spacing={4} mt={4} flexWrap="wrap" justify="center">
+                  {skills.map((skill, index) => (
+                    <Badge key={index} bg="rgba(255, 255, 255, 0.2)" color="white" px={3} py={1} borderRadius="full">
+                      {skill}
+                    </Badge>
+                  ))}
                 </HStack>
               </VStack>
               
